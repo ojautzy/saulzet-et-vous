@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Mes tâches" %} — Saulzet &amp; Vous{% endblock %}
+
+{% block content %}
+<section class="bg-creme py-8">
+  <div class="max-w-4xl mx-auto px-4">
+    <div class="mb-6">
+      <h1 class="font-playfair text-2xl md:text-3xl text-vert-foret font-bold">
+        {% trans "Mes tâches" %}
+      </h1>
+      <p class="text-sm text-gris-pierre mt-1 font-sans">
+        {% trans "Sollicitations qui vous sont assignées" %}
+      </p>
+    </div>
+
+    <div id="report-cards">
+      {% include "dashboard/partials/report_cards.html" %}
+    </div>
+  </div>
+</section>
+{% endblock %}

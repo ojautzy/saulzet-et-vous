@@ -1,16 +1,19 @@
 {% extends "base.html" %}
 {% load i18n %}
 
-{% block title %}{% trans "Mes sollicitations" %} — Saulzet &amp; Vous{% endblock %}
+{% block title %}{% trans "Tableau de bord" %} — Saulzet &amp; Vous{% endblock %}
 
 {% block content %}
 <section class="bg-creme py-8">
-  <div class="max-w-4xl mx-auto px-4">
+  <div class="max-w-5xl mx-auto px-4">
     <div class="mb-6">
       <h1 class="font-playfair text-2xl md:text-3xl text-vert-foret font-bold">
-        {% trans "Mes sollicitations" %}
+        {% trans "Tableau de bord" %}
       </h1>
     </div>
+
+    {# Status counters #}
+    {% include "dashboard/partials/status_counters.html" %}
 
     {# Filters #}
     <div class="flex flex-wrap items-end gap-4 mt-2 mb-12">
@@ -19,10 +22,10 @@
           {% trans "Type" %}
         </label>
         <select class="w-full font-sans text-sm bg-white border border-creme-fonce rounded-lg px-3 py-2 text-encre shadow-sm focus:outline-none focus:ring-2 focus:ring-vert-prairie/40 focus:border-vert-prairie transition"
-                hx-get="{% url 'reports:list' %}"
+                hx-get="{% url 'dashboard:dashboard' %}"
                 hx-target="#report-cards"
                 hx-swap="innerHTML"
-                hx-include="[name='status']"
+                hx-include="[name='status'], [name='assigned']"
                 name="type"
                 aria-label="{% trans 'Filtrer par type' %}">
           <option value="">{% trans "Tous les types" %}</option>
@@ -37,10 +40,10 @@
           {% trans "Statut" %}
         </label>
         <select class="w-full font-sans text-sm bg-white border border-creme-fonce rounded-lg px-3 py-2 text-encre shadow-sm focus:outline-none focus:ring-2 focus:ring-vert-prairie/40 focus:border-vert-prairie transition"
-                hx-get="{% url 'reports:list' %}"
+                hx-get="{% url 'dashboard:dashboard' %}"
                 hx-target="#report-cards"
                 hx-swap="innerHTML"
-                hx-include="[name='type']"
+                hx-include="[name='type'], [name='assigned']"
                 name="status"
                 aria-label="{% trans 'Filtrer par statut' %}">
           <option value="">{% trans "Tous les statuts" %}</option>
@@ -49,11 +52,31 @@
           {% endfor %}
         </select>
       </div>
+
+      <div class="flex-1 min-w-[140px]">
+        <label class="block text-xs font-sans font-semibold text-gris-pierre uppercase tracking-wide mb-1.5">
+          {% trans "Élu assigné" %}
+        </label>
+        <select class="w-full font-sans text-sm bg-white border border-creme-fonce rounded-lg px-3 py-2 text-encre shadow-sm focus:outline-none focus:ring-2 focus:ring-vert-prairie/40 focus:border-vert-prairie transition"
+                hx-get="{% url 'dashboard:dashboard' %}"
+                hx-target="#report-cards"
+                hx-swap="innerHTML"
+                hx-include="[name='type'], [name='status']"
+                name="assigned"
+                aria-label="{% trans 'Filtrer par élu assigné' %}">
+          <option value="">{% trans "Tous les élus" %}</option>
+          {% for elected in elected_users %}
+          <option value="{{ elected.pk }}" {% if current_assigned == elected.pk|stringformat:"s" %}selected{% endif %}>
+            {{ elected.get_full_name }}
+          </option>
+          {% endfor %}
+        </select>
+      </div>
     </div>
 
     {# Report cards #}
     <div id="report-cards" class="pt-4">
-      {% include "reports/partials/report_cards.html" %}
+      {% include "dashboard/partials/report_cards.html" %}
     </div>
   </div>
 </section>
