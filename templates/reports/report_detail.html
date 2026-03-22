@@ -100,7 +100,7 @@
           <div class="flex-1 pt-1">
             <p class="text-sm font-sans">
               <span class="font-semibold">{{ report.author.get_full_name }}</span>
-              {% trans "a cree cette sollicitation" %}
+              {% trans "a créé cette sollicitation" %}
             </p>
             <p class="text-xs text-gris-clair mt-0.5">{{ report.created_at|date:"d/m/Y a H:i" }}</p>
           </div>
@@ -150,7 +150,7 @@
       </div>
       <div x-show="confirmCancel" x-transition class="space-y-3">
         <p class="text-sm text-encre font-sans">
-          {% trans "Etes-vous sur de vouloir annuler cette sollicitation ? Cette action est irreversible." %}
+          {% trans "Êtes-vous sûr de vouloir annuler cette sollicitation ? Cette action est irréversible." %}
         </p>
         <div class="flex gap-2">
           <form method="post" action="{% url 'reports:cancel' pk=report.pk %}">
@@ -176,6 +176,6 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
         integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
         crossorigin=""></script>
-<script src="{% static 'js/map.js' %}"></script>
+<script src="{% static 'js/map.js' %}?v=2"></script>
 {% endif %}
 {% endblock %}

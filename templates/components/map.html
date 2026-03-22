@@ -10,16 +10,18 @@ Parameters:
   - marker_lat: marker latitude (for read-only display)
   - marker_lng: marker longitude (for read-only display)
 {% endcomment %}
+{% load l10n %}
 <div id="{{ map_id|default:'map' }}"
-     class="w-full h-64 md:h-80 rounded-lg border border-base-300 z-0"
+     class="w-full rounded-lg border border-base-300 z-0"
+     style="height: 320px;"
      role="application"
      aria-label="Carte interactive"
      data-editable="{{ editable|default:'false' }}"
-     data-lat="{{ lat|default:'45.6565' }}"
-     data-lng="{{ lng|default:'2.9162' }}"
+     data-lat="{{ lat|default:'45.6565'|unlocalize }}"
+     data-lng="{{ lng|default:'2.9162'|unlocalize }}"
      data-zoom="{{ zoom|default:'14' }}"
      {% if marker_lat and marker_lng %}
-     data-marker-lat="{{ marker_lat }}"
-     data-marker-lng="{{ marker_lng }}"
+     data-marker-lat="{{ marker_lat|unlocalize }}"
+     data-marker-lng="{{ marker_lng|unlocalize }}"
      {% endif %}>
 </div>

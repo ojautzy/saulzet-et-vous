@@ -28,7 +28,7 @@ class ReportForm(forms.ModelForm):
             ),
             "description": forms.Textarea(
                 attrs={
-                    "placeholder": _("Decrivez votre question, idee ou signalement..."),
+                    "placeholder": _("Décrivez votre question, idée ou signalement..."),
                     "class": "textarea textarea-bordered w-full font-serif min-h-[150px]",
                     "rows": 6,
                 }
@@ -55,13 +55,13 @@ class ReportForm(forms.ModelForm):
         for f in files:
             if f.size > MAX_PHOTO_SIZE:
                 raise ValidationError(
-                    _("Le fichier %(name)s depasse la taille maximale de 10 Mo."),
+                    _("Le fichier %(name)s dépasse la taille maximale de 10 Mo."),
                     params={"name": f.name},
                 )
             ext = f.name.rsplit(".", 1)[-1].lower() if "." in f.name else ""
             if f".{ext}" not in ALLOWED_EXTENSIONS:
                 raise ValidationError(
-                    _("Le format du fichier %(name)s n'est pas accepte."),
+                    _("Le format du fichier %(name)s n'est pas accepté."),
                     params={"name": f.name},
                 )
         return cleaned_data

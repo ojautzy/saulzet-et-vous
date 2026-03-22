@@ -15,15 +15,15 @@ class Report(models.Model):
 
     class Type(models.TextChoices):
         QUESTION = "question", _("Question")
-        IDEA = "idea", _("Idee / Suggestion")
+        IDEA = "idea", _("Idée / Suggestion")
         ISSUE = "issue", _("Signalement")
 
     class Status(models.TextChoices):
         NEW = "new", _("Nouveau")
         ASSIGNED = "assigned", _("Pris en charge")
         IN_PROGRESS = "in_progress", _("En cours")
-        RESOLVED = "resolved", _("Resolu")
-        CANCELLED = "cancelled", _("Annule")
+        RESOLVED = "resolved", _("Résolu")
+        CANCELLED = "cancelled", _("Annulé")
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     title = models.CharField(_("titre"), max_length=200)
