@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Mes sollicitations" %} — Saulzet &amp; Vous{% endblock %}
+
+{% block content %}
+<section class="bg-creme py-8">
+  <div class="max-w-4xl mx-auto px-4">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+      <h1 class="font-playfair text-2xl md:text-3xl text-vert-foret font-bold">
+        {% trans "Mes sollicitations" %}
+      </h1>
+      <a href="{% url 'reports:create' %}" class="btn-primary-saulzet text-sm">
+        {% trans "Ecrire a vos elus" %}
+      </a>
+    </div>
+
+    {# Filters #}
+    <div class="flex flex-wrap gap-2 mb-6" x-data>
+      {# Type filter #}
+      <select class="select select-bordered select-sm font-sans"
+              hx-get="{% url 'reports:list' %}"
+              hx-target="#report-cards"
+              hx-swap="innerHTML"
+              hx-include="[name='status_filter']"
+              name="type"
+              aria-label="{% trans 'Filtrer par type' %}">
+        <option value="">{% trans "Tous les types" %}</option>
+        {% for value, label in report_types %}
+        <option value="{{ value }}" {% if current_type == value %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+
+      {# Status filter #}
+      <select class="select select-bordered select-sm font-sans"
+              hx-get="{% url 'reports:list' %}"
+              hx-target="#report-cards"
+              hx-swap="innerHTML"
+              hx-include="[name='type']"
+              name="status"
+              aria-label="{% trans 'Filtrer par statut' %}">
+        <option value="">{% trans "Tous les statuts" %}</option>
+        {% for value, label in statuses %}
+        <option value="{{ value }}" {% if current_status == value %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    {# Report cards #}
+    <div id="report-cards">
+      {% include "reports/partials/report_cards.html" %}
+    </div>
+  </div>
+</section>
+{% endblock %}

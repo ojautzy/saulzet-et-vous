@@ -1,0 +1,25 @@
+{% comment %}
+Leaflet map component.
+Usage: {% include "components/map.html" with editable=True lat=45.6565 lng=2.9162 map_id="map" %}
+Parameters:
+  - editable: True for click-to-place marker, False for read-only
+  - lat: initial latitude (default: 45.6565)
+  - lng: initial longitude (default: 2.9162)
+  - zoom: initial zoom (default: 14)
+  - map_id: HTML id for the map div (default: "map")
+  - marker_lat: marker latitude (for read-only display)
+  - marker_lng: marker longitude (for read-only display)
+{% endcomment %}
+<div id="{{ map_id|default:'map' }}"
+     class="w-full h-64 md:h-80 rounded-lg border border-base-300 z-0"
+     role="application"
+     aria-label="Carte interactive"
+     data-editable="{{ editable|default:'false' }}"
+     data-lat="{{ lat|default:'45.6565' }}"
+     data-lng="{{ lng|default:'2.9162' }}"
+     data-zoom="{{ zoom|default:'14' }}"
+     {% if marker_lat and marker_lng %}
+     data-marker-lat="{{ marker_lat }}"
+     data-marker-lng="{{ marker_lng }}"
+     {% endif %}>
+</div>

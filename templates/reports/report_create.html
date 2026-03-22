@@ -1,0 +1,249 @@
+{% extends "base.html" %}
+{% load i18n static %}
+
+{% block title %}{% trans "Ecrire a vos elus" %} — Saulzet &amp; Vous{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+      crossorigin="" />
+{% endblock %}
+
+{% block content %}
+<section class="bg-creme py-8">
+  <div class="max-w-3xl mx-auto px-4">
+    <h1 class="font-playfair text-2xl md:text-3xl text-vert-foret font-bold mb-6">
+      {% trans "Ecrire a vos elus" %}
+    </h1>
+
+    <form method="post" enctype="multipart/form-data" class="space-y-6"
+          x-data="photoUploader()" novalidate>
+      {% csrf_token %}
+
+      {% if form.non_field_errors %}
+      <div class="alert alert-error">
+        {% for error in form.non_field_errors %}
+        <p>{{ error }}</p>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      {# Type selection #}
+      <div class="card-saulzet">
+        <label class="font-sans font-semibold text-vert-foret text-sm mb-3 block">
+          {% trans "Type de sollicitation" %} *
+        </label>
+        {% if form.report_type.errors %}
+        <div class="text-error text-sm mb-2">{{ form.report_type.errors }}</div>
+        {% endif %}
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <label class="cursor-pointer">
+            <input type="radio" name="report_type" value="issue"
+                   {% if form.report_type.value == "issue" or not form.report_type.value %}checked{% endif %}
+                   class="peer hidden" />
+            <div class="border-2 border-base-300 rounded-lg p-4 text-center transition-all
+                        peer-checked:border-vert-foret peer-checked:bg-vert-tres-clair">
+              <span class="text-2xl block mb-1">&#9888;</span>
+              <span class="font-sans font-semibold text-sm">{% trans "Signalement" %}</span>
+              <span class="block text-xs text-gris-pierre mt-1">{% trans "Un probleme a signaler" %}</span>
+            </div>
+          </label>
+          <label class="cursor-pointer">
+            <input type="radio" name="report_type" value="question"
+                   {% if form.report_type.value == "question" %}checked{% endif %}
+                   class="peer hidden" />
+            <div class="border-2 border-base-300 rounded-lg p-4 text-center transition-all
+                        peer-checked:border-vert-foret peer-checked:bg-vert-tres-clair">
+              <span class="text-2xl block mb-1">?</span>
+              <span class="font-sans font-semibold text-sm">{% trans "Question" %}</span>
+              <span class="block text-xs text-gris-pierre mt-1">{% trans "Une question aux elus" %}</span>
+            </div>
+          </label>
+          <label class="cursor-pointer">
+            <input type="radio" name="report_type" value="idea"
+                   {% if form.report_type.value == "idea" %}checked{% endif %}
+                   class="peer hidden" />
+            <div class="border-2 border-base-300 rounded-lg p-4 text-center transition-all
+                        peer-checked:border-vert-foret peer-checked:bg-vert-tres-clair">
+              <span class="text-2xl block mb-1">&#128161;</span>
+              <span class="font-sans font-semibold text-sm">{% trans "Idee" %}</span>
+              <span class="block text-xs text-gris-pierre mt-1">{% trans "Une suggestion a partager" %}</span>
+            </div>
+          </label>
+        </div>
+      </div>
+
+      {# Title #}
+      <div class="card-saulzet">
+        <label for="id_title" class="font-sans font-semibold text-vert-foret text-sm mb-2 block">
+          {% trans "Titre" %} *
+        </label>
+        {% if form.title.errors %}
+        <div class="text-error text-sm mb-2">{{ form.title.errors }}</div>
+        {% endif %}
+        {{ form.title }}
+        <p class="text-xs text-gris-clair mt-1">{% trans "200 caracteres maximum" %}</p>
+      </div>
+
+      {# Description #}
+      <div class="card-saulzet">
+        <label for="id_description" class="font-sans font-semibold text-vert-foret text-sm mb-2 block">
+          {% trans "Description" %} *
+        </label>
+        {% if form.description.errors %}
+        <div class="text-error text-sm mb-2">{{ form.description.errors }}</div>
+        {% endif %}
+        {{ form.description }}
+      </div>
+
+      {# Photos #}
+      <div class="card-saulzet">
+        <label class="font-sans font-semibold text-vert-foret text-sm mb-2 block">
+          {% trans "Photos" %}
+          <span class="font-normal text-gris-clair">({% trans "optionnel" %})</span>
+        </label>
+        {% if form.photos.errors %}
+        <div class="text-error text-sm mb-2">{{ form.photos.errors }}</div>
+        {% endif %}
+
+        {# Drop zone #}
+        <div class="border-2 border-dashed border-base-300 rounded-lg p-6 text-center transition-colors"
+             :class="{ 'border-vert-prairie bg-vert-tres-clair': dragOver }"
+             @dragover.prevent="dragOver = true"
+             @dragleave.prevent="dragOver = false"
+             @drop.prevent="handleDrop($event)"
+             aria-label="{% trans 'Zone de depot de photos' %}">
+          <p class="text-gris-pierre text-sm mb-3">
+            {% trans "Glissez vos photos ici ou" %}
+          </p>
+          <label class="btn btn-sm btn-outline border-vert-foret text-vert-foret hover:bg-vert-foret hover:text-white cursor-pointer">
+            {% trans "Choisir des fichiers" %}
+            <input type="file" name="photos" multiple accept="image/*"
+                   class="hidden" @change="handleFiles($event)" />
+          </label>
+          <p class="text-xs text-gris-clair mt-3">
+            {% trans "Max 5 photos, 10 Mo chacune — JPEG, PNG, WebP, HEIC" %}
+          </p>
+        </div>
+
+        {# Photo previews #}
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-4" x-show="previews.length > 0">
+          <template x-for="(preview, index) in previews" :key="index">
+            <div class="relative group">
+              <img :src="preview.url" class="w-full h-32 object-cover rounded-lg" :alt="preview.name" />
+              <button type="button"
+                      class="absolute top-1 right-1 btn btn-circle btn-xs bg-error text-white border-none opacity-80 group-hover:opacity-100"
+                      @click="removePhoto(index)"
+                      :aria-label="'Supprimer ' + preview.name">
+                &#10005;
+              </button>
+              <p class="text-xs text-gris-pierre truncate mt-1" x-text="preview.name"></p>
+            </div>
+          </template>
+        </div>
+      </div>
+
+      {# Location (collapsible) #}
+      <div class="card-saulzet" x-data="{ locationOpen: false }">
+        <button type="button"
+                class="flex items-center justify-between w-full font-sans font-semibold text-vert-foret text-sm"
+                @click="locationOpen = !locationOpen"
+                :aria-expanded="locationOpen">
+          <span>
+            {% trans "Localisation" %}
+            <span class="font-normal text-gris-clair">({% trans "optionnel" %})</span>
+          </span>
+          <svg class="w-5 h-5 transition-transform" :class="{ 'rotate-180': locationOpen }"
+               fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+          </svg>
+        </button>
+
+        <div x-show="locationOpen" x-collapse class="mt-4 space-y-4">
+          <div class="flex gap-2 mb-3">
+            <button type="button" id="geo-locate-btn"
+                    class="btn btn-sm btn-outline border-vert-foret text-vert-foret hover:bg-vert-foret hover:text-white"
+                    aria-label="{% trans 'Utiliser ma position GPS' %}">
+              {% trans "Ma position" %}
+            </button>
+          </div>
+
+          {% include "components/map.html" with editable=True map_id="map" %}
+
+          {{ form.latitude }}
+          {{ form.longitude }}
+
+          <div>
+            <label for="id_location_text" class="font-sans text-sm text-gris-pierre mb-1 block">
+              {% trans "Description du lieu" %}
+            </label>
+            {{ form.location_text }}
+          </div>
+        </div>
+      </div>
+
+      {# Submit #}
+      <div class="flex justify-end">
+        <button type="submit" class="btn-primary-saulzet text-lg">
+          {% trans "Envoyer ma sollicitation" %}
+        </button>
+      </div>
+    </form>
+  </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+        crossorigin=""></script>
+<script src="{% static 'js/map.js' %}"></script>
+<script>
+function photoUploader() {
+  return {
+    previews: [],
+    dragOver: false,
+    dataTransfer: new DataTransfer(),
+
+    handleFiles(event) {
+      const files = event.target.files;
+      this.addFiles(files);
+    },
+
+    handleDrop(event) {
+      this.dragOver = false;
+      const files = event.dataTransfer.files;
+      this.addFiles(files);
+    },
+
+    addFiles(files) {
+      for (const file of files) {
+        if (this.previews.length >= 5) break;
+        if (!file.type.startsWith('image/')) continue;
+        this.dataTransfer.items.add(file);
+        const url = URL.createObjectURL(file);
+        this.previews.push({ url, name: file.name });
+      }
+      this.updateInput();
+    },
+
+    removePhoto(index) {
+      URL.revokeObjectURL(this.previews[index].url);
+      this.previews.splice(index, 1);
+      const newDt = new DataTransfer();
+      const items = this.dataTransfer.files;
+      for (let i = 0; i < items.length; i++) {
+        if (i !== index) newDt.items.add(items[i]);
+      }
+      this.dataTransfer = newDt;
+      this.updateInput();
+    },
+
+    updateInput() {
+      const input = this.$el.querySelector('input[type="file"]');
+      if (input) input.files = this.dataTransfer.files;
+    }
+  };
+}
+</script>
+{% endblock %}
