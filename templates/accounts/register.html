@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Inscription" %} — Saulzet &amp; Vous{% endblock %}
+
+{% block content %}
+<div class="max-w-md mx-auto px-4 py-12">
+  <div class="card-saulzet">
+    <h1 class="font-playfair text-2xl text-vert-foret font-bold text-center mb-6">
+      {% trans "Inscription" %}
+    </h1>
+
+    <div class="info-box mb-6">
+      <p class="font-sans text-sm text-vert-foret">
+        {% trans "Après votre inscription, un administrateur validera votre compte dans les plus brefs délais." %}
+      </p>
+    </div>
+
+    <form method="post" class="space-y-4">
+      {% csrf_token %}
+
+      <div>
+        <label for="id_email" class="label font-sans text-sm font-semibold text-encre">
+          {{ form.email.label }} <span class="text-error">*</span>
+        </label>
+        {{ form.email }}
+        {% if form.email.errors %}
+        <p class="text-error text-sm mt-1">{{ form.email.errors.0 }}</p>
+        {% endif %}
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label for="id_first_name" class="label font-sans text-sm font-semibold text-encre">
+            {{ form.first_name.label }} <span class="text-error">*</span>
+          </label>
+          {{ form.first_name }}
+          {% if form.first_name.errors %}
+          <p class="text-error text-sm mt-1">{{ form.first_name.errors.0 }}</p>
+          {% endif %}
+        </div>
+        <div>
+          <label for="id_last_name" class="label font-sans text-sm font-semibold text-encre">
+            {{ form.last_name.label }} <span class="text-error">*</span>
+          </label>
+          {{ form.last_name }}
+          {% if form.last_name.errors %}
+          <p class="text-error text-sm mt-1">{{ form.last_name.errors.0 }}</p>
+          {% endif %}
+        </div>
+      </div>
+
+      <div>
+        <label for="id_phone" class="label font-sans text-sm font-semibold text-encre">
+          {{ form.phone.label }} <span class="text-error">*</span>
+        </label>
+        {{ form.phone }}
+        {% if form.phone.errors %}
+        <p class="text-error text-sm mt-1">{{ form.phone.errors.0 }}</p>
+        {% endif %}
+      </div>
+
+      <div>
+        <label for="id_address" class="label font-sans text-sm font-semibold text-encre">
+          {{ form.address.label }} <span class="text-error">*</span>
+        </label>
+        {{ form.address }}
+        {% if form.address.errors %}
+        <p class="text-error text-sm mt-1">{{ form.address.errors.0 }}</p>
+        {% endif %}
+      </div>
+
+      <div>
+        <label for="id_password1" class="label font-sans text-sm font-semibold text-encre">
+          {{ form.password1.label }}
+        </label>
+        {{ form.password1 }}
+        {% if form.password1.help_text %}
+        <p class="text-gris-clair text-xs mt-1">{{ form.password1.help_text }}</p>
+        {% endif %}
+        {% if form.password1.errors %}
+        <p class="text-error text-sm mt-1">{{ form.password1.errors.0 }}</p>
+        {% endif %}
+      </div>
+
+      <div>
+        <label for="id_password2" class="label font-sans text-sm font-semibold text-encre">
+          {{ form.password2.label }}
+        </label>
+        {{ form.password2 }}
+        {% if form.password2.errors %}
+        <p class="text-error text-sm mt-1">{{ form.password2.errors.0 }}</p>
+        {% endif %}
+      </div>
+
+      {% if form.non_field_errors %}
+      <div class="alert alert-error text-sm">
+        {% for error in form.non_field_errors %}
+        <span>{{ error }}</span>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      <button type="submit" class="btn-primary-saulzet w-full">
+        {% trans "S'inscrire" %}
+      </button>
+    </form>
+
+    <p class="text-center font-sans text-sm text-gris-pierre mt-6">
+      {% trans "Déjà inscrit(e) ?" %}
+      <a href="{% url 'accounts:login' %}" class="text-vert-foret font-semibold hover:underline">
+        {% trans "Connectez-vous" %}
+      </a>
+    </p>
+  </div>
+</div>
+{% endblock %}

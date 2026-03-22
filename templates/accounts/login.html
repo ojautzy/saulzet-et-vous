@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Connexion" %} — Saulzet &amp; Vous{% endblock %}
+
+{% block content %}
+<div class="max-w-md mx-auto px-4 py-12">
+  <div class="card-saulzet">
+    <h1 class="font-playfair text-2xl text-vert-foret font-bold text-center mb-6">
+      {% trans "Connexion" %}
+    </h1>
+
+    <!-- Tabs -->
+    <div x-data="{ tab: '{{ active_tab|default:'magic' }}' }" class="space-y-6">
+      <div class="flex border-b border-creme-fonce" role="tablist">
+        <button @click="tab = 'magic'"
+                :class="tab === 'magic' ? 'border-vert-foret text-vert-foret font-semibold' : 'border-transparent text-gris-pierre hover:text-encre'"
+                class="flex-1 py-3 text-center border-b-2 font-sans text-sm transition-colors"
+                role="tab" :aria-selected="tab === 'magic'">
+          {% trans "Lien magique" %}
+        </button>
+        <button @click="tab = 'password'"
+                :class="tab === 'password' ? 'border-vert-foret text-vert-foret font-semibold' : 'border-transparent text-gris-pierre hover:text-encre'"
+                class="flex-1 py-3 text-center border-b-2 font-sans text-sm transition-colors"
+                role="tab" :aria-selected="tab === 'password'">
+          {% trans "Mot de passe" %}
+        </button>
+      </div>
+
+      <!-- Magic link tab -->
+      <div x-show="tab === 'magic'" x-transition role="tabpanel">
+        <div class="info-box mb-4">
+          <p class="font-sans text-sm text-vert-foret">
+            {% trans "Entrez votre email et recevez un lien de connexion sécurisé. Pas besoin de mot de passe !" %}
+          </p>
+        </div>
+        <form method="post" action="{% url 'accounts:magic_link_request' %}" class="space-y-4">
+          {% csrf_token %}
+          <div>
+            <label for="id_magic_email" class="label font-sans text-sm font-semibold text-encre">
+              {{ magic_form.email.label }}
+            </label>
+            {{ magic_form.email }}
+            {% if magic_form.email.errors %}
+            <p class="text-error text-sm mt-1">{{ magic_form.email.errors.0 }}</p>
+            {% endif %}
+          </div>
+          <button type="submit" class="btn-primary-saulzet w-full">
+            {% trans "Recevoir le lien de connexion" %}
+          </button>
+        </form>
+      </div>
+
+      <!-- Password tab -->
+      <div x-show="tab === 'password'" x-transition role="tabpanel">
+        <form method="post" action="{% url 'accounts:login_password' %}" class="space-y-4">
+          {% csrf_token %}
+          <div>
+            <label for="id_username" class="label font-sans text-sm font-semibold text-encre">
+              {{ password_form.username.label }}
+            </label>
+            {{ password_form.username }}
+            {% if password_form.username.errors %}
+            <p class="text-error text-sm mt-1">{{ password_form.username.errors.0 }}</p>
+            {% endif %}
+          </div>
+          <div>
+            <label for="id_password" class="label font-sans text-sm font-semibold text-encre">
+              {{ password_form.password.label }}
+            </label>
+            {{ password_form.password }}
+            {% if password_form.password.errors %}
+            <p class="text-error text-sm mt-1">{{ password_form.password.errors.0 }}</p>
+            {% endif %}
+          </div>
+          {% if password_form.non_field_errors %}
+          <div class="alert alert-error text-sm">
+            {% for error in password_form.non_field_errors %}
+            <span>{{ error }}</span>
+            {% endfor %}
+          </div>
+          {% endif %}
+          <button type="submit" class="btn-primary-saulzet w-full">
+            {% trans "Se connecter" %}
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <p class="text-center font-sans text-sm text-gris-pierre mt-6">
+      {% trans "Pas encore de compte ?" %}
+      <a href="{% url 'accounts:register' %}" class="text-vert-foret font-semibold hover:underline">
+        {% trans "Inscrivez-vous" %}
+      </a>
+    </p>
+  </div>
+</div>
+{% endblock %}

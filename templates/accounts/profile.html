@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Mon profil" %} — Saulzet &amp; Vous{% endblock %}
+
+{% block content %}
+<div class="max-w-md mx-auto px-4 py-12">
+  <div class="card-saulzet">
+    <h1 class="font-playfair text-2xl text-vert-foret font-bold text-center mb-6">
+      {% trans "Mon profil" %}
+    </h1>
+
+    <div class="info-box mb-6">
+      <p class="font-sans text-sm text-vert-foret">
+        <strong>{% trans "Email :" %}</strong> {{ user.email }}<br>
+        <strong>{% trans "Rôle :" %}</strong> {{ user.get_role_display }}
+      </p>
+    </div>
+
+    <form method="post" class="space-y-4">
+      {% csrf_token %}
+
+      <div>
+        <label for="id_first_name" class="label font-sans text-sm font-semibold text-encre">
+          {{ form.first_name.label }}
+        </label>
+        {{ form.first_name }}
+        {% if form.first_name.errors %}
+        <p class="text-error text-sm mt-1">{{ form.first_name.errors.0 }}</p>
+        {% endif %}
+      </div>
+
+      <div>
+        <label for="id_last_name" class="label font-sans text-sm font-semibold text-encre">
+          {{ form.last_name.label }}
+        </label>
+        {{ form.last_name }}
+        {% if form.last_name.errors %}
+        <p class="text-error text-sm mt-1">{{ form.last_name.errors.0 }}</p>
+        {% endif %}
+      </div>
+
+      <div>
+        <label for="id_phone" class="label font-sans text-sm font-semibold text-encre">
+          {{ form.phone.label }}
+        </label>
+        {{ form.phone }}
+        {% if form.phone.errors %}
+        <p class="text-error text-sm mt-1">{{ form.phone.errors.0 }}</p>
+        {% endif %}
+      </div>
+
+      <div>
+        <label for="id_address" class="label font-sans text-sm font-semibold text-encre">
+          {{ form.address.label }}
+        </label>
+        {{ form.address }}
+        {% if form.address.errors %}
+        <p class="text-error text-sm mt-1">{{ form.address.errors.0 }}</p>
+        {% endif %}
+      </div>
+
+      <button type="submit" class="btn-primary-saulzet w-full">
+        {% trans "Enregistrer" %}
+      </button>
+    </form>
+
+    <!-- Delete account -->
+    <div class="border-t border-creme-fonce mt-8 pt-6" x-data="{ confirmDelete: false }">
+      <button @click="confirmDelete = true" x-show="!confirmDelete"
+              class="btn btn-outline btn-error w-full">
+        {% trans "Supprimer mon compte" %}
+      </button>
+
+      <div x-show="confirmDelete" x-transition class="space-y-4">
+        <div class="alert alert-error">
+          <div>
+            <p class="font-sans font-semibold">{% trans "Attention, cette action est définitive !" %}</p>
+            <p class="font-sans text-sm mt-1">
+              {% trans "La suppression de votre compte entraînera la suppression de toutes vos questions et sollicitations adressées aux élus. Cette action est irréversible." %}
+            </p>
+          </div>
+        </div>
+        <div class="flex gap-3">
+          <button @click="confirmDelete = false" class="btn btn-outline flex-1">
+            {% trans "Annuler" %}
+          </button>
+          <form method="post" action="{% url 'accounts:delete_account' %}" class="flex-1">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-error w-full text-white">
+              {% trans "Confirmer la suppression" %}
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

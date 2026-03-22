@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% load static i18n %}
+
+{% block title %}Saulzet &amp; Vous — {% trans "Votre commune à portée de main" %}{% endblock %}
+
+{% block content %}
+<!-- Hero section -->
+<section class="relative h-[50vh] min-h-[350px] flex items-end overflow-hidden"
+         style="background-image: url('{% static 'img/campaign/puy2.jpeg' %}'); background-size: cover; background-position: center;"
+         role="img" aria-label="{% trans 'Paysage de Saulzet-le-Froid' %}">
+  <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
+  <div class="relative z-10 max-w-5xl mx-auto w-full px-4 pb-10">
+    <h1 class="font-playfair text-4xl md:text-5xl text-white font-black leading-tight">
+      Saulzet <span class="italic font-normal text-terre-claire">&amp;</span> Vous
+    </h1>
+    <p class="font-sans text-white/80 text-lg mt-2 tracking-wide">
+      {% trans "Vivre, Partager, Préserver" %}
+    </p>
+  </div>
+</section>
+
+<!-- Slogan banner -->
+<section class="bg-vert-foret text-white py-4">
+  <div class="max-w-5xl mx-auto px-4 text-center">
+    <p class="font-sans text-lg tracking-wider font-light">
+      {% trans "Échangeons pour faire vivre nos villages" %}
+    </p>
+  </div>
+</section>
+
+<!-- Presentation -->
+<section class="bg-creme py-12">
+  <div class="max-w-3xl mx-auto px-4 text-center">
+    <h2 class="font-playfair text-2xl md:text-3xl text-vert-foret font-bold mb-6">
+      {% trans "Un espace d'échange entre habitants et élus" %}
+    </h2>
+    <div class="font-serif text-lg text-encre leading-relaxed space-y-4">
+      <p>
+        {% trans "Une question sur la vie communale, une idée à partager, un souci à signaler sur la voirie ou les équipements ? Cet espace est le vôtre." %}
+      </p>
+      <p>
+        {% trans "Vos élus s'engagent à vous lire et à vous répondre. Ensemble, faisons de nos villages des lieux où chacun peut s'exprimer et contribuer." %}
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- Call to action -->
+<section class="bg-creme-fonce py-12">
+  <div class="max-w-3xl mx-auto px-4">
+    <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+      <a href="#" class="btn-primary-saulzet text-lg w-full sm:w-auto text-center">
+        {% trans "Écrire à vos élus" %}
+      </a>
+      {% if not user.is_authenticated %}
+      <a href="{% url 'accounts:login' %}" class="btn-secondary-saulzet text-lg w-full sm:w-auto text-center">
+        {% trans "Se connecter" %}
+      </a>
+      {% endif %}
+    </div>
+  </div>
+</section>
+{% endblock %}
