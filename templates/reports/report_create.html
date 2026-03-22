@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load i18n static %}
 
-{% block title %}{% trans "Ecrire a vos elus" %} — Saulzet &amp; Vous{% endblock %}
+{% block title %}{% trans "Écrire à vos élus" %} — Saulzet &amp; Vous{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
@@ -13,7 +13,7 @@
 <section class="bg-creme py-8">
   <div class="max-w-3xl mx-auto px-4">
     <h1 class="font-playfair text-2xl md:text-3xl text-vert-foret font-bold mb-6">
-      {% trans "Ecrire a vos elus" %}
+      {% trans "Écrire à vos élus" %}
     </h1>
 
     <form method="post" enctype="multipart/form-data" class="space-y-6"
@@ -36,38 +36,39 @@
         {% if form.report_type.errors %}
         <div class="text-error text-sm mb-2">{{ form.report_type.errors }}</div>
         {% endif %}
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <label class="cursor-pointer">
+        <div x-data="{ selectedType: '{% if form.report_type.value %}{{ form.report_type.value }}{% else %}issue{% endif %}' }"
+             style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem;">
+          <label style="cursor: pointer; display: block;" @click="selectedType = 'issue'">
             <input type="radio" name="report_type" value="issue"
-                   {% if form.report_type.value == "issue" or not form.report_type.value %}checked{% endif %}
-                   class="peer hidden" />
-            <div class="border-2 border-base-300 rounded-lg p-4 text-center transition-all
-                        peer-checked:border-vert-foret peer-checked:bg-vert-tres-clair">
+                   :checked="selectedType === 'issue'"
+                   style="display:none" />
+            <div class="border-2 rounded-lg p-4 text-center transition-all"
+                 :class="selectedType === 'issue' ? 'border-vert-foret bg-vert-tres-clair' : 'border-base-300'">
               <span class="text-2xl block mb-1">&#9888;</span>
               <span class="font-sans font-semibold text-sm">{% trans "Signalement" %}</span>
-              <span class="block text-xs text-gris-pierre mt-1">{% trans "Un probleme a signaler" %}</span>
+              <span class="block text-xs text-gris-pierre mt-1">{% trans "Un problème à signaler" %}</span>
             </div>
           </label>
-          <label class="cursor-pointer">
+          <label style="cursor: pointer; display: block;" @click="selectedType = 'question'">
             <input type="radio" name="report_type" value="question"
-                   {% if form.report_type.value == "question" %}checked{% endif %}
-                   class="peer hidden" />
-            <div class="border-2 border-base-300 rounded-lg p-4 text-center transition-all
-                        peer-checked:border-vert-foret peer-checked:bg-vert-tres-clair">
+                   :checked="selectedType === 'question'"
+                   style="display:none" />
+            <div class="border-2 rounded-lg p-4 text-center transition-all"
+                 :class="selectedType === 'question' ? 'border-vert-foret bg-vert-tres-clair' : 'border-base-300'">
               <span class="text-2xl block mb-1">?</span>
               <span class="font-sans font-semibold text-sm">{% trans "Question" %}</span>
-              <span class="block text-xs text-gris-pierre mt-1">{% trans "Une question aux elus" %}</span>
+              <span class="block text-xs text-gris-pierre mt-1">{% trans "Une question aux élus" %}</span>
             </div>
           </label>
-          <label class="cursor-pointer">
+          <label style="cursor: pointer; display: block;" @click="selectedType = 'idea'">
             <input type="radio" name="report_type" value="idea"
-                   {% if form.report_type.value == "idea" %}checked{% endif %}
-                   class="peer hidden" />
-            <div class="border-2 border-base-300 rounded-lg p-4 text-center transition-all
-                        peer-checked:border-vert-foret peer-checked:bg-vert-tres-clair">
+                   :checked="selectedType === 'idea'"
+                   style="display:none" />
+            <div class="border-2 rounded-lg p-4 text-center transition-all"
+                 :class="selectedType === 'idea' ? 'border-vert-foret bg-vert-tres-clair' : 'border-base-300'">
               <span class="text-2xl block mb-1">&#128161;</span>
-              <span class="font-sans font-semibold text-sm">{% trans "Idee" %}</span>
-              <span class="block text-xs text-gris-pierre mt-1">{% trans "Une suggestion a partager" %}</span>
+              <span class="font-sans font-semibold text-sm">{% trans "Idée" %}</span>
+              <span class="block text-xs text-gris-pierre mt-1">{% trans "Une suggestion à partager" %}</span>
             </div>
           </label>
         </div>
@@ -82,7 +83,7 @@
         <div class="text-error text-sm mb-2">{{ form.title.errors }}</div>
         {% endif %}
         {{ form.title }}
-        <p class="text-xs text-gris-clair mt-1">{% trans "200 caracteres maximum" %}</p>
+        <p class="text-xs text-gris-clair mt-1">{% trans "200 caractères maximum" %}</p>
       </div>
 
       {# Description #}
@@ -144,22 +145,21 @@
       </div>
 
       {# Location (collapsible) #}
-      <div class="card-saulzet" x-data="{ locationOpen: false }">
+      <div class="card-saulzet">
         <button type="button"
-                class="flex items-center justify-between w-full font-sans font-semibold text-vert-foret text-sm"
-                @click="locationOpen = !locationOpen"
+                style="display: flex; align-items: center; justify-content: space-between; width: 100%;"
+                class="font-sans font-semibold text-vert-foret text-sm"
+                @click="toggleLocation()"
                 :aria-expanded="locationOpen">
           <span>
             {% trans "Localisation" %}
             <span class="font-normal text-gris-clair">({% trans "optionnel" %})</span>
           </span>
-          <svg class="w-5 h-5 transition-transform" :class="{ 'rotate-180': locationOpen }"
-               fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-          </svg>
+          <span style="width: 1.25rem; height: 1.25rem; display: inline-block; transition: transform 0.2s;"
+                :style="locationOpen ? 'transform: rotate(180deg)' : ''">&#9660;</span>
         </button>
 
-        <div x-show="locationOpen" x-collapse class="mt-4 space-y-4">
+        <div x-show="locationOpen" x-transition class="mt-4 space-y-4">
           <div class="flex gap-2 mb-3">
             <button type="button" id="geo-locate-btn"
                     class="btn btn-sm btn-outline border-vert-foret text-vert-foret hover:bg-vert-foret hover:text-white"
@@ -197,13 +197,26 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
         integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
         crossorigin=""></script>
-<script src="{% static 'js/map.js' %}"></script>
+<script src="{% static 'js/map.js' %}?v=2"></script>
 <script>
 function photoUploader() {
   return {
     previews: [],
     dragOver: false,
     dataTransfer: new DataTransfer(),
+    locationOpen: false,
+    mapReady: false,
+
+    toggleLocation() {
+      this.locationOpen = !this.locationOpen;
+      if (this.locationOpen && !this.mapReady) {
+        var self = this;
+        setTimeout(function() {
+          initCreateMap();
+          self.mapReady = true;
+        }, 300);
+      }
+    },
 
     handleFiles(event) {
       const files = event.target.files;

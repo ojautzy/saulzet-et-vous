@@ -60,7 +60,7 @@ def report_create_view(request: HttpRequest) -> HttpResponse:
                 photo.process_image()
                 photo.save()
 
-            messages.success(request, _("Votre sollicitation a bien ete envoyee."))
+            messages.success(request, _("Votre sollicitation a bien été envoyée."))
             return redirect("reports:detail", pk=report.pk)
     else:
         form = ReportForm()
@@ -86,7 +86,7 @@ def report_cancel_view(request: HttpRequest, pk: str) -> HttpResponse:
     report = get_object_or_404(Report, pk=pk, author=request.user)
 
     if not report.is_cancellable:
-        messages.error(request, _("Cette sollicitation ne peut plus etre annulee."))
+        messages.error(request, _("Cette sollicitation ne peut plus être annulée."))
         return redirect("reports:detail", pk=report.pk)
 
     old_status = report.status
@@ -96,11 +96,11 @@ def report_cancel_view(request: HttpRequest, pk: str) -> HttpResponse:
     Comment.objects.create(
         report=report,
         author=request.user,
-        content=_("Sollicitation annulee par l'auteur."),
+        content=_("Sollicitation annulée par l'auteur."),
         is_status_change=True,
         old_status=old_status,
         new_status=Report.Status.CANCELLED,
     )
 
-    messages.success(request, _("Votre sollicitation a ete annulee."))
+    messages.success(request, _("Votre sollicitation a été annulée."))
     return redirect("reports:detail", pk=report.pk)

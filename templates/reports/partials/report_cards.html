@@ -5,18 +5,6 @@
   {% for report in reports %}
   <a href="{% url 'reports:detail' pk=report.pk %}" class="block card-saulzet hover:shadow-lg transition-shadow">
     <div class="flex flex-col sm:flex-row gap-4">
-      {# Thumbnail #}
-      {% with first_photo=report.photos.first %}
-      {% if first_photo and first_photo.thumbnail %}
-      <div class="flex-shrink-0">
-        <img src="{{ first_photo.thumbnail.url }}"
-             alt=""
-             class="w-full sm:w-28 h-24 object-cover rounded-lg"
-             loading="lazy" />
-      </div>
-      {% endif %}
-      {% endwith %}
-
       {# Content #}
       <div class="flex-1 min-w-0">
         <div class="flex flex-wrap gap-2 mb-2">
@@ -32,6 +20,18 @@
           {% endif %}
         </div>
       </div>
+
+      {# Thumbnail #}
+      {% with first_photo=report.photos.first %}
+      {% if first_photo and first_photo.thumbnail %}
+      <div class="flex-shrink-0">
+        <img src="{{ first_photo.thumbnail.url }}"
+             alt=""
+             class="w-full sm:w-28 h-24 object-cover rounded-lg"
+             loading="lazy" />
+      </div>
+      {% endif %}
+      {% endwith %}
     </div>
   </a>
   {% endfor %}
@@ -42,7 +42,7 @@
     {% trans "Vous n'avez pas encore de sollicitation." %}
   </p>
   <a href="{% url 'reports:create' %}" class="btn-primary-saulzet">
-    {% trans "Ecrire a vos elus" %}
+    {% trans "Écrire à vos élus" %}
   </a>
 </div>
 {% endif %}
