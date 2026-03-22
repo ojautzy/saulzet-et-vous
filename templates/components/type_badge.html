@@ -1,0 +1,17 @@
+{% comment %}
+Type badge component for reports.
+Usage: {% include "components/type_badge.html" with report_type=report.report_type label=report.type_label %}
+{% endcomment %}
+{% if report_type == "question" %}
+<span class="badge text-white text-xs font-sans font-semibold gap-1" style="background-color: #4A7C28;">
+  ? {{ label }}
+</span>
+{% elif report_type == "idea" %}
+<span class="badge text-white text-xs font-sans font-semibold gap-1" style="background-color: #C49A2A;">
+  &#128161; {{ label }}
+</span>
+{% elif report_type == "issue" %}
+<span class="badge text-white text-xs font-sans font-semibold gap-1" style="background-color: #DC2626;">
+  &#9888; {{ label }}
+</span>
+{% endif %}
