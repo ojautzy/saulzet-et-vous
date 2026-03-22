@@ -1,0 +1,25 @@
+{% comment %}
+Status badge component for reports.
+Usage: {% include "components/status_badge.html" with status=report.status label=report.status_label %}
+{% endcomment %}
+{% if status == "new" %}
+<span class="badge text-white text-xs font-sans font-semibold gap-1" style="background-color: #C49A2A;">
+  &#9679; {{ label }}
+</span>
+{% elif status == "assigned" %}
+<span class="badge text-white text-xs font-sans font-semibold gap-1" style="background-color: #4A7C28;">
+  &rarr; {{ label }}
+</span>
+{% elif status == "in_progress" %}
+<span class="badge text-xs font-sans font-semibold gap-1" style="background-color: #7BAE4E; color: #2D5016;">
+  &#10227; {{ label }}
+</span>
+{% elif status == "resolved" %}
+<span class="badge text-white text-xs font-sans font-semibold gap-1" style="background-color: #2D5016;">
+  &#10003; {{ label }}
+</span>
+{% elif status == "cancelled" %}
+<span class="badge text-white text-xs font-sans font-semibold gap-1" style="background-color: #9B9590;">
+  &#10005; {{ label }}
+</span>
+{% endif %}
