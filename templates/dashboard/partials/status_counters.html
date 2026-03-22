@@ -1,0 +1,29 @@
+{% load i18n %}
+
+<div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 mb-8">
+  {# Nouveau #}
+  <div class="card-saulzet text-center ring-2 ring-terre-claire">
+    <p class="text-2xl font-bold font-sans text-terre">{{ count_new }}</p>
+    <p class="text-xs text-gris-pierre mt-1 font-sans">{% trans "Nouveau" %}</p>
+  </div>
+  {# Pris en charge #}
+  <div class="card-saulzet text-center">
+    <p class="text-2xl font-bold font-sans text-vert-foret">{{ count_assigned }}</p>
+    <p class="text-xs text-gris-pierre mt-1 font-sans">{% trans "Pris en charge" %}</p>
+  </div>
+  {# En cours #}
+  <div class="card-saulzet text-center ring-2 ring-terre-claire">
+    <p class="text-2xl font-bold font-sans text-terre">{{ count_in_progress }}</p>
+    <p class="text-xs text-gris-pierre mt-1 font-sans">{% trans "En cours" %}</p>
+  </div>
+  {# Résolu #}
+  <div class="card-saulzet text-center">
+    <p class="text-2xl font-bold font-sans text-vert-foret">{{ count_resolved }}</p>
+    <p class="text-xs text-gris-pierre mt-1 font-sans">{% trans "Résolu" %}</p>
+  </div>
+  {# Annulé #}
+  <div class="card-saulzet text-center">
+    <p class="text-2xl font-bold font-sans text-gris-clair">{{ count_cancelled }}</p>
+    <p class="text-xs text-gris-pierre mt-1 font-sans">{% trans "Annulé" %}</p>
+  </div>
+</div>

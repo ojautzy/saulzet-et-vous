@@ -1,0 +1,17 @@
+{% load i18n %}
+
+{% if report.status == "assigned" or report.status == "in_progress" %}
+<div class="card-saulzet mb-6">
+  <h2 class="font-sans font-semibold text-vert-foret text-sm mb-3">{% trans "Ajouter un commentaire" %}</h2>
+  <form method="post" action="{% url 'dashboard:comment' pk=report.pk %}">
+    {% csrf_token %}
+    <textarea name="content" rows="3" required
+              class="textarea textarea-bordered w-full font-serif mb-3"
+              placeholder="{% trans 'Votre commentaire...' %}"
+              aria-label="{% trans 'Commentaire' %}"></textarea>
+    <button type="submit" class="btn-secondary-saulzet">
+      {% trans "Ajouter un commentaire" %}
+    </button>
+  </form>
+</div>
+{% endif %}
