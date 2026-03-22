@@ -1,0 +1,12 @@
+Bonjour,
+
+Une nouvelle inscription a été enregistrée sur Saulzet & Vous :
+
+- Nom : {{ user.get_full_name }}
+- Email : {{ user.email }}
+- Téléphone : {{ user.phone }}
+- Adresse : {{ user.address|default:"Non renseignée" }}
+
+Rendez-vous dans l'interface d'administration pour valider (ou rejeter) ce compte.
+
+— Saulzet & Vous

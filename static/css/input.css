@@ -1,0 +1,54 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --vert-foret: #2D5016;
+    --vert-prairie: #4A7C28;
+    --vert-clair: #7BAE4E;
+    --vert-tres-clair: #E8F3DC;
+    --terre: #8B6914;
+    --terre-claire: #C49A2A;
+    --creme: #FDF8F0;
+    --creme-fonce: #F5EDE0;
+    --gris-pierre: #6B6560;
+    --gris-clair: #9B9590;
+    --encre: #1A1A18;
+    --blanc: #FFFFFF;
+  }
+
+  body {
+    @apply bg-creme text-encre font-sans;
+    font-size: 16px;
+    line-height: 1.6;
+  }
+
+  h1,
+  h2,
+  h3 {
+    @apply font-playfair;
+  }
+}
+
+@layer components {
+  .btn-primary-saulzet {
+    @apply btn bg-vert-foret hover:bg-vert-prairie text-white border-none h-12 min-h-[3rem] px-6 rounded-lg text-base;
+  }
+
+  .btn-secondary-saulzet {
+    @apply btn bg-terre-claire hover:bg-terre text-white border-none h-12 min-h-[3rem] px-6 rounded-lg text-base;
+  }
+
+  .card-saulzet {
+    @apply bg-white shadow-md rounded-xl p-6;
+  }
+
+  .info-box {
+    @apply bg-vert-tres-clair border-l-[3px] border-vert-clair p-4 rounded-r-lg;
+  }
+
+  .alert-success-saulzet {
+    @apply bg-vert-tres-clair text-vert-foret;
+  }
+}

@@ -1,0 +1,9 @@
+Bonjour {{ user.first_name }},
+
+Bonne nouvelle ! Votre compte sur Saulzet & Vous a été validé par un administrateur.
+
+Vous pouvez dès maintenant vous connecter et utiliser la plateforme de signalement citoyen.
+
+À bientôt sur Saulzet & Vous !
+
+— L'équipe Saulzet & Vous

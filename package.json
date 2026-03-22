@@ -1,0 +1,16 @@
+{
+  "name": "saulzet-et-vous",
+  "version": "1.0.0",
+  "description": "Plateforme de signalement citoyen — Saulzet-le-Froid",
+  "private": true,
+  "scripts": {
+    "build:css": "tailwindcss -i static/css/input.css -o static/css/output.css --minify",
+    "watch:css": "tailwindcss -i static/css/input.css -o static/css/output.css --watch"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4",
+    "daisyui": "^4.12",
+    "postcss": "^8.4",
+    "autoprefixer": "^10.4"
+  }
+}

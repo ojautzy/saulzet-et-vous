@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Inscription en attente" %} — Saulzet &amp; Vous{% endblock %}
+
+{% block content %}
+<div class="max-w-lg mx-auto px-4 py-12">
+  <div class="card-saulzet text-center">
+    <div class="text-5xl mb-4">⏳</div>
+    <h1 class="font-playfair text-2xl text-vert-foret font-bold mb-4">
+      {% trans "Inscription en attente de validation" %}
+    </h1>
+    <div class="font-serif text-encre leading-relaxed space-y-3">
+      <p>
+        {% trans "Votre inscription a bien été enregistrée. Un administrateur de la commune va valider votre compte dans les plus brefs délais." %}
+      </p>
+      <p>
+        {% trans "Vous recevrez un email de confirmation dès que votre compte sera activé." %}
+      </p>
+    </div>
+    <div class="mt-8">
+      <a href="{% url 'home' %}" class="btn-secondary-saulzet">
+        {% trans "Retour à l'accueil" %}
+      </a>
+    </div>
+  </div>
+</div>
+{% endblock %}

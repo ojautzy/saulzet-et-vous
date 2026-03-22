@@ -1,0 +1,54 @@
+{% load i18n %}
+<nav class="bg-vert-foret text-white" x-data="{ mobileOpen: false }">
+  <div class="max-w-5xl mx-auto px-4">
+    <div class="flex items-center justify-between h-16">
+      <!-- Logo -->
+      <a href="{% url 'home' %}" class="flex items-center gap-1 tracking-wide no-underline">
+        <span class="font-playfair font-black text-xl text-white">Saulzet</span>
+        <span class="font-playfair italic text-xl text-terre-claire">&amp;</span>
+        <span class="font-playfair font-bold text-xl text-white">Vous</span>
+      </a>
+
+      <!-- Desktop nav -->
+      <div class="hidden md:flex items-center gap-4 font-sans text-sm tracking-wide">
+        {% if user.is_authenticated and user.is_approved %}
+          <a href="{% url 'home' %}" class="hover:text-vert-tres-clair transition-colors">{% trans "Accueil" %}</a>
+          <a href="{% url 'accounts:profile' %}" class="hover:text-vert-tres-clair transition-colors">{{ user.first_name }}</a>
+          <a href="{% url 'accounts:logout' %}" class="btn btn-sm btn-outline border-white text-white hover:bg-white hover:text-vert-foret">
+            {% trans "Déconnexion" %}
+          </a>
+        {% else %}
+          <a href="{% url 'accounts:login' %}" class="btn btn-sm btn-outline border-white text-white hover:bg-white hover:text-vert-foret">
+            {% trans "Connexion" %}
+          </a>
+          <a href="{% url 'accounts:register' %}" class="btn btn-sm bg-terre-claire hover:bg-terre text-white border-none">
+            {% trans "Inscription" %}
+          </a>
+        {% endif %}
+      </div>
+
+      <!-- Mobile hamburger -->
+      <button class="md:hidden btn btn-ghost btn-sm text-white"
+              @click="mobileOpen = !mobileOpen"
+              :aria-expanded="mobileOpen"
+              aria-label="{% trans 'Menu de navigation' %}">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path x-show="!mobileOpen" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+          <path x-show="mobileOpen" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+
+    <!-- Mobile menu -->
+    <div class="md:hidden pb-4 space-y-2" x-show="mobileOpen" x-collapse>
+      {% if user.is_authenticated and user.is_approved %}
+        <a href="{% url 'home' %}" class="block py-2 hover:text-vert-tres-clair">{% trans "Accueil" %}</a>
+        <a href="{% url 'accounts:profile' %}" class="block py-2 hover:text-vert-tres-clair">{{ user.first_name }}</a>
+        <a href="{% url 'accounts:logout' %}" class="block py-2 hover:text-vert-tres-clair">{% trans "Déconnexion" %}</a>
+      {% else %}
+        <a href="{% url 'accounts:login' %}" class="block py-2 hover:text-vert-tres-clair">{% trans "Connexion" %}</a>
+        <a href="{% url 'accounts:register' %}" class="block py-2 hover:text-vert-tres-clair">{% trans "Inscription" %}</a>
+      {% endif %}
+    </div>
+  </div>
+</nav>
