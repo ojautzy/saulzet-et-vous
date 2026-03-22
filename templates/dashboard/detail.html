@@ -1,0 +1,231 @@
+{% extends "base.html" %}
+{% load i18n static %}
+
+{% block title %}{{ report.title }} — {% trans "Tableau de bord" %} — Saulzet &amp; Vous{% endblock %}
+
+{% block extra_css %}
+{% if report.latitude and report.longitude %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+      crossorigin="" />
+{% endif %}
+{% endblock %}
+
+{% block content %}
+<section class="bg-creme py-8">
+  <div class="max-w-3xl mx-auto px-4">
+
+    {# Back link #}
+    <a href="{% url 'dashboard:dashboard' %}" class="inline-flex items-center text-sm text-vert-foret hover:text-vert-prairie mb-4 font-sans">
+      &larr; {% trans "Tableau de bord" %}
+    </a>
+
+    {# Header #}
+    <div class="card-saulzet mb-6">
+      <div class="flex flex-wrap gap-2 mb-3">
+        {% include "components/type_badge.html" with report_type=report.report_type label=report.type_label %}
+        {% include "components/status_badge.html" with status=report.status label=report.status_label %}
+      </div>
+      <h1 class="font-playfair text-2xl md:text-3xl text-vert-foret font-bold">
+        {{ report.title }}
+      </h1>
+      <p class="text-sm text-gris-clair mt-2 font-sans">
+        {% trans "Par" %} {{ report.author.get_full_name }} — {{ report.created_at|date:"d/m/Y à H:i" }}
+      </p>
+      {% if report.assigned_to %}
+      <p class="text-sm text-gris-pierre mt-1 font-sans">
+        {% trans "Assigné à" %} <span class="font-semibold">{{ report.assigned_to.get_full_name }}</span>
+        {% if report.assigned_at %}— {{ report.assigned_at|date:"d/m/Y à H:i" }}{% endif %}
+      </p>
+      {% endif %}
+    </div>
+
+    {# Author info #}
+    <div class="card-saulzet mb-6" x-data="{ open: false }">
+      <button type="button"
+              class="w-full flex items-center justify-between cursor-pointer group"
+              @click="open = !open"
+              :aria-expanded="open"
+              aria-controls="author-details">
+        <h2 class="font-sans font-semibold text-vert-foret text-sm">
+          {% trans "Auteur du signalement" %}
+          <span class="font-normal text-gris-pierre ml-1">— {{ report.author.get_full_name }}</span>
+        </h2>
+        <span style="width:1.25rem;height:1.25rem;display:inline-block;transition:transform 0.2s;font-size:0.65rem;"
+              class="flex-shrink-0 text-gris-clair group-hover:text-vert-prairie"
+              :style="open ? 'transform:rotate(180deg)' : ''">&#9660;</span>
+      </button>
+
+      <div id="author-details"
+           x-show="open"
+           x-collapse
+           x-cloak>
+        <div class="border-t border-creme-fonce mt-4 pt-4">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm font-sans">
+            <div>
+              <p class="text-xs text-gris-clair uppercase tracking-wide mb-0.5">{% trans "Nom complet" %}</p>
+              <p class="text-encre">{{ report.author.get_full_name }}</p>
+            </div>
+            <div>
+              <p class="text-xs text-gris-clair uppercase tracking-wide mb-0.5">{% trans "Email" %}</p>
+              <p><a href="mailto:{{ report.author.email }}" class="text-vert-foret hover:text-vert-prairie">{{ report.author.email }}</a></p>
+            </div>
+            {% if report.author.phone %}
+            <div>
+              <p class="text-xs text-gris-clair uppercase tracking-wide mb-0.5">{% trans "Téléphone" %}</p>
+              <p><a href="tel:{{ report.author.phone }}" class="text-vert-foret hover:text-vert-prairie">{{ report.author.phone }}</a></p>
+            </div>
+            {% endif %}
+            {% if report.author.address %}
+            <div>
+              <p class="text-xs text-gris-clair uppercase tracking-wide mb-0.5">{% trans "Adresse" %}</p>
+              <p class="text-encre">{{ report.author.address }}</p>
+            </div>
+            {% endif %}
+            <div>
+              <p class="text-xs text-gris-clair uppercase tracking-wide mb-0.5">{% trans "Rôle" %}</p>
+              <p class="text-encre">{{ report.author.get_role_display }}</p>
+            </div>
+            <div>
+              <p class="text-xs text-gris-clair uppercase tracking-wide mb-0.5">{% trans "Inscrit depuis" %}</p>
+              <p class="text-encre">{{ report.author.created_at|date:"d/m/Y" }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {# Description #}
+    <div class="card-saulzet mb-6">
+      <h2 class="font-sans font-semibold text-vert-foret text-sm mb-3">{% trans "Description" %}</h2>
+      <div class="font-serif text-base leading-relaxed text-encre whitespace-pre-line">{{ report.description }}</div>
+    </div>
+
+    {# Photos #}
+    {% if report.photos.exists %}
+    <div class="card-saulzet mb-6" x-data="{ lightbox: false, currentImg: '' }">
+      <h2 class="font-sans font-semibold text-vert-foret text-sm mb-3">{% trans "Photos" %}</h2>
+      <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+        {% for photo in report.photos.all %}
+        <button type="button"
+                class="overflow-hidden rounded-lg cursor-pointer focus:outline-none focus:ring-2 focus:ring-vert-foret"
+                @click="lightbox = true; currentImg = '{{ photo.image.url }}'"
+                aria-label="{% trans 'Voir la photo en grand' %}">
+          <img src="{{ photo.thumbnail.url }}"
+               alt="{{ photo.original_filename }}"
+               class="w-full h-32 object-cover hover:scale-105 transition-transform"
+               loading="lazy" />
+        </button>
+        {% endfor %}
+      </div>
+
+      {# Lightbox #}
+      <div x-show="lightbox"
+           x-transition:enter="transition ease-out duration-200"
+           x-transition:enter-start="opacity-0"
+           x-transition:enter-end="opacity-100"
+           x-transition:leave="transition ease-in duration-150"
+           x-transition:leave-start="opacity-100"
+           x-transition:leave-end="opacity-0"
+           class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4"
+           @click.self="lightbox = false"
+           @keydown.escape.window="lightbox = false"
+           role="dialog"
+           aria-modal="true"
+           aria-label="{% trans 'Photo en grand format' %}">
+        <button class="absolute top-4 right-4 btn btn-circle btn-sm bg-white/20 text-white border-none hover:bg-white/40"
+                @click="lightbox = false"
+                aria-label="{% trans 'Fermer' %}">&#10005;</button>
+        <img :src="currentImg" class="max-w-full max-h-[85vh] rounded-lg" alt="" />
+      </div>
+    </div>
+    {% endif %}
+
+    {# Map #}
+    {% if report.latitude and report.longitude %}
+    <div class="card-saulzet mb-6">
+      <h2 class="font-sans font-semibold text-vert-foret text-sm mb-3">{% trans "Localisation" %}</h2>
+      {% include "components/map.html" with editable=False map_id="detail-map" marker_lat=report.latitude marker_lng=report.longitude %}
+      {% if report.location_text %}
+      <p class="text-sm text-gris-pierre mt-3 font-sans">&#128205; {{ report.location_text }}</p>
+      {% endif %}
+    </div>
+    {% endif %}
+
+    {# Actions #}
+    {% include "dashboard/partials/actions.html" %}
+
+    {# Comment form #}
+    {% include "dashboard/partials/comment_form.html" %}
+
+    {# Resolution text #}
+    {% if report.status == "resolved" and report.resolution_text %}
+    <div class="card-saulzet mb-6 ring-2 ring-vert-foret">
+      <h2 class="font-sans font-semibold text-vert-foret text-sm mb-3">{% trans "Réponse apportée" %}</h2>
+      <div class="font-serif text-base leading-relaxed text-encre whitespace-pre-line">{{ report.resolution_text }}</div>
+      {% if report.resolved_at %}
+      <p class="text-xs text-gris-clair mt-3 font-sans">{% trans "Résolu le" %} {{ report.resolved_at|date:"d/m/Y à H:i" }}</p>
+      {% endif %}
+    </div>
+    {% endif %}
+
+    {# Timeline #}
+    <div class="card-saulzet mb-6">
+      <h2 class="font-sans font-semibold text-vert-foret text-sm mb-4">{% trans "Historique" %}</h2>
+      <div class="space-y-4">
+        {# Creation event #}
+        <div class="flex gap-3">
+          <div class="flex-shrink-0 w-8 h-8 rounded-full bg-vert-tres-clair flex items-center justify-center text-vert-foret text-xs font-bold">+</div>
+          <div class="flex-1 pt-1">
+            <p class="text-sm font-sans">
+              <span class="font-semibold">{{ report.author.get_full_name }}</span>
+              {% trans "a créé cette sollicitation" %}
+            </p>
+            <p class="text-xs text-gris-clair mt-0.5">{{ report.created_at|date:"d/m/Y à H:i" }}</p>
+          </div>
+        </div>
+
+        {# Comments / status changes #}
+        {% for comment in report.comments.all %}
+        <div class="flex gap-3">
+          {% if comment.is_status_change %}
+          <div class="flex-shrink-0 w-8 h-8 rounded-full bg-terre-claire/20 flex items-center justify-center text-terre text-xs font-bold">&#10227;</div>
+          <div class="flex-1 pt-1">
+            <p class="text-sm font-sans">
+              <span class="font-semibold">{{ comment.author.get_full_name }}</span>
+              — {{ comment.content }}
+            </p>
+            <div class="flex gap-2 mt-1">
+              {% include "components/status_badge.html" with status=comment.old_status label=comment.old_status %}
+              <span class="text-gris-clair">&rarr;</span>
+              {% include "components/status_badge.html" with status=comment.new_status label=comment.new_status %}
+            </div>
+            <p class="text-xs text-gris-clair mt-0.5">{{ comment.created_at|date:"d/m/Y à H:i" }}</p>
+          </div>
+          {% else %}
+          <div class="flex-shrink-0 w-8 h-8 rounded-full bg-creme-fonce flex items-center justify-center text-gris-pierre text-xs font-bold">&#9993;</div>
+          <div class="flex-1 pt-1">
+            <p class="text-sm font-sans">
+              <span class="font-semibold">{{ comment.author.get_full_name }}</span>
+            </p>
+            <p class="text-sm text-encre mt-1 font-serif whitespace-pre-line">{{ comment.content }}</p>
+            <p class="text-xs text-gris-clair mt-0.5">{{ comment.created_at|date:"d/m/Y à H:i" }}</p>
+          </div>
+          {% endif %}
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+  </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+{% if report.latitude and report.longitude %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+        crossorigin=""></script>
+<script src="{% static 'js/map.js' %}?v=2"></script>
+{% endif %}
+{% endblock %}
