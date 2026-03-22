@@ -11,6 +11,7 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("accounts/", include("apps.accounts.urls")),
     path("reports/", include("apps.reports.urls")),
+    path("dashboard/", include("apps.dashboard.urls")),
     path("", home_view, name="home"),
 ]
 

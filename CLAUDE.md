@@ -57,6 +57,13 @@ python manage.py makemigrations && python manage.py migrate
 - URL tunnel Cloudflare : https://saulzet.jautzy.com
 - Coordonnées Saulzet-le-Froid : lat 45.6565, lng 2.9162
 
+## Versioning
+
+- La version du projet est définie dans le fichier `VERSION` à la racine (ex: `0.3.0`)
+- Elle est affichée dans le footer du site via le context processor `saulzet_et_vous.context_processors.version`
+- **Règle impérative** : à chaque création de tag Git (`git tag vX.Y.Z`), mettre à jour le fichier `VERSION` avec la même valeur (sans le préfixe `v`). Toujours committer la mise à jour de `VERSION` **avant** de créer le tag.
+- Schéma : `MAJEURE.MINEURE.PATCH` — une phase de développement = une version mineure
+
 ## État du projet
 
 Plan complet dans `saulzet-et-vous-plan-v2.md`. Prompts par phase dans `prompt-phase*-claude-code.md`.

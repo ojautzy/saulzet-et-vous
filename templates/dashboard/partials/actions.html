@@ -1,0 +1,108 @@
+{% load i18n %}
+
+<div class="card-saulzet mb-6">
+  <h2 class="font-sans font-semibold text-vert-foret text-sm mb-4">{% trans "Actions" %}</h2>
+
+  <div class="space-y-4">
+    {# Take ownership (NEW → ASSIGNED) — all elected #}
+    {% if report.status == "new" %}
+    <form method="post" action="{% url 'dashboard:assign' pk=report.pk %}">
+      {% csrf_token %}
+      <button type="submit" class="btn-primary-saulzet w-full sm:w-auto">
+        {% trans "Prendre en charge" %}
+      </button>
+    </form>
+    {% endif %}
+
+    {# Mayor assign to another elected (NEW only) #}
+    {% if report.status == "new" and user.is_mayor %}
+    <div x-data="{ showAssign: false }">
+      <button type="button" class="btn-secondary-saulzet w-full sm:w-auto" @click="showAssign = !showAssign">
+        {% trans "Affecter à un élu" %}
+      </button>
+      <form method="post" action="{% url 'dashboard:assign' pk=report.pk %}"
+            x-show="showAssign" x-transition class="mt-3 space-y-3">
+        {% csrf_token %}
+        <select name="assign_to" class="select select-bordered w-full font-sans" required
+                aria-label="{% trans 'Sélectionner un élu' %}">
+          <option value="">{% trans "Choisir un élu..." %}</option>
+          {% for elected in elected_users %}
+          <option value="{{ elected.pk }}">{{ elected.get_full_name }}</option>
+          {% endfor %}
+        </select>
+        <button type="submit" class="btn-primary-saulzet">{% trans "Affecter" %}</button>
+      </form>
+    </div>
+    {% endif %}
+
+    {# Move to in_progress (ASSIGNED → IN_PROGRESS) — assigned elected only #}
+    {% if report.status == "assigned" and report.assigned_to == user %}
+    <div x-data="{ showProgress: false }">
+      <button type="button" class="btn-secondary-saulzet w-full sm:w-auto" @click="showProgress = !showProgress">
+        {% trans "Passer en cours de traitement" %}
+      </button>
+      <form method="post" action="{% url 'dashboard:status' pk=report.pk %}"
+            x-show="showProgress" x-transition class="mt-3 space-y-3">
+        {% csrf_token %}
+        <input type="hidden" name="new_status" value="in_progress" />
+        <textarea name="comment" rows="2"
+                  class="textarea textarea-bordered w-full font-serif"
+                  placeholder="{% trans "Commentaire d'avancement (optionnel)" %}"
+                  aria-label="{% trans "Commentaire d'avancement" %}"></textarea>
+        <button type="submit" class="btn-secondary-saulzet">{% trans "Confirmer" %}</button>
+      </form>
+    </div>
+    {% endif %}
+
+    {# Resolve (ASSIGNED or IN_PROGRESS → RESOLVED) — assigned elected only #}
+    {% if report.status == "assigned" or report.status == "in_progress" %}
+    {% if report.assigned_to == user %}
+    <div x-data="{ showResolve: false }">
+      <button type="button" class="btn-primary-saulzet w-full sm:w-auto" @click="showResolve = !showResolve">
+        {% trans "Clôturer avec une réponse" %}
+      </button>
+      <form method="post" action="{% url 'dashboard:status' pk=report.pk %}"
+            x-show="showResolve" x-transition class="mt-3 space-y-3">
+        {% csrf_token %}
+        <input type="hidden" name="new_status" value="resolved" />
+        <textarea name="resolution_text" rows="4" required
+                  class="textarea textarea-bordered w-full font-serif"
+                  placeholder="{% trans "Réponse à l'habitant (obligatoire)" %}"
+                  aria-label="{% trans "Réponse à l'habitant" %}"></textarea>
+        <button type="submit" class="btn-primary-saulzet">{% trans "Clôturer" %}</button>
+      </form>
+    </div>
+    {% endif %}
+    {% endif %}
+
+    {# Reassign (ASSIGNED or IN_PROGRESS) — assigned elected or mayor #}
+    {% if report.status == "assigned" or report.status == "in_progress" %}
+    {% if report.assigned_to == user or user.is_mayor %}
+    <div x-data="{ showReassign: false }">
+      <button type="button" class="btn btn-outline border-gris-clair text-gris-pierre hover:bg-creme-fonce btn-sm w-full sm:w-auto"
+              @click="showReassign = !showReassign">
+        {% trans "Réaffecter à un autre élu" %}
+      </button>
+      <form method="post" action="{% url 'dashboard:reassign' pk=report.pk %}"
+            x-show="showReassign" x-transition class="mt-3 space-y-3">
+        {% csrf_token %}
+        <select name="assign_to" class="select select-bordered w-full font-sans" required
+                aria-label="{% trans 'Sélectionner un élu' %}">
+          <option value="">{% trans "Choisir un élu..." %}</option>
+          {% for elected in elected_users %}
+          {% if elected.pk != report.assigned_to_id %}
+          <option value="{{ elected.pk }}">{{ elected.get_full_name }}</option>
+          {% endif %}
+          {% endfor %}
+        </select>
+        <textarea name="comment" rows="2"
+                  class="textarea textarea-bordered w-full font-serif"
+                  placeholder="{% trans 'Commentaire de passation (optionnel)' %}"
+                  aria-label="{% trans 'Commentaire de passation' %}"></textarea>
+        <button type="submit" class="btn-secondary-saulzet">{% trans "Réaffecter" %}</button>
+      </form>
+    </div>
+    {% endif %}
+    {% endif %}
+  </div>
+</div>
