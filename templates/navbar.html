@@ -13,6 +13,8 @@
       <div class="hidden md:flex items-center gap-4 font-sans text-sm tracking-wide">
         {% if user.is_authenticated and user.is_approved %}
           <a href="{% url 'home' %}" class="hover:text-vert-tres-clair transition-colors">{% trans "Accueil" %}</a>
+          <a href="{% url 'reports:list' %}" class="hover:text-vert-tres-clair transition-colors">{% trans "Mes sollicitations" %}</a>
+          <a href="{% url 'reports:create' %}" class="btn btn-sm bg-terre-claire hover:bg-terre text-white border-none">{% trans "Écrire à vos élus" %}</a>
           <a href="{% url 'accounts:profile' %}" class="hover:text-vert-tres-clair transition-colors">{{ user.first_name }}</a>
           <a href="{% url 'accounts:logout' %}" class="btn btn-sm btn-outline border-white text-white hover:bg-white hover:text-vert-foret">
             {% trans "Déconnexion" %}
@@ -43,6 +45,8 @@
     <div class="md:hidden pb-4 space-y-2" x-show="mobileOpen" x-collapse>
       {% if user.is_authenticated and user.is_approved %}
         <a href="{% url 'home' %}" class="block py-2 hover:text-vert-tres-clair">{% trans "Accueil" %}</a>
+        <a href="{% url 'reports:list' %}" class="block py-2 hover:text-vert-tres-clair">{% trans "Mes sollicitations" %}</a>
+        <a href="{% url 'reports:create' %}" class="block py-2 hover:text-vert-tres-clair">{% trans "Écrire à vos élus" %}</a>
         <a href="{% url 'accounts:profile' %}" class="block py-2 hover:text-vert-tres-clair">{{ user.first_name }}</a>
         <a href="{% url 'accounts:logout' %}" class="block py-2 hover:text-vert-tres-clair">{% trans "Déconnexion" %}</a>
       {% else %}

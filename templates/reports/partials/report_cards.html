@@ -1,0 +1,48 @@
+{% load i18n %}
+
+{% if reports %}
+<div class="space-y-4">
+  {% for report in reports %}
+  <a href="{% url 'reports:detail' pk=report.pk %}" class="block card-saulzet hover:shadow-lg transition-shadow">
+    <div class="flex flex-col sm:flex-row gap-4">
+      {# Thumbnail #}
+      {% with first_photo=report.photos.first %}
+      {% if first_photo and first_photo.thumbnail %}
+      <div class="flex-shrink-0">
+        <img src="{{ first_photo.thumbnail.url }}"
+             alt=""
+             class="w-full sm:w-28 h-24 object-cover rounded-lg"
+             loading="lazy" />
+      </div>
+      {% endif %}
+      {% endwith %}
+
+      {# Content #}
+      <div class="flex-1 min-w-0">
+        <div class="flex flex-wrap gap-2 mb-2">
+          {% include "components/type_badge.html" with report_type=report.report_type label=report.type_label %}
+          {% include "components/status_badge.html" with status=report.status label=report.status_label %}
+        </div>
+        <h2 class="font-sans font-semibold text-encre text-base truncate">{{ report.title }}</h2>
+        <p class="text-sm text-gris-pierre mt-1 line-clamp-2">{{ report.description }}</p>
+        <div class="flex flex-wrap items-center gap-3 mt-2 text-xs text-gris-clair">
+          <span>{{ report.created_at|date:"d/m/Y" }}</span>
+          {% if report.location_text %}
+          <span>&#128205; {{ report.location_text }}</span>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </a>
+  {% endfor %}
+</div>
+{% else %}
+<div class="card-saulzet text-center py-12">
+  <p class="text-gris-pierre text-lg mb-4">
+    {% trans "Vous n'avez pas encore de sollicitation." %}
+  </p>
+  <a href="{% url 'reports:create' %}" class="btn-primary-saulzet">
+    {% trans "Ecrire a vos elus" %}
+  </a>
+</div>
+{% endif %}
