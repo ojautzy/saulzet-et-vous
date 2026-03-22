@@ -1,20 +1,21 @@
 # Saulzet & Vous
 
-Plateforme de signalement citoyen pour la commune de **Saulzet-le-Froid** (Puy-de-Dôme).
+Plateforme de démocratie participative pour la commune de **Saulzet-le-Froid** (284 hab., Puy-de-Dôme).
 
-Les habitants signalent des problèmes (voirie, eau, éclairage…) et les élus prennent en charge leur résolution.
+Les habitants écrivent à leurs élus (questions, idées, signalements) via un formulaire web. Les élus disposent d'un tableau de bord pour prendre en charge, suivre et répondre aux sollicitations.
 
 ## Stack technique
 
-- **Backend** : Django 5.x (Python 3.12+)
-- **Frontend** : HTMX + Alpine.js + Tailwind CSS + DaisyUI
+- **Backend** : Django 5.2 (Python 3.12+)
+- **Frontend** : HTMX 2.x + Alpine.js 3.x + Tailwind CSS 3.x + DaisyUI 4.x
+- **Cartographie** : Leaflet.js + OpenStreetMap
 - **BDD** : SQLite (dev) / PostgreSQL (prod)
 
 ## Installation
 
 ```bash
 # Cloner le projet
-git clone https://github.com/saulzet-le-froid/saulzet-et-vous.git
+git clone https://github.com/ojautzy/saulzet-et-vous.git
 cd saulzet-et-vous
 
 # Environnement Python
@@ -80,6 +81,19 @@ Le tunnel est déjà configuré côté Cloudflare. Il suffit de lancer le serveu
 | `mayor` | Maire et 1er Adjoint |
 | `elected` | Adjoint ou Conseiller municipal |
 | `citizen` | Habitant |
+
+## Fonctionnalités
+
+- **Authentification** : inscription avec validation admin, connexion par magic link ou mot de passe
+- **Sollicitations** : les habitants créent des questions, idées ou signalements avec photos et géolocalisation
+- **Tableau de bord élus** : vue d'ensemble avec filtres, compteurs par statut, page « Mes tâches »
+- **Workflow** : prise en charge, affectation (maire), suivi, clôture avec réponse
+- **Commentaires** : timeline chronologique des échanges et changements de statut
+
+## Versioning
+
+La version du projet est dans le fichier `VERSION` à la racine et affichée dans le footer du site.
+Elle suit le schéma `MAJEURE.MINEURE.PATCH` et doit toujours être synchronisée avec le tag Git.
 
 ## Licence
 
