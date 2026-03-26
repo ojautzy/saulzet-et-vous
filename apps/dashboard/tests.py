@@ -1,11 +1,13 @@
 """Tests for the dashboard app."""
 
 import uuid
+from datetime import timedelta
 
 from django.contrib.auth import get_user_model
 from django.template import RequestContext, Template
 from django.test import Client, RequestFactory, TestCase
 from django.urls import reverse
+from django.utils import timezone
 
 from apps.reports.models import Comment, Report
 
@@ -519,3 +521,142 @@ class TestDetailView(DashboardTestMixin, TestCase):
             reverse("dashboard:detail", kwargs={"pk": uuid.uuid4()})
         )
         assert resp.status_code == 404
+
+
+class TestToggleVisibility(DashboardTestMixin, TestCase):
+    """Tests for toggling report visibility."""
+
+    def test_elected_can_toggle_to_public(self) -> None:
+        self.client.login(email="elected@test.com", password="testpass123")
+        assert self.report.is_public is False
+        resp = self.client.post(
+            reverse("dashboard:toggle_visibility", kwargs={"pk": self.report.pk})
+        )
+        assert resp.status_code == 302
+        self.report.refresh_from_db()
+        assert self.report.is_public is True
+
+    def test_elected_can_toggle_to_private(self) -> None:
+        self.report.is_public = True
+        self.report.save()
+        self.client.login(email="elected@test.com", password="testpass123")
+        self.client.post(
+            reverse("dashboard:toggle_visibility", kwargs={"pk": self.report.pk})
+        )
+        self.report.refresh_from_db()
+        assert self.report.is_public is False
+
+    def test_citizen_cannot_toggle(self) -> None:
+        self.client.login(email="citizen@test.com", password="testpass123")
+        resp = self.client.post(
+            reverse("dashboard:toggle_visibility", kwargs={"pk": self.report.pk})
+        )
+        assert resp.status_code == 403
+
+    def test_toggle_creates_comment(self) -> None:
+        self.client.login(email="elected@test.com", password="testpass123")
+        self.client.post(
+            reverse("dashboard:toggle_visibility", kwargs={"pk": self.report.pk})
+        )
+        comment = Comment.objects.filter(report=self.report).last()
+        assert comment is not None
+        assert "publique" in comment.content
+
+
+class TestAdminCleanup(DashboardTestMixin, TestCase):
+    """Tests for admin cleanup views."""
+
+    def setUp(self) -> None:
+        super().setUp()
+        self.admin = User.objects.create_user(
+            email="admin@test.com",
+            password="testpass123",
+            first_name="Admin",
+            last_name="User",
+            is_approved=True,
+            role=User.Role.ADMIN,
+        )
+        self.cancelled_report = Report.objects.create(
+            author=self.citizen,
+            title="Cancelled report",
+            description="To delete",
+            report_type=Report.Type.ISSUE,
+            status=Report.Status.CANCELLED,
+        )
+        self.resolved_report = Report.objects.create(
+            author=self.citizen,
+            title="Old resolved",
+            description="Resolved long ago",
+            report_type=Report.Type.QUESTION,
+            status=Report.Status.RESOLVED,
+            resolved_at=timezone.now() - timedelta(days=45),
+        )
+        self.recent_resolved = Report.objects.create(
+            author=self.citizen,
+            title="Recent resolved",
+            description="Resolved recently",
+            report_type=Report.Type.IDEA,
+            status=Report.Status.RESOLVED,
+            resolved_at=timezone.now() - timedelta(days=5),
+        )
+
+    def test_only_admin_can_access_cleanup(self) -> None:
+        self.client.login(email="citizen@test.com", password="testpass123")
+        resp = self.client.get(reverse("dashboard:admin_cleanup"))
+        assert resp.status_code == 403
+
+        self.client.login(email="elected@test.com", password="testpass123")
+        resp = self.client.get(reverse("dashboard:admin_cleanup"))
+        assert resp.status_code == 403
+
+        self.client.login(email="admin@test.com", password="testpass123")
+        resp = self.client.get(reverse("dashboard:admin_cleanup"))
+        assert resp.status_code == 200
+
+    def test_delete_cancelled_reports(self) -> None:
+        self.client.login(email="admin@test.com", password="testpass123")
+        resp = self.client.post(reverse("dashboard:admin_cleanup_cancelled"))
+        assert resp.status_code == 302
+        assert not Report.objects.filter(pk=self.cancelled_report.pk).exists()
+        # Non-cancelled still exists
+        assert Report.objects.filter(pk=self.report.pk).exists()
+
+    def test_delete_resolved_with_default_delay(self) -> None:
+        self.client.login(email="admin@test.com", password="testpass123")
+        resp = self.client.post(
+            reverse("dashboard:admin_cleanup_resolved"),
+            {"days": "30"},
+        )
+        assert resp.status_code == 302
+        # 45-day-old resolved should be deleted
+        assert not Report.objects.filter(pk=self.resolved_report.pk).exists()
+        # 5-day-old resolved should remain
+        assert Report.objects.filter(pk=self.recent_resolved.pk).exists()
+
+    def test_delete_resolved_with_custom_delay(self) -> None:
+        self.client.login(email="admin@test.com", password="testpass123")
+        resp = self.client.post(
+            reverse("dashboard:admin_cleanup_resolved"),
+            {"days": "3"},
+        )
+        assert resp.status_code == 302
+        # Both resolved should be deleted (both > 3 days)
+        assert not Report.objects.filter(pk=self.resolved_report.pk).exists()
+        assert not Report.objects.filter(pk=self.recent_resolved.pk).exists()
+
+    def test_cascade_deletes_photos_and_comments(self) -> None:
+        Comment.objects.create(
+            report=self.cancelled_report,
+            author=self.citizen,
+            content="A comment",
+        )
+        self.client.login(email="admin@test.com", password="testpass123")
+        self.client.post(reverse("dashboard:admin_cleanup_cancelled"))
+        assert Comment.objects.filter(report=self.cancelled_report).count() == 0
+
+    def test_unrelated_reports_not_deleted(self) -> None:
+        self.client.login(email="admin@test.com", password="testpass123")
+        self.client.post(reverse("dashboard:admin_cleanup_cancelled"))
+        # The NEW report should still be there
+        assert Report.objects.filter(pk=self.report.pk).exists()
+        assert Report.objects.filter(pk=self.resolved_report.pk).exists()

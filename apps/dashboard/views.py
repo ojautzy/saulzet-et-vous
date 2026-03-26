@@ -1,5 +1,7 @@
 """Views for the elected officials dashboard."""
 
+from datetime import timedelta
+
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.db.models import Case, IntegerField, Value, When
@@ -11,7 +13,7 @@ from django.views.decorators.http import require_POST
 
 from apps.reports.models import Comment, Report
 
-from .decorators import elected_required
+from .decorators import admin_required, elected_required
 
 User = get_user_model()
 
@@ -341,3 +343,98 @@ def comment_view(request: HttpRequest, pk: str) -> HttpResponse:
 
     messages.success(request, _("Commentaire ajouté."))
     return redirect("dashboard:detail", pk=report.pk)
+
+
+@elected_required
+@require_POST
+def toggle_visibility_view(request: HttpRequest, pk: str) -> HttpResponse:
+    """Toggle a report's public/private visibility."""
+    report = get_object_or_404(Report, pk=pk)
+
+    report.is_public = not report.is_public
+    report.save(update_fields=["is_public", "updated_at"])
+
+    if report.is_public:
+        comment_text = _("Sollicitation passée en publique")
+    else:
+        comment_text = _("Sollicitation passée en privée")
+
+    Comment.objects.create(
+        report=report,
+        author=request.user,
+        content=comment_text,
+        is_status_change=False,
+    )
+
+    messages.success(request, comment_text)
+    return redirect("dashboard:detail", pk=report.pk)
+
+
+@admin_required
+def admin_cleanup_cancelled_view(request: HttpRequest) -> HttpResponse:
+    """Delete all cancelled reports."""
+    cancelled = Report.objects.filter(status=Report.Status.CANCELLED)
+    count = cancelled.count()
+
+    if request.method == "POST":
+        cancelled.delete()
+        messages.success(
+            request,
+            _("%(count)s sollicitation(s) annulée(s) supprimée(s).") % {"count": count},
+        )
+        return redirect("dashboard:admin_cleanup")
+
+    return render(request, "dashboard/admin_cleanup.html", {
+        "cancelled_count": count,
+        "resolved_count": _get_resolved_count(30),
+        "default_days": 30,
+    })
+
+
+@admin_required
+def admin_cleanup_resolved_view(request: HttpRequest) -> HttpResponse:
+    """Delete resolved reports older than a given delay."""
+    days = int(request.POST.get("days", 30))
+    cutoff = timezone.now() - timedelta(days=days)
+    resolved = Report.objects.filter(
+        status=Report.Status.RESOLVED,
+        resolved_at__lt=cutoff,
+    )
+    count = resolved.count()
+
+    if request.method == "POST":
+        resolved.delete()
+        messages.success(
+            request,
+            _("%(count)s sollicitation(s) résolue(s) supprimée(s).") % {"count": count},
+        )
+        return redirect("dashboard:admin_cleanup")
+
+    return redirect("dashboard:admin_cleanup")
+
+
+@admin_required
+def admin_cleanup_resolved_count_view(request: HttpRequest) -> HttpResponse:
+    """Return the count of resolved reports for a given delay (HTMX)."""
+    days = int(request.GET.get("days", 30))
+    count = _get_resolved_count(days)
+    return HttpResponse(str(count))
+
+
+def _get_resolved_count(days: int) -> int:
+    """Get count of resolved reports older than given days."""
+    cutoff = timezone.now() - timedelta(days=days)
+    return Report.objects.filter(
+        status=Report.Status.RESOLVED,
+        resolved_at__lt=cutoff,
+    ).count()
+
+
+@admin_required
+def admin_cleanup_view(request: HttpRequest) -> HttpResponse:
+    """Display the admin cleanup page."""
+    return render(request, "dashboard/admin_cleanup.html", {
+        "cancelled_count": Report.objects.filter(status=Report.Status.CANCELLED).count(),
+        "resolved_count": _get_resolved_count(30),
+        "default_days": 30,
+    })

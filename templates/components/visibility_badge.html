@@ -1,0 +1,6 @@
+{% load i18n %}
+{% if is_public %}
+<span class="badge badge-sm bg-vert-tres-clair text-vert-foret border-vert-prairie/30 gap-1 font-sans">&#128065; {% trans "Publique" %}</span>
+{% else %}
+<span class="badge badge-sm bg-base-200 text-gris-pierre border-base-300 gap-1 font-sans">&#128274; {% trans "Privée" %}</span>
+{% endif %}

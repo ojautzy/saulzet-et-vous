@@ -16,7 +16,7 @@ class ReportForm(forms.ModelForm):
 
     class Meta:
         model = Report
-        fields = ["report_type", "title", "description", "latitude", "longitude", "location_text"]
+        fields = ["report_type", "title", "description", "latitude", "longitude", "location_text", "is_public"]
         widgets = {
             "report_type": forms.RadioSelect,
             "title": forms.TextInput(
@@ -41,6 +41,14 @@ class ReportForm(forms.ModelForm):
                     "class": "input input-bordered w-full font-sans",
                 }
             ),
+            "is_public": forms.CheckboxInput(
+                attrs={
+                    "class": "checkbox checkbox-success",
+                }
+            ),
+        }
+        labels = {
+            "is_public": _("Rendre ma sollicitation publique"),
         }
 
     def clean(self) -> dict:
@@ -65,3 +73,37 @@ class ReportForm(forms.ModelForm):
                     params={"name": f.name},
                 )
         return cleaned_data
+
+
+class ReportEditForm(forms.ModelForm):
+    """Form for editing an existing report (limited fields)."""
+
+    class Meta:
+        model = Report
+        fields = ["latitude", "longitude", "location_text", "is_public"]
+        widgets = {
+            "latitude": forms.HiddenInput,
+            "longitude": forms.HiddenInput,
+            "location_text": forms.TextInput(
+                attrs={
+                    "placeholder": _("Ex : Devant la mairie, Chemin de..."),
+                    "class": "input input-bordered w-full font-sans",
+                }
+            ),
+            "is_public": forms.CheckboxInput(
+                attrs={
+                    "class": "checkbox checkbox-success",
+                }
+            ),
+        }
+        labels = {
+            "is_public": _("Sollicitation publique"),
+        }
+
+    def __init__(self, *args, **kwargs) -> None:
+        self.can_edit_visibility = kwargs.pop("can_edit_visibility", True)
+        super().__init__(*args, **kwargs)
+        self.fields["latitude"].required = False
+        self.fields["longitude"].required = False
+        if not self.can_edit_visibility:
+            del self.fields["is_public"]

@@ -77,7 +77,7 @@ class RegisterForm(forms.ModelForm):
 
     class Meta:
         model = User
-        fields = ("email", "first_name", "last_name", "phone", "address")
+        fields = ("email", "first_name", "last_name", "phone", "address", "village")
         widgets = {
             "email": forms.EmailInput(
                 attrs={
@@ -109,6 +109,11 @@ class RegisterForm(forms.ModelForm):
                     "placeholder": _("Ex : 3 rue du Bourg"),
                 }
             ),
+            "village": forms.Select(
+                attrs={
+                    "class": "select select-bordered w-full",
+                }
+            ),
         }
         labels = {
             "email": _("Adresse email"),
@@ -116,6 +121,7 @@ class RegisterForm(forms.ModelForm):
             "last_name": _("Nom"),
             "phone": _("Téléphone"),
             "address": _("Adresse à Saulzet-le-Froid"),
+            "village": _("Village / Hameau"),
         }
 
     def __init__(self, *args, **kwargs) -> None:
@@ -124,6 +130,7 @@ class RegisterForm(forms.ModelForm):
         self.fields["last_name"].required = True
         self.fields["phone"].required = True
         self.fields["address"].required = True
+        self.fields["village"].required = True
 
     def clean(self) -> dict:
         cleaned_data = super().clean()
@@ -151,7 +158,7 @@ class ProfileForm(forms.ModelForm):
 
     class Meta:
         model = User
-        fields = ("first_name", "last_name", "phone", "address")
+        fields = ("first_name", "last_name", "phone", "address", "village")
         widgets = {
             "first_name": forms.TextInput(
                 attrs={"class": "input input-bordered w-full"}
@@ -165,10 +172,14 @@ class ProfileForm(forms.ModelForm):
             "address": forms.TextInput(
                 attrs={"class": "input input-bordered w-full"}
             ),
+            "village": forms.Select(
+                attrs={"class": "select select-bordered w-full"}
+            ),
         }
         labels = {
             "first_name": _("Prénom"),
             "last_name": _("Nom"),
             "phone": _("Téléphone"),
             "address": _("Adresse à Saulzet-le-Froid"),
+            "village": _("Village / Hameau"),
         }

@@ -49,6 +49,14 @@ class User(AbstractUser):
         ELECTED = "elected", _("Adjoint / Conseiller")
         CITIZEN = "citizen", _("Habitant")
 
+    class Village(models.TextChoices):
+        BOURG = "bourg", _("Le Bourg")
+        SOUVERAND = "souverand", _("Souverand")
+        ZANIERES = "zanieres", _("Zanières")
+        PESSADE = "pessade", _("Pessade")
+        LA_MARTRE = "la_martre", _("La Martre")
+        ESPINASSE = "espinasse", _("Espinasse")
+
     # Remove username field, use email instead
     username = None
     email = models.EmailField(_("adresse email"), unique=True)
@@ -66,6 +74,13 @@ class User(AbstractUser):
     )
     phone = models.CharField(_("téléphone"), max_length=20, blank=True)
     address = models.CharField(_("adresse à Saulzet-le-Froid"), max_length=255, blank=True)
+    village = models.CharField(
+        _("village"),
+        max_length=20,
+        choices=Village.choices,
+        blank=True,
+        help_text=_("Village ou hameau de résidence à Saulzet-le-Froid."),
+    )
     magic_link_token = models.CharField(max_length=64, null=True, blank=True)
     magic_link_expires = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(_("date de création"), auto_now_add=True)
