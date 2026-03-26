@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Sollicitations en cours" %} — Saulzet &amp; Vous{% endblock %}
+
+{% block content %}
+<section class="bg-creme py-8">
+  <div class="max-w-3xl mx-auto px-4">
+    <h1 class="font-playfair text-2xl md:text-3xl text-vert-foret font-bold mb-6">
+      {% trans "Sollicitations en cours" %}
+    </h1>
+
+    {# Filters #}
+    <div class="flex flex-wrap gap-2 mb-6">
+      <button class="btn btn-sm {% if not current_type %}btn-primary-saulzet{% else %}btn-outline border-vert-foret text-vert-foret{% endif %}"
+              hx-get="{% url 'reports:public' %}"
+              hx-target="#public-reports"
+              hx-push-url="true">
+        {% trans "Tous" %}
+      </button>
+      {% for value, label in report_types %}
+      <button class="btn btn-sm {% if current_type == value %}btn-primary-saulzet{% else %}btn-outline border-vert-foret text-vert-foret{% endif %}"
+              hx-get="{% url 'reports:public' %}?type={{ value }}"
+              hx-target="#public-reports"
+              hx-push-url="true">
+        {{ label }}
+      </button>
+      {% endfor %}
+    </div>
+
+    <div id="public-reports">
+      {% include "reports/partials/public_report_cards.html" %}
+    </div>
+  </div>
+</section>
+{% endblock %}

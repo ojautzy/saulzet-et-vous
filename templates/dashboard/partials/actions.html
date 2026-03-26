@@ -104,5 +104,20 @@
     </div>
     {% endif %}
     {% endif %}
+    {# Toggle visibility — all elected, active statuses #}
+    {% if report.status == "new" or report.status == "assigned" or report.status == "in_progress" %}
+    <form method="post" action="{% url 'dashboard:toggle_visibility' pk=report.pk %}" class="inline">
+      {% csrf_token %}
+      {% if report.is_public %}
+      <button type="submit" class="btn btn-outline btn-sm border-gris-clair text-gris-pierre hover:bg-creme-fonce w-full sm:w-auto">
+        &#128274; {% trans "Passer en privé" %}
+      </button>
+      {% else %}
+      <button type="submit" class="btn btn-outline btn-sm border-vert-prairie text-vert-foret hover:bg-vert-tres-clair w-full sm:w-auto">
+        &#128065; {% trans "Passer en public" %}
+      </button>
+      {% endif %}
+    </form>
+    {% endif %}
   </div>
 </div>

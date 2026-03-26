@@ -43,7 +43,7 @@ class UserAdmin(BaseUserAdmin):
 
     fieldsets = (
         (None, {"fields": ("email", "password")}),
-        (_("Informations personnelles"), {"fields": ("first_name", "last_name", "phone", "address")}),
+        (_("Informations personnelles"), {"fields": ("first_name", "last_name", "phone", "address", "village")}),
         (_("Rôle et approbation"), {"fields": ("role", "is_approved")}),
         (
             _("Permissions"),
