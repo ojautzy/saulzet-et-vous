@@ -72,6 +72,11 @@ class Report(models.Model):
     updated_at = models.DateTimeField(_("date de modification"), auto_now=True)
     assigned_at = models.DateTimeField(_("date d'assignation"), null=True, blank=True)
     resolved_at = models.DateTimeField(_("date de resolution"), null=True, blank=True)
+    is_public = models.BooleanField(
+        _("sollicitation publique"),
+        default=False,
+        help_text=_("Si activé, la sollicitation est visible par tous les habitants."),
+    )
 
     class Meta:
         verbose_name = _("sollicitation")

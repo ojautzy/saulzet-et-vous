@@ -3,7 +3,7 @@
 {% if reports %}
 <div class="space-y-4">
   {% for report in reports %}
-  <a href="{% url 'dashboard:detail' pk=report.pk %}" class="block card-saulzet hover:shadow-lg transition-shadow">
+  <div class="card-saulzet">
     <div class="flex flex-col sm:flex-row gap-4">
       {# Content #}
       <div class="flex-1 min-w-0">
@@ -15,11 +15,10 @@
         <h2 class="font-sans font-semibold text-encre text-base truncate">{{ report.title }}</h2>
         <p class="text-sm text-gris-pierre mt-1 line-clamp-2">{{ report.description }}</p>
         <div class="flex flex-wrap items-center gap-3 mt-2 text-xs text-gris-clair">
-          <span>{% trans "Par" %} {{ report.author.get_full_name }}</span>
-          {% if report.assigned_to %}
-          <span>&#8594; {{ report.assigned_to.get_full_name }}</span>
+          <span>{{ report.created_at|date:"d/m/Y" }}</span>
+          {% if report.author.village %}
+          <span>&#127968; {{ report.author.get_village_display }}</span>
           {% endif %}
-          <span>{{ report.updated_at|date:"d/m/Y" }}</span>
           {% if report.location_text %}
           <span>&#128205; {{ report.location_text }}</span>
           {% endif %}
@@ -38,13 +37,13 @@
       {% endif %}
       {% endwith %}
     </div>
-  </a>
+  </div>
   {% endfor %}
 </div>
 {% else %}
 <div class="card-saulzet text-center py-12">
   <p class="text-gris-pierre text-lg">
-    {% trans "Aucune sollicitation à afficher." %}
+    {% trans "Aucune sollicitation publique en cours pour le moment." %}
   </p>
 </div>
 {% endif %}

@@ -12,7 +12,6 @@
       <!-- Desktop nav -->
       <div class="hidden md:flex items-center gap-4 font-sans text-sm tracking-wide">
         {% if user.is_authenticated and user.is_approved %}
-          <a href="{% url 'home' %}" class="hover:text-vert-tres-clair transition-colors">{% trans "Accueil" %}</a>
           {% if user.is_elected %}
             <a href="{% url 'dashboard:dashboard' %}" class="hover:text-vert-tres-clair transition-colors">{% trans "Tableau de bord" %}</a>
             <a href="{% url 'dashboard:my_tasks' %}" class="hover:text-vert-tres-clair transition-colors flex items-center gap-1">
@@ -23,8 +22,12 @@
               {% endif %}
             </a>
           {% endif %}
+          <a href="{% url 'reports:public' %}" class="hover:text-vert-tres-clair transition-colors">{% trans "En cours" %}</a>
           <a href="{% url 'reports:list' %}" class="hover:text-vert-tres-clair transition-colors">{% trans "Mes sollicitations" %}</a>
           <a href="{% url 'reports:create' %}" class="btn btn-sm bg-terre-claire hover:bg-terre text-white border-none">{% trans "Écrire à vos élus" %}</a>
+          {% if user.is_admin %}
+          <a href="{% url 'dashboard:admin_cleanup' %}" class="hover:text-vert-tres-clair transition-colors">{% trans "Maintenance" %}</a>
+          {% endif %}
           <a href="{% url 'accounts:profile' %}" class="hover:text-vert-tres-clair transition-colors">{{ user.first_name }}</a>
           <a href="{% url 'accounts:logout' %}" class="btn btn-sm btn-outline border-white text-white hover:bg-white hover:text-vert-foret">
             {% trans "Déconnexion" %}
@@ -54,7 +57,6 @@
     <!-- Mobile menu -->
     <div class="md:hidden pb-4 space-y-2" x-show="mobileOpen" x-collapse>
       {% if user.is_authenticated and user.is_approved %}
-        <a href="{% url 'home' %}" class="block py-2 hover:text-vert-tres-clair">{% trans "Accueil" %}</a>
         {% if user.is_elected %}
           <a href="{% url 'dashboard:dashboard' %}" class="block py-2 hover:text-vert-tres-clair">{% trans "Tableau de bord" %}</a>
           <a href="{% url 'dashboard:my_tasks' %}" class="block py-2 hover:text-vert-tres-clair flex items-center gap-2">
@@ -65,8 +67,12 @@
             {% endif %}
           </a>
         {% endif %}
+        <a href="{% url 'reports:public' %}" class="block py-2 hover:text-vert-tres-clair">{% trans "En cours" %}</a>
         <a href="{% url 'reports:list' %}" class="block py-2 hover:text-vert-tres-clair">{% trans "Mes sollicitations" %}</a>
         <a href="{% url 'reports:create' %}" class="block py-2 hover:text-vert-tres-clair">{% trans "Écrire à vos élus" %}</a>
+        {% if user.is_admin %}
+        <a href="{% url 'dashboard:admin_cleanup' %}" class="block py-2 hover:text-vert-tres-clair">{% trans "Maintenance" %}</a>
+        {% endif %}
         <a href="{% url 'accounts:profile' %}" class="block py-2 hover:text-vert-tres-clair">{{ user.first_name }}</a>
         <a href="{% url 'accounts:logout' %}" class="block py-2 hover:text-vert-tres-clair">{% trans "Déconnexion" %}</a>
       {% else %}

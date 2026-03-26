@@ -25,6 +25,7 @@
       <div class="flex flex-wrap gap-2 mb-3">
         {% include "components/type_badge.html" with report_type=report.report_type label=report.type_label %}
         {% include "components/status_badge.html" with status=report.status label=report.status_label %}
+        {% include "components/visibility_badge.html" with is_public=report.is_public %}
       </div>
       <h1 class="font-playfair text-2xl md:text-3xl text-vert-foret font-bold">
         {{ report.title }}
@@ -137,6 +138,15 @@
         {% endfor %}
       </div>
     </div>
+
+    {# Edit button #}
+    {% if report.author == user and report.status != "resolved" and report.status != "cancelled" %}
+    <div class="card-saulzet mb-6">
+      <a href="{% url 'reports:edit' pk=report.pk %}" class="btn-secondary-saulzet w-full sm:w-auto">
+        {% trans "Modifier cette sollicitation" %}
+      </a>
+    </div>
+    {% endif %}
 
     {# Cancel button #}
     {% if report.is_cancellable %}

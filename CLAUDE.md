@@ -47,10 +47,16 @@ python manage.py makemigrations && python manage.py migrate
 
 ## Architecture des rôles
 
-- `admin` : gestion technique, validation inscriptions
+- `admin` : gestion technique, validation inscriptions, nettoyage (suppression sollicitations annulées/résolues)
 - `mayor` : supervision, affectation des sollicitations
-- `elected` : prise en charge, commentaires, clôture
-- `citizen` : création et suivi de ses sollicitations
+- `elected` : prise en charge, commentaires, clôture, bascule public/privé
+- `citizen` : création, suivi, modification de ses sollicitations, choix public/privé (tant que statut NEW)
+
+## Règles métier clés
+
+- **Visibilité** : une sollicitation peut être publique ou privée (`is_public`). L'habitant peut changer la visibilité tant que le statut est NEW. Après prise en charge, seul l'élu peut basculer la visibilité.
+- **Modification** : l'habitant peut modifier localisation, photos et visibilité tant que la sollicitation n'est pas résolue ou annulée. Le titre et la description ne sont pas modifiables.
+- **Tableau de bord public** : affiche les sollicitations publiques avec statut ASSIGNED ou IN_PROGRESS, visible par tous les utilisateurs connectés.
 
 ## Accès dev
 
@@ -66,4 +72,6 @@ python manage.py makemigrations && python manage.py migrate
 
 ## État du projet
 
-Plan complet dans `saulzet-et-vous-plan-v2.md`. Prompts par phase dans `prompt-phase*-claude-code.md`.
+- **Version actuelle** : 0.4.0 (Phase 3bis — Retours utilisateurs)
+- Plan complet dans `saulzet-et-vous-plan-v2.md`. Prompts par phase dans `prompt-phase*-claude-code.md`.
+- Phases 1 à 3bis implémentées. Prochaine étape : Phase 4 (Interface Maire).

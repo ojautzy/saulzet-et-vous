@@ -25,6 +25,7 @@
       <div class="flex flex-wrap gap-2 mb-3">
         {% include "components/type_badge.html" with report_type=report.report_type label=report.type_label %}
         {% include "components/status_badge.html" with status=report.status label=report.status_label %}
+        {% include "components/visibility_badge.html" with is_public=report.is_public %}
       </div>
       <h1 class="font-playfair text-2xl md:text-3xl text-vert-foret font-bold">
         {{ report.title }}
@@ -80,6 +81,12 @@
             <div>
               <p class="text-xs text-gris-clair uppercase tracking-wide mb-0.5">{% trans "Adresse" %}</p>
               <p class="text-encre">{{ report.author.address }}</p>
+            </div>
+            {% endif %}
+            {% if report.author.village %}
+            <div>
+              <p class="text-xs text-gris-clair uppercase tracking-wide mb-0.5">{% trans "Village" %}</p>
+              <p class="text-encre">{{ report.author.get_village_display }}</p>
             </div>
             {% endif %}
             <div>
