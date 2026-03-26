@@ -553,6 +553,9 @@ class TestReportEdit(ReportTestMixin, TestCase):
         assert resp.status_code == 302  # redirect with error
 
     def test_visibility_change_creates_comment(self) -> None:
+        # Visibility can only be changed by author when status is NEW
+        self.report.status = Report.Status.NEW
+        self.report.save()
         resp = self.client.post(
             reverse("reports:edit", kwargs={"pk": self.report.pk}),
             {
@@ -568,6 +571,22 @@ class TestReportEdit(ReportTestMixin, TestCase):
         assert Comment.objects.filter(
             report=self.report, content__contains="publique"
         ).exists()
+
+    def test_cannot_change_visibility_after_assignment(self) -> None:
+        """Once assigned, author cannot change visibility."""
+        assert self.report.status == Report.Status.ASSIGNED
+        resp = self.client.post(
+            reverse("reports:edit", kwargs={"pk": self.report.pk}),
+            {
+                "latitude": str(self.report.latitude),
+                "longitude": str(self.report.longitude),
+                "location_text": self.report.location_text,
+                "is_public": "on",
+            },
+        )
+        assert resp.status_code == 302
+        self.report.refresh_from_db()
+        assert self.report.is_public is False
 
 
 class TestPublicReports(ReportTestMixin, TestCase):

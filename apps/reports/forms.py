@@ -99,3 +99,11 @@ class ReportEditForm(forms.ModelForm):
         labels = {
             "is_public": _("Sollicitation publique"),
         }
+
+    def __init__(self, *args, **kwargs) -> None:
+        self.can_edit_visibility = kwargs.pop("can_edit_visibility", True)
+        super().__init__(*args, **kwargs)
+        self.fields["latitude"].required = False
+        self.fields["longitude"].required = False
+        if not self.can_edit_visibility:
+            del self.fields["is_public"]
