@@ -60,6 +60,16 @@
         {% endif %}
       </div>
 
+      <div>
+        <label for="id_village" class="label font-sans text-sm font-semibold text-encre">
+          {{ form.village.label }}
+        </label>
+        {{ form.village }}
+        {% if form.village.errors %}
+        <p class="text-error text-sm mt-1">{{ form.village.errors.0 }}</p>
+        {% endif %}
+      </div>
+
       <button type="submit" class="btn-primary-saulzet w-full">
         {% trans "Enregistrer" %}
       </button>

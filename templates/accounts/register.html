@@ -71,6 +71,16 @@
       </div>
 
       <div>
+        <label for="id_village" class="label font-sans text-sm font-semibold text-encre">
+          {{ form.village.label }} <span class="text-error">*</span>
+        </label>
+        {{ form.village }}
+        {% if form.village.errors %}
+        <p class="text-error text-sm mt-1">{{ form.village.errors.0 }}</p>
+        {% endif %}
+      </div>
+
+      <div>
         <label for="id_password1" class="label font-sans text-sm font-semibold text-encre">
           {{ form.password1.label }}
         </label>

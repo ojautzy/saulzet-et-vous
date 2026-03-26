@@ -410,3 +410,226 @@ class TestAccessControl(ReportTestMixin, TestCase):
         resp = self.client.get(reverse("reports:create"))
         assert resp.status_code == 302
         assert "pending" in resp.url
+
+
+class TestIsPublic(ReportTestMixin, TestCase):
+    """Tests for the is_public field on Report."""
+
+    def test_create_public_report(self) -> None:
+        resp = self.client.post(
+            reverse("reports:create"),
+            {
+                "report_type": "issue",
+                "title": "Public report",
+                "description": "Visible par tous",
+                "is_public": "on",
+            },
+        )
+        assert resp.status_code == 302
+        report = Report.objects.get(title="Public report")
+        assert report.is_public is True
+
+    def test_create_private_report_default(self) -> None:
+        resp = self.client.post(
+            reverse("reports:create"),
+            {
+                "report_type": "issue",
+                "title": "Private report",
+                "description": "Privée par défaut",
+            },
+        )
+        assert resp.status_code == 302
+        report = Report.objects.get(title="Private report")
+        assert report.is_public is False
+
+    def test_visibility_badge_displayed(self) -> None:
+        report = Report.objects.create(
+            author=self.user,
+            title="Badge test",
+            description="Test badge",
+            report_type=Report.Type.ISSUE,
+            is_public=True,
+        )
+        resp = self.client.get(reverse("reports:detail", kwargs={"pk": report.pk}))
+        content = resp.content.decode()
+        assert "Publique" in content
+
+
+class TestReportEdit(ReportTestMixin, TestCase):
+    """Tests for editing reports."""
+
+    def setUp(self) -> None:
+        super().setUp()
+        self.report = Report.objects.create(
+            author=self.user,
+            title="Editable report",
+            description="Can be edited",
+            report_type=Report.Type.ISSUE,
+            status=Report.Status.ASSIGNED,
+            latitude=45.6565,
+            longitude=2.9162,
+            location_text="Devant la mairie",
+        )
+
+    def test_author_can_edit_location(self) -> None:
+        resp = self.client.post(
+            reverse("reports:edit", kwargs={"pk": self.report.pk}),
+            {
+                "latitude": "45.6570",
+                "longitude": "2.9170",
+                "location_text": "Place du village",
+            },
+        )
+        assert resp.status_code == 302
+        self.report.refresh_from_db()
+        assert self.report.location_text == "Place du village"
+        # Auto comment created
+        assert Comment.objects.filter(
+            report=self.report, content__contains="Localisation"
+        ).exists()
+
+    def test_author_can_add_photo(self) -> None:
+        img = create_test_image()
+        resp = self.client.post(
+            reverse("reports:edit", kwargs={"pk": self.report.pk}),
+            {
+                "latitude": str(self.report.latitude),
+                "longitude": str(self.report.longitude),
+                "location_text": self.report.location_text,
+                "photos": [img],
+            },
+        )
+        assert resp.status_code == 302
+        assert self.report.photos.count() == 1
+        assert Comment.objects.filter(
+            report=self.report, content__contains="Photos"
+        ).exists()
+
+    def test_author_can_delete_photo(self) -> None:
+        photo = Photo(
+            report=self.report,
+            original_filename="test.jpg",
+            order=0,
+        )
+        img = create_test_image()
+        photo.image.save("test.jpg", img, save=False)
+        photo.process_image()
+        photo.save()
+        resp = self.client.post(
+            reverse(
+                "reports:delete_photo",
+                kwargs={"pk": self.report.pk, "photo_pk": photo.pk},
+            )
+        )
+        assert resp.status_code == 302
+        assert self.report.photos.count() == 0
+
+    def test_title_description_not_editable(self) -> None:
+        """Title and description fields are not in the edit form."""
+        resp = self.client.get(
+            reverse("reports:edit", kwargs={"pk": self.report.pk})
+        )
+        assert resp.status_code == 200
+        content = resp.content.decode()
+        # No form input named "title" or "description" should exist
+        import re
+
+        assert not re.search(r'<input[^>]+name="title"', content)
+        assert not re.search(r'<(input|textarea)[^>]+name="description"', content)
+
+    def test_non_author_cannot_edit(self) -> None:
+        self.client.login(email="other@test.com", password="testpass123")
+        resp = self.client.get(
+            reverse("reports:edit", kwargs={"pk": self.report.pk})
+        )
+        assert resp.status_code == 404
+
+    def test_cannot_edit_resolved_report(self) -> None:
+        self.report.status = Report.Status.RESOLVED
+        self.report.save()
+        resp = self.client.get(
+            reverse("reports:edit", kwargs={"pk": self.report.pk})
+        )
+        assert resp.status_code == 302  # redirect with error
+
+    def test_visibility_change_creates_comment(self) -> None:
+        resp = self.client.post(
+            reverse("reports:edit", kwargs={"pk": self.report.pk}),
+            {
+                "latitude": str(self.report.latitude),
+                "longitude": str(self.report.longitude),
+                "location_text": self.report.location_text,
+                "is_public": "on",
+            },
+        )
+        assert resp.status_code == 302
+        self.report.refresh_from_db()
+        assert self.report.is_public is True
+        assert Comment.objects.filter(
+            report=self.report, content__contains="publique"
+        ).exists()
+
+
+class TestPublicReports(ReportTestMixin, TestCase):
+    """Tests for the public reports view."""
+
+    def setUp(self) -> None:
+        super().setUp()
+        self.public_assigned = Report.objects.create(
+            author=self.other_user,
+            title="Public assigned",
+            description="Visible",
+            report_type=Report.Type.ISSUE,
+            status=Report.Status.ASSIGNED,
+            is_public=True,
+        )
+        self.public_in_progress = Report.objects.create(
+            author=self.other_user,
+            title="Public in progress",
+            description="Visible",
+            report_type=Report.Type.QUESTION,
+            status=Report.Status.IN_PROGRESS,
+            is_public=True,
+        )
+        self.private_report = Report.objects.create(
+            author=self.other_user,
+            title="Private report",
+            description="Hidden",
+            report_type=Report.Type.ISSUE,
+            status=Report.Status.ASSIGNED,
+            is_public=False,
+        )
+        self.public_resolved = Report.objects.create(
+            author=self.other_user,
+            title="Public resolved",
+            description="Hidden too",
+            report_type=Report.Type.ISSUE,
+            status=Report.Status.RESOLVED,
+            is_public=True,
+        )
+
+    def test_all_connected_users_have_access(self) -> None:
+        resp = self.client.get(reverse("reports:public"))
+        assert resp.status_code == 200
+
+    def test_only_public_in_progress_shown(self) -> None:
+        resp = self.client.get(reverse("reports:public"))
+        content = resp.content.decode()
+        assert "Public assigned" in content
+        assert "Public in progress" in content
+
+    def test_private_not_shown(self) -> None:
+        resp = self.client.get(reverse("reports:public"))
+        content = resp.content.decode()
+        assert "Private report" not in content
+
+    def test_resolved_not_shown(self) -> None:
+        resp = self.client.get(reverse("reports:public"))
+        content = resp.content.decode()
+        assert "Public resolved" not in content
+
+    def test_anonymous_cannot_access(self) -> None:
+        self.client.logout()
+        resp = self.client.get(reverse("reports:public"))
+        assert resp.status_code == 302
+        assert "/accounts/login/" in resp.url

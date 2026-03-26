@@ -23,8 +23,12 @@
               {% endif %}
             </a>
           {% endif %}
+          <a href="{% url 'reports:public' %}" class="hover:text-vert-tres-clair transition-colors">{% trans "Sollicitations en cours" %}</a>
           <a href="{% url 'reports:list' %}" class="hover:text-vert-tres-clair transition-colors">{% trans "Mes sollicitations" %}</a>
           <a href="{% url 'reports:create' %}" class="btn btn-sm bg-terre-claire hover:bg-terre text-white border-none">{% trans "Écrire à vos élus" %}</a>
+          {% if user.is_admin %}
+          <a href="{% url 'dashboard:admin_cleanup' %}" class="hover:text-vert-tres-clair transition-colors">{% trans "Maintenance" %}</a>
+          {% endif %}
           <a href="{% url 'accounts:profile' %}" class="hover:text-vert-tres-clair transition-colors">{{ user.first_name }}</a>
           <a href="{% url 'accounts:logout' %}" class="btn btn-sm btn-outline border-white text-white hover:bg-white hover:text-vert-foret">
             {% trans "Déconnexion" %}
@@ -65,8 +69,12 @@
             {% endif %}
           </a>
         {% endif %}
+        <a href="{% url 'reports:public' %}" class="block py-2 hover:text-vert-tres-clair">{% trans "Sollicitations en cours" %}</a>
         <a href="{% url 'reports:list' %}" class="block py-2 hover:text-vert-tres-clair">{% trans "Mes sollicitations" %}</a>
         <a href="{% url 'reports:create' %}" class="block py-2 hover:text-vert-tres-clair">{% trans "Écrire à vos élus" %}</a>
+        {% if user.is_admin %}
+        <a href="{% url 'dashboard:admin_cleanup' %}" class="block py-2 hover:text-vert-tres-clair">{% trans "Maintenance" %}</a>
+        {% endif %}
         <a href="{% url 'accounts:profile' %}" class="block py-2 hover:text-vert-tres-clair">{{ user.first_name }}</a>
         <a href="{% url 'accounts:logout' %}" class="block py-2 hover:text-vert-tres-clair">{% trans "Déconnexion" %}</a>
       {% else %}

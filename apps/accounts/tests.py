@@ -111,6 +111,7 @@ class TestRegistration(TestCase):
                 "last_name": "Habitant",
                 "phone": "0612345678",
                 "address": "3 rue du Bourg",
+                "village": "bourg",
                 "password1": "",
                 "password2": "",
             },
@@ -130,6 +131,7 @@ class TestRegistration(TestCase):
                 "last_name": "Motdepasse",
                 "phone": "0698765432",
                 "address": "5 place de l'Église",
+                "village": "bourg",
                 "password1": "SecurePass123!",
                 "password2": "SecurePass123!",
             },
@@ -148,6 +150,7 @@ class TestRegistration(TestCase):
                 "last_name": "User",
                 "phone": "0611111111",
                 "address": "1 rue Test",
+                "village": "bourg",
                 "password1": "pass1",
                 "password2": "pass2",
             },
@@ -323,3 +326,102 @@ class TestPasswordLogin(TestCase):
         )
         assert response.status_code == 302
         assert "pending" in response.url
+
+
+class TestVillageField(TestCase):
+    """Tests for the village field on User."""
+
+    def test_register_with_village_required(self):
+        response = self.client.post(
+            "/accounts/register/",
+            {
+                "email": "village@example.com",
+                "first_name": "Test",
+                "last_name": "Village",
+                "phone": "0612345678",
+                "address": "3 rue du Bourg",
+                "village": "",
+                "password1": "",
+                "password2": "",
+            },
+        )
+        # Should re-render form (village is required)
+        assert response.status_code == 200
+        assert not User.objects.filter(email="village@example.com").exists()
+
+    def test_register_with_village_success(self):
+        response = self.client.post(
+            "/accounts/register/",
+            {
+                "email": "village@example.com",
+                "first_name": "Test",
+                "last_name": "Village",
+                "phone": "0612345678",
+                "address": "3 rue du Bourg",
+                "village": "bourg",
+                "password1": "",
+                "password2": "",
+            },
+        )
+        assert response.status_code == 302
+        user = User.objects.get(email="village@example.com")
+        assert user.village == "bourg"
+        assert user.get_village_display() == "Le Bourg"
+
+    def test_profile_update_village(self):
+        user = User.objects.create_user(
+            email="profile@example.com",
+            password="testpass123",
+            first_name="Pro",
+            last_name="File",
+            is_approved=True,
+            village="bourg",
+        )
+        self.client.login(email="profile@example.com", password="testpass123")
+        response = self.client.post(
+            "/accounts/profile/",
+            {
+                "first_name": "Pro",
+                "last_name": "File",
+                "phone": "0612345678",
+                "address": "5 rue haute",
+                "village": "pessade",
+            },
+        )
+        assert response.status_code == 302
+        user.refresh_from_db()
+        assert user.village == "pessade"
+
+    def test_village_displayed_in_dashboard_detail(self):
+        citizen = User.objects.create_user(
+            email="citizen_v@test.com",
+            password="testpass123",
+            first_name="Jean",
+            last_name="Dupont",
+            is_approved=True,
+            village="zanieres",
+        )
+        User.objects.create_user(
+            email="elected_v@test.com",
+            password="testpass123",
+            first_name="Marie",
+            last_name="Martin",
+            is_approved=True,
+            role=User.Role.ELECTED,
+        )
+        from apps.reports.models import Report
+
+        report = Report.objects.create(
+            author=citizen,
+            title="Test village display",
+            description="Test",
+            report_type="issue",
+        )
+        self.client.login(email="elected_v@test.com", password="testpass123")
+        from django.urls import reverse
+
+        response = self.client.get(
+            reverse("dashboard:detail", kwargs={"pk": report.pk})
+        )
+        assert response.status_code == 200
+        assert "Zanières" in response.content.decode()
