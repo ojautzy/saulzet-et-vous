@@ -22,10 +22,20 @@
       {% trans "Modifier ma sollicitation" %}
     </h1>
 
-    {% if form.non_field_errors %}
+    {% if form.non_field_errors or form.errors %}
     <div class="alert alert-error mb-4">
       {% for error in form.non_field_errors %}
       <p>{{ error }}</p>
+      {% endfor %}
+      {% for field in form.hidden_fields %}
+        {% for error in field.errors %}
+        <p>{{ field.label }} : {{ error }}</p>
+        {% endfor %}
+      {% endfor %}
+      {% for field in form.visible_fields %}
+        {% for error in field.errors %}
+        <p>{{ field.label }} : {{ error }}</p>
+        {% endfor %}
       {% endfor %}
     </div>
     {% endif %}
@@ -91,16 +101,12 @@
             <img src="{{ photo.thumbnail.url }}"
                  alt="{{ photo.original_filename }}"
                  class="w-full h-32 object-cover rounded-lg" loading="lazy" />
-            <form method="post" action="{% url 'reports:delete_photo' pk=report.pk photo_pk=photo.pk %}"
-                  class="absolute top-1 right-1">
-              {% csrf_token %}
-              <button type="submit"
-                      class="btn btn-circle btn-xs bg-error text-white border-none opacity-80 group-hover:opacity-100"
-                      aria-label="{% trans 'Supprimer cette photo' %}"
-                      onclick="return confirm('{% trans "Supprimer cette photo ?" %}')">
-                &#10005;
-              </button>
-            </form>
+            <button type="button"
+                    class="absolute top-1 right-1 btn btn-circle btn-xs bg-error text-white border-none opacity-80 group-hover:opacity-100"
+                    aria-label="{% trans 'Supprimer cette photo' %}"
+                    onclick="if(confirm('{% trans "Supprimer cette photo ?" %}')) document.getElementById('delete-photo-{{ photo.pk }}').submit()">
+              &#10005;
+            </button>
             <p class="text-xs text-gris-pierre truncate mt-1">{{ photo.original_filename }}</p>
           </div>
           {% endfor %}
@@ -150,6 +156,7 @@
         <label class="font-sans font-semibold text-vert-foret text-sm mb-3 block">
           {% trans "Visibilité" %}
         </label>
+        {% if can_edit_visibility %}
         <div class="flex items-start gap-3">
           {{ form.is_public }}
           <div>
@@ -157,6 +164,12 @@
             <p class="text-xs text-gris-clair mt-1">{% trans "Cocher pour rendre votre sollicitation visible par les autres habitants" %}</p>
           </div>
         </div>
+        {% else %}
+        <div class="flex items-start gap-3">
+          {% include "components/visibility_badge.html" with is_public=report.is_public %}
+          <p class="text-xs text-gris-clair">{% trans "La visibilité ne peut plus être modifiée après prise en charge. Contactez l'élu en charge si besoin." %}</p>
+        </div>
+        {% endif %}
       </div>
 
       {# Comment #}
@@ -180,6 +193,14 @@
         </button>
       </div>
     </form>
+
+    {# Hidden forms for photo deletion (outside main form to avoid nesting) #}
+    {% for photo in report.photos.all %}
+    <form id="delete-photo-{{ photo.pk }}" method="post"
+          action="{% url 'reports:delete_photo' pk=report.pk photo_pk=photo.pk %}" class="hidden">
+      {% csrf_token %}
+    </form>
+    {% endfor %}
   </div>
 </section>
 {% endblock %}

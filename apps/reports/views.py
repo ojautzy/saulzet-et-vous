@@ -115,8 +115,10 @@ def report_edit_view(request: HttpRequest, pk: str) -> HttpResponse:
         messages.error(request, _("Cette sollicitation ne peut plus être modifiée."))
         return redirect("reports:detail", pk=report.pk)
 
+    can_edit_visibility = report.status == Report.Status.NEW
+
     if request.method == "POST":
-        form = ReportEditForm(request.POST, instance=report)
+        form = ReportEditForm(request.POST, instance=report, can_edit_visibility=can_edit_visibility)
         if form.is_valid():
             auto_comments = []
 
@@ -175,11 +177,12 @@ def report_edit_view(request: HttpRequest, pk: str) -> HttpResponse:
             messages.success(request, _("Votre sollicitation a été mise à jour."))
             return redirect("reports:detail", pk=report.pk)
     else:
-        form = ReportEditForm(instance=report)
+        form = ReportEditForm(instance=report, can_edit_visibility=can_edit_visibility)
 
     return render(request, "reports/report_edit.html", {
         "form": form,
         "report": report,
+        "can_edit_visibility": can_edit_visibility,
     })
 
 
@@ -213,7 +216,7 @@ def public_reports_view(request: HttpRequest) -> HttpResponse:
     reports = Report.objects.filter(
         is_public=True,
         status__in=[Report.Status.ASSIGNED, Report.Status.IN_PROGRESS],
-    ).select_related("author").order_by("-created_at")
+    ).select_related("author").prefetch_related("photos").order_by("-created_at")
 
     # HTMX filter by type
     report_type = request.GET.get("type", "")
