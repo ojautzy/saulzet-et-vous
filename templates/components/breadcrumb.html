@@ -1,0 +1,13 @@
+{% load i18n %}
+<div class="breadcrumbs text-sm mb-4">
+  <ul>
+    <li><a href="{% url 'home' %}" class="text-vert-prairie hover:text-vert-foret">{% trans "Accueil" %}</a></li>
+    {% for crumb in crumbs %}
+      {% if forloop.last %}
+        <li class="text-gris-pierre">{{ crumb.title }}</li>
+      {% else %}
+        <li><a href="{{ crumb.get_absolute_url }}" class="text-vert-prairie hover:text-vert-foret">{{ crumb.title }}</a></li>
+      {% endif %}
+    {% endfor %}
+  </ul>
+</div>

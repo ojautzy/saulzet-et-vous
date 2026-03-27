@@ -45,6 +45,10 @@ class UserAdmin(BaseUserAdmin):
         (None, {"fields": ("email", "password")}),
         (_("Informations personnelles"), {"fields": ("first_name", "last_name", "phone", "address", "village")}),
         (_("Rôle et approbation"), {"fields": ("role", "is_approved")}),
+        (_("Équipe municipale"), {
+            "fields": ("photo", "function_title", "function_order"),
+            "classes": ("collapse",),
+        }),
         (
             _("Permissions"),
             {

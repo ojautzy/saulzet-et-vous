@@ -45,6 +45,7 @@ class User(AbstractUser):
 
     class Role(models.TextChoices):
         ADMIN = "admin", _("Administrateur")
+        SECRETARY = "secretary", _("Secrétaire de mairie")
         MAYOR = "mayor", _("Maire / 1er Adjoint")
         ELECTED = "elected", _("Adjoint / Conseiller")
         CITIZEN = "citizen", _("Habitant")
@@ -66,6 +67,24 @@ class User(AbstractUser):
         max_length=10,
         choices=Role.choices,
         default=Role.CITIZEN,
+    )
+    photo = models.ImageField(
+        _("photo"),
+        upload_to="accounts/photos/",
+        blank=True,
+        null=True,
+        help_text=_("Photo pour la page équipe municipale."),
+    )
+    function_title = models.CharField(
+        _("fonction"),
+        max_length=100,
+        blank=True,
+        help_text=_("Ex: Maire, 1er Adjoint, Conseiller municipal"),
+    )
+    function_order = models.PositiveIntegerField(
+        _("ordre d'affichage"),
+        default=100,
+        help_text=_("Ordre sur la page équipe (1 = Maire, 2 = 1er Adjoint, etc.)"),
     )
     is_approved = models.BooleanField(
         _("compte approuvé"),
@@ -103,9 +122,22 @@ class User(AbstractUser):
         return self.role == self.Role.ADMIN
 
     @property
+    def is_secretary(self) -> bool:
+        return self.role == self.Role.SECRETARY
+
+    @property
     def is_mayor(self) -> bool:
         return self.role == self.Role.MAYOR
 
     @property
     def is_elected(self) -> bool:
         return self.role in (self.Role.MAYOR, self.Role.ELECTED)
+
+    @property
+    def is_staff_member(self) -> bool:
+        return self.role in (
+            self.Role.ADMIN,
+            self.Role.SECRETARY,
+            self.Role.MAYOR,
+            self.Role.ELECTED,
+        )

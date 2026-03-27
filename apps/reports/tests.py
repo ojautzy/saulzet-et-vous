@@ -112,7 +112,7 @@ class TestReportCreation(ReportTestMixin, TestCase):
         self.client.logout()
         resp = self.client.get(reverse("reports:create"))
         assert resp.status_code == 302
-        assert "/accounts/login/" in resp.url
+        assert "/comptes/login/" in resp.url
 
     def test_unapproved_user_redirected(self) -> None:
         self.client.login(email="pending@test.com", password="testpass123")
@@ -392,7 +392,7 @@ class TestAccessControl(ReportTestMixin, TestCase):
         self.client.logout()
         resp = self.client.get(reverse("reports:list"))
         assert resp.status_code == 302
-        assert "/accounts/login/" in resp.url
+        assert "/comptes/login/" in resp.url
 
     def test_anonymous_cannot_access_create(self) -> None:
         self.client.logout()
@@ -651,4 +651,4 @@ class TestPublicReports(ReportTestMixin, TestCase):
         self.client.logout()
         resp = self.client.get(reverse("reports:public"))
         assert resp.status_code == 302
-        assert "/accounts/login/" in resp.url
+        assert "/comptes/login/" in resp.url

@@ -89,7 +89,7 @@ class TestDashboardAccess(DashboardTestMixin, TestCase):
     def test_anonymous_cannot_access_dashboard(self) -> None:
         resp = self.client.get(reverse("dashboard:dashboard"))
         assert resp.status_code == 302
-        assert "/accounts/login/" in resp.url
+        assert "/comptes/login/" in resp.url
 
     def test_unapproved_elected_redirected(self) -> None:
         self.client.login(email="unapproved@test.com", password="testpass123")
