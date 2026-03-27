@@ -1,0 +1,163 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Migration du contenu — Validation" %}{% endblock %}
+
+{% block content %}
+<section class="bg-creme py-10">
+  <div class="max-w-7xl mx-auto px-4">
+
+    <h1 class="font-playfair text-3xl font-bold text-vert-foret mb-2">
+      {% trans "Migration du contenu" %}
+    </h1>
+    <p class="text-gris-pierre mb-6">
+      {% trans "Validez les décisions de migration avant d'exécuter la commande" %}
+      <code>manage.py migrate_content</code>.
+    </p>
+
+    {% if messages %}
+    <div class="mb-4">
+      {% for message in messages %}
+      <div class="alert {% if message.tags == 'success' %}alert-success{% elif message.tags == 'error' %}alert-error{% else %}alert-info{% endif %} mb-2">
+        {{ message }}
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <form method="post">
+      {% csrf_token %}
+
+      <!-- Summary -->
+      <div class="grid grid-cols-2 md:grid-cols-5 gap-3 mb-6">
+        <div class="card-saulzet p-4 text-center">
+          <p class="text-2xl font-bold text-vert-foret">{{ inventory|length }}</p>
+          <p class="text-xs text-gris-pierre">{% trans "Pages trouvées" %}</p>
+        </div>
+        <div class="card-saulzet p-4 text-center">
+          <p class="text-2xl font-bold text-green-600">{{ stats.conserver }}</p>
+          <p class="text-xs text-gris-pierre">{% trans "À conserver" %}</p>
+        </div>
+        <div class="card-saulzet p-4 text-center">
+          <p class="text-2xl font-bold text-yellow-600">{{ stats.mettre_a_jour }}</p>
+          <p class="text-xs text-gris-pierre">{% trans "À mettre à jour" %}</p>
+        </div>
+        <div class="card-saulzet p-4 text-center">
+          <p class="text-2xl font-bold text-blue-600">{{ stats.fusionner }}</p>
+          <p class="text-xs text-gris-pierre">{% trans "À fusionner" %}</p>
+        </div>
+        <div class="card-saulzet p-4 text-center">
+          <p class="text-2xl font-bold text-red-600">{{ stats.supprimer }}</p>
+          <p class="text-xs text-gris-pierre">{% trans "À supprimer" %}</p>
+        </div>
+      </div>
+
+      <!-- Legend -->
+      <details class="mb-4">
+        <summary class="cursor-pointer text-sm text-gris-pierre hover:text-vert-foret">
+          {% trans "Aide sur les statuts et la fusion" %}
+        </summary>
+        <div class="card-saulzet p-4 mt-2 text-sm">
+          <ul class="list-disc pl-5 space-y-1">
+            <li><strong>{% trans "Conserver" %}</strong> — {% trans "Le contenu sera migré et publié tel quel." %}</li>
+            <li><strong>{% trans "Mettre à jour" %}</strong> — {% trans "Le contenu sera migré mais non publié (brouillon à relire)." %}</li>
+            <li><strong>{% trans "Fusionner" %}</strong> — {% trans "Le contenu sera combiné avec les autres pages pointant vers la même cible. Chaque source deviendra une section séparée par un titre h2 et un séparateur." %}</li>
+            <li><strong>{% trans "Supprimer" %}</strong> — {% trans "Le contenu ne sera pas migré." %}</li>
+          </ul>
+          <p class="mt-2 text-gris-pierre">
+            {% trans "Cliquez sur le titre d'une page source pour la prévisualiser dans un nouvel onglet." %}
+          </p>
+        </div>
+      </details>
+
+      <!-- Table -->
+      <div class="overflow-x-auto">
+        <table class="table table-zebra w-full bg-white rounded-lg shadow">
+          <thead>
+            <tr class="bg-vert-foret text-white">
+              <th class="text-xs">{% trans "Page source" %}</th>
+              <th class="text-xs">{% trans "Contenu" %}</th>
+              <th class="text-xs">{% trans "Cible" %}</th>
+              <th class="text-xs">{% trans "Statut" %}</th>
+              <th class="text-xs">{% trans "Priorité" %}</th>
+              <th class="text-xs">{% trans "Notes" %}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in inventory %}
+            <tr class="{% if item.suggested_status == 'supprimer' %}opacity-60{% endif %}">
+              <td class="text-xs max-w-48">
+                <a href="http://www.saulzet-le-froid.fr{{ item.source_url }}"
+                   target="_blank"
+                   rel="noopener"
+                   class="font-semibold truncate block text-vert-prairie hover:text-vert-foret hover:underline"
+                   title="{% trans 'Voir sur l\'ancien site' %}: {{ item.source_title }}">
+                  🔍 {{ item.source_title|truncatechars:40 }}
+                </a>
+                <p class="text-gris-pierre truncate" title="{{ item.source_url }}">{{ item.source_url|truncatechars:40 }}</p>
+                {% if item.pdfs_count %}
+                <span class="badge badge-sm badge-outline">{{ item.pdfs_count }} PDF</span>
+                {% endif %}
+                {% if item.images_count %}
+                <span class="badge badge-sm badge-outline">{{ item.images_count }} img</span>
+                {% endif %}
+              </td>
+              <td class="text-xs max-w-48">
+                <span class="badge badge-sm badge-ghost">{{ item.content_type }}</span>
+                <p class="text-gris-pierre mt-1 truncate" title="{{ item.content_summary }}">{{ item.content_summary|truncatechars:80 }}</p>
+              </td>
+              <td class="text-xs">
+                <input type="text"
+                       name="target_{{ forloop.counter0 }}"
+                       value="{{ item.target_page }}"
+                       class="input input-bordered input-xs w-full max-w-36"
+                       placeholder="slug/cible">
+              </td>
+              <td class="text-xs">
+                <select name="status_{{ forloop.counter0 }}" class="select select-bordered select-xs w-full max-w-32">
+                  <option value="conserver" {% if item.suggested_status == "conserver" %}selected{% endif %}>
+                    &#x2705; {% trans "Conserver" %}
+                  </option>
+                  <option value="mettre_a_jour" {% if item.suggested_status == "mettre_a_jour" %}selected{% endif %}>
+                    &#x270F;&#xFE0F; {% trans "Mettre à jour" %}
+                  </option>
+                  <option value="fusionner" {% if item.suggested_status == "fusionner" %}selected{% endif %}>
+                    &#x1F500; {% trans "Fusionner" %}
+                  </option>
+                  <option value="supprimer" {% if item.suggested_status == "supprimer" %}selected{% endif %}>
+                    &#x274C; {% trans "Supprimer" %}
+                  </option>
+                </select>
+              </td>
+              <td class="text-xs">
+                <span class="badge badge-sm
+                  {% if item.priority == 'CRITIQUE' %}badge-error
+                  {% elif item.priority == 'HAUTE' %}badge-warning
+                  {% elif item.priority == 'MOYENNE' %}badge-info
+                  {% else %}badge-ghost{% endif %}">
+                  {{ item.priority }}
+                </span>
+              </td>
+              <td class="text-xs">
+                <input type="text"
+                       name="notes_{{ forloop.counter0 }}"
+                       value="{{ item.notes }}"
+                       class="input input-bordered input-xs w-full max-w-48"
+                       placeholder="Notes...">
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <div class="mt-6 flex justify-end">
+        <button type="submit" class="btn btn-primary-saulzet">
+          {% trans "Enregistrer les décisions" %}
+        </button>
+      </div>
+    </form>
+
+  </div>
+</section>
+{% endblock %}
