@@ -38,6 +38,9 @@ static/css/output.css
 .DS_Store
 Thumbs.db
 
+# Migration content (large files, instance-specific)
+/migration/
+
 # Documents de planification (restent locaux)
 prompt-*.md
 *-plan-*.md

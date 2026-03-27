@@ -14,6 +14,8 @@ class Page(models.Model):
         CONTACT = "contact", _("Page de contact")
         DOCUMENTS = "documents", _("Liste de documents")
         EQUIPE = "equipe", _("Équipe municipale")
+        HABITANTS = "habitants", _("Habitants")
+        ACCES = "acces", _("Accès et plan")
 
     title = models.CharField(_("titre"), max_length=200)
     slug = models.SlugField(

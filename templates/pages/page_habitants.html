@@ -1,0 +1,107 @@
+{% extends "pages/page_base.html" %}
+{% load i18n %}
+
+{% block page_content %}
+<div class="prose prose-lg max-w-none font-serif">
+  {{ page.content|safe }}
+</div>
+
+<!-- Courbe démographique -->
+<div class="mt-8 card-saulzet p-6">
+  <h2 class="text-2xl font-playfair font-bold text-vert-foret mb-4">
+    {% trans "Évolution de la population depuis 1793" %}
+  </h2>
+  <div class="relative w-full" style="height: 400px;">
+    <canvas id="populationChart"></canvas>
+  </div>
+  <p class="text-sm text-gray-500 mt-3 font-sans">
+    {% trans "Source : INSEE, Série historique du recensement de la population (2022)" %}
+  </p>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const ctx = document.getElementById('populationChart');
+  if (!ctx) return;
+
+  const data = {
+    labels: [
+      1793, 1800, 1806, 1821, 1831, 1836, 1841, 1846, 1851,
+      1856, 1861, 1866, 1872, 1876, 1881, 1886, 1891, 1896,
+      1901, 1906, 1911, 1921, 1926, 1931, 1936, 1946, 1954,
+      1962, 1968, 1975, 1982, 1990, 1999, 2006, 2011, 2016, 2022
+    ],
+    datasets: [{
+      label: 'Population',
+      data: [
+        640, 574, 629, 741, 699, 697, 681, 687, 696,
+        658, 652, 626, 660, 712, 701, 703, 659, 632,
+        642, 614, 561, 510, 476, 436, 400, 365, 373,
+        370, 307, 264, 252, 228, 231, 248, 263, 267, 287
+      ],
+      borderColor: '#2D5016',
+      backgroundColor: 'rgba(74, 124, 40, 0.1)',
+      fill: true,
+      tension: 0.3,
+      pointBackgroundColor: '#4A7C28',
+      pointBorderColor: '#2D5016',
+      pointRadius: 3,
+      pointHoverRadius: 6,
+      borderWidth: 2
+    }]
+  };
+
+  new Chart(ctx, {
+    type: 'line',
+    data: data,
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: '#2D5016',
+          titleFont: { family: "'Source Sans 3', sans-serif" },
+          bodyFont: { family: "'Source Sans 3', sans-serif" },
+          callbacks: {
+            title: function(items) {
+              return 'Année ' + items[0].label;
+            },
+            label: function(item) {
+              return item.raw + ' habitants';
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          title: { display: false },
+          ticks: {
+            font: { family: "'Source Sans 3', sans-serif", size: 11 },
+            maxRotation: 45,
+            autoSkip: true,
+            maxTicksLimit: 15
+          },
+          grid: { display: false }
+        },
+        y: {
+          title: {
+            display: true,
+            text: 'Nombre d\'habitants',
+            font: { family: "'Source Sans 3', sans-serif", size: 12 }
+          },
+          ticks: {
+            font: { family: "'Source Sans 3', sans-serif", size: 11 }
+          },
+          beginAtZero: false,
+          suggestedMin: 200
+        }
+      }
+    }
+  });
+});
+</script>
+{% endblock %}
