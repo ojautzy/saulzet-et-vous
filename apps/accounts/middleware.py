@@ -8,11 +8,11 @@ from django.shortcuts import redirect
 
 # URLs that unapproved users can access
 EXEMPT_URL_PATTERNS = [
-    re.compile(r"^/accounts/pending/$"),
-    re.compile(r"^/accounts/logout/$"),
-    re.compile(r"^/accounts/login/"),
-    re.compile(r"^/accounts/register/$"),
-    re.compile(r"^/accounts/magic/"),
+    re.compile(r"^/comptes/pending/$"),
+    re.compile(r"^/comptes/logout/$"),
+    re.compile(r"^/comptes/login/"),
+    re.compile(r"^/comptes/register/$"),
+    re.compile(r"^/comptes/magic/"),
     re.compile(r"^/admin/"),
     re.compile(r"^/static/"),
     re.compile(r"^/media/"),
@@ -31,6 +31,7 @@ class ApprovalMiddleware:
             request.user.is_authenticated
             and not request.user.is_approved
             and not request.user.is_superuser
+            and not request.user.is_secretary
             and not self._is_exempt(request.path)
         ):
             return redirect("accounts:pending")

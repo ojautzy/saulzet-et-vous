@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% load i18n pages_tags %}
+
+{% block title %}{% trans "Documents" %} — Saulzet-le-Froid{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto px-4 py-8">
+  {% if page %}{% breadcrumb page %}{% endif %}
+
+  <h1 class="text-3xl font-playfair font-bold text-vert-foret mb-6">
+    {% trans "Documents officiels" %}
+  </h1>
+
+  {% if page and page.content %}
+  <div class="prose font-serif mb-6">
+    {{ page.content|safe }}
+  </div>
+  {% endif %}
+
+  <!-- Filtres par catégorie -->
+  <div class="flex flex-wrap gap-2 mb-6">
+    <a href="{% url 'document_list' %}"
+       class="btn btn-sm {% if not current_category %}btn-primary-saulzet{% else %}btn-ghost border-vert-prairie text-vert-foret{% endif %}">
+      {% trans "Tous" %}
+    </a>
+    {% for value, label in categories %}
+    <a href="{% url 'document_list_category' category=value %}"
+       class="btn btn-sm {% if current_category == value %}btn-primary-saulzet{% else %}btn-ghost border-vert-prairie text-vert-foret{% endif %}">
+      {{ label }}
+    </a>
+    {% endfor %}
+  </div>
+
+  {% include "components/document_list.html" %}
+</div>
+{% endblock %}

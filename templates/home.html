@@ -1,63 +1,129 @@
 {% extends "base.html" %}
 {% load static i18n %}
 
-{% block title %}Saulzet &amp; Vous — {% trans "Votre commune à portée de main" %}{% endblock %}
+{% block title %}Saulzet-le-Froid — {% trans "Site officiel de la commune" %}{% endblock %}
+{% block meta_description %}{% trans "Site officiel de Saulzet-le-Froid, commune du Puy-de-Dôme. Informations pratiques, démarches, vie communale et démocratie participative." %}{% endblock %}
 
 {% block content %}
-<!-- Hero section -->
-<section class="relative h-[50vh] min-h-[350px] flex items-end overflow-hidden"
+<!-- Hero -->
+<section class="relative h-[50vh] min-h-[380px] flex items-end overflow-hidden"
          style="background-image: url('{% static 'img/campaign/puy2.jpeg' %}'); background-size: cover; background-position: center;"
          role="img" aria-label="{% trans 'Paysage de Saulzet-le-Froid' %}">
-  <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
+  <div class="absolute inset-0 bg-gradient-to-t from-black/65 via-black/25 to-transparent"></div>
   <div class="relative z-10 max-w-5xl mx-auto w-full px-4 pb-10">
     <h1 class="font-playfair text-4xl md:text-5xl text-white font-black leading-tight">
-      Saulzet <span class="italic font-normal text-terre-claire">&amp;</span> Vous
+      Saulzet-le-Froid
     </h1>
     <p class="font-sans text-white/80 text-lg mt-2 tracking-wide">
-      {% trans "Vivre, Partager, Préserver" %}
+      {% trans "Entre Monts Dore et Monts Dômes — 284 habitants" %}
     </p>
   </div>
 </section>
 
-<!-- Slogan banner -->
-<section class="bg-vert-foret text-white py-4">
-  <div class="max-w-5xl mx-auto px-4 text-center">
-    <p class="font-sans text-lg tracking-wider font-light">
-      {% trans "Échangeons pour faire vivre nos villages" %}
-    </p>
-  </div>
-</section>
+<!-- Accès rapides -->
+<section class="bg-creme pt-14 pb-16">
+  <div class="max-w-5xl mx-auto px-4">
 
-<!-- Presentation -->
-<section class="bg-creme py-12">
-  <div class="max-w-3xl mx-auto px-4 text-center">
-    <h2 class="font-playfair text-2xl md:text-3xl text-vert-foret font-bold mb-6">
-      {% trans "Un espace d'échange entre habitants et élus" %}
+    <h2 class="font-playfair text-2xl font-bold text-vert-foret mb-6 text-center">
+      {% trans "Accès rapides" %}
     </h2>
-    <div class="font-serif text-lg text-encre leading-relaxed space-y-4">
-      <p>
-        {% trans "Une question sur la vie communale, une idée à partager, un souci à signaler sur la voirie ou les équipements ? Cet espace est le vôtre." %}
-      </p>
-      <p>
-        {% trans "Vos élus s'engagent à vous lire et à vous répondre. Ensemble, faisons de nos villages des lieux où chacun peut s'exprimer et contribuer." %}
-      </p>
-    </div>
-  </div>
-</section>
-
-<!-- Call to action -->
-<section class="bg-creme-fonce py-12">
-  <div class="max-w-3xl mx-auto px-4">
-    <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
-      <a href="{% url 'reports:create' %}" class="btn-primary-saulzet text-lg w-full sm:w-auto text-center">
-        {% trans "Écrire à vos élus" %}
-      </a>
-      {% if not user.is_authenticated %}
-      <a href="{% url 'accounts:login' %}" class="btn-secondary-saulzet text-lg w-full sm:w-auto text-center">
-        {% trans "Se connecter" %}
-      </a>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
+      <!-- Saulzet & Vous -->
+      {% if user.is_authenticated and user.is_approved %}
+      <a href="{% url 'reports:create' %}" class="card-saulzet p-6 text-center hover:shadow-lg transition-shadow group flex flex-col items-center border-l-4 border-terre-claire">
+      {% else %}
+      <a href="{% url 'accounts:login' %}" class="card-saulzet p-6 text-center hover:shadow-lg transition-shadow group flex flex-col items-center border-l-4 border-terre-claire">
       {% endif %}
+        <div class="w-11 h-11 mx-auto mb-3 bg-terre-claire/20 rounded-full flex items-center justify-center group-hover:bg-terre-claire transition-colors">
+          <svg class="w-5 h-5 text-terre group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+          </svg>
+        </div>
+        <h3 class="text-sm font-semibold text-vert-foret">
+          <span class="font-playfair">Saulzet</span>
+          <span class="font-playfair italic text-terre-claire">&amp;</span>
+          <span class="font-playfair">Vous</span>
+        </h3>
+        <p class="text-xs text-gris-pierre mt-1">{% trans "Échangez avec vos élus" %}</p>
+      </a>
+      <!-- La mairie -->
+      <a href="/equipe-municipale/" class="card-saulzet p-6 text-center hover:shadow-lg transition-shadow group flex flex-col items-center">
+        <div class="w-11 h-11 mx-auto mb-3 bg-vert-tres-clair rounded-full flex items-center justify-center group-hover:bg-vert-prairie transition-colors">
+          <svg class="w-5 h-5 text-vert-foret group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+          </svg>
+        </div>
+        <h3 class="text-sm font-semibold text-vert-foret">{% trans "La mairie" %}</h3>
+        <p class="text-xs text-gris-pierre mt-1">{% trans "Horaires et équipe" %}</p>
+      </a>
+      <!-- Contact -->
+      <a href="{% url 'contact' %}" class="card-saulzet p-6 text-center hover:shadow-lg transition-shadow group flex flex-col items-center">
+        <div class="w-11 h-11 mx-auto mb-3 bg-vert-tres-clair rounded-full flex items-center justify-center group-hover:bg-vert-prairie transition-colors">
+          <svg class="w-5 h-5 text-vert-foret group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+          </svg>
+        </div>
+        <h3 class="text-sm font-semibold text-vert-foret">{% trans "Contact" %}</h3>
+        <p class="text-xs text-gris-pierre mt-1">{% trans "Écrire à la mairie" %}</p>
+      </a>
+      <!-- Documents -->
+      <a href="{% url 'document_list' %}" class="card-saulzet p-6 text-center hover:shadow-lg transition-shadow group flex flex-col items-center">
+        <div class="w-11 h-11 mx-auto mb-3 bg-vert-tres-clair rounded-full flex items-center justify-center group-hover:bg-vert-prairie transition-colors">
+          <svg class="w-5 h-5 text-vert-foret group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+          </svg>
+        </div>
+        <h3 class="text-sm font-semibold text-vert-foret">{% trans "Documents" %}</h3>
+        <p class="text-xs text-gris-pierre mt-1">{% trans "PV, arrêtés, bulletins" %}</p>
+      </a>
     </div>
+
+    {% if recent_pages %}
+    <h2 class="font-playfair text-2xl font-bold text-vert-foret mb-6 text-center">
+      {% trans "Dernières actualités" %}
+    </h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-12">
+      {% for page in recent_pages %}
+      <a href="{{ page.get_absolute_url }}" class="card-saulzet p-5 hover:shadow-lg transition-shadow">
+        <h3 class="font-playfair font-bold text-base text-vert-foret mb-1">{{ page.title }}</h3>
+        {% if page.excerpt %}
+        <p class="text-gris-pierre text-sm line-clamp-2">{{ page.excerpt }}</p>
+        {% endif %}
+        <p class="text-xs text-gris-clair mt-2">{{ page.updated_at|date:"d/m/Y" }}</p>
+      </a>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <h2 class="font-playfair text-2xl font-bold text-vert-foret mb-6 text-center">
+      {% trans "Informations pratiques" %}
+    </h2>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div class="card-saulzet p-6 text-center flex flex-col items-center">
+        <svg width="36" height="36" class="mb-3 text-vert-prairie" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+        <h3 class="text-sm font-semibold text-vert-foret mb-1">{% trans "Horaires de la mairie" %}</h3>
+        <p class="text-xs text-gris-pierre">{% trans "Lundi, mardi, jeudi et vendredi" %}</p>
+        <p class="text-sm font-semibold text-vert-foret mt-1">{% trans "8h30 — 12h00" %}</p>
+      </div>
+      <div class="card-saulzet p-6 text-center flex flex-col items-center">
+        <svg width="36" height="36" class="mb-3 text-vert-prairie" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+        </svg>
+        <h3 class="text-sm font-semibold text-vert-foret mb-1">{% trans "Adresse" %}</h3>
+        <p class="text-xs text-gris-pierre">Le Bourg<br>63710 Saulzet-le-Froid</p>
+      </div>
+      <div class="card-saulzet p-6 text-center flex flex-col items-center">
+        <svg width="36" height="36" class="mb-3 text-vert-prairie" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
+        </svg>
+        <h3 class="text-sm font-semibold text-vert-foret mb-1">{% trans "Téléphone" %}</h3>
+        <p class="text-xs text-gris-pierre">04 73 22 81 65</p>
+      </div>
+    </div>
+
   </div>
 </section>
 {% endblock %}

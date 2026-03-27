@@ -25,6 +25,19 @@ def elected_required(view_func: Any) -> Any:
     return _wrapped
 
 
+def mayor_required(view_func: Any) -> Any:
+    """Restrict access to mayor and admin users."""
+
+    @wraps(view_func)
+    @login_required
+    def _wrapped(request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
+        if not request.user.is_mayor and not request.user.is_admin:
+            return HttpResponseForbidden()
+        return view_func(request, *args, **kwargs)
+
+    return _wrapped
+
+
 def admin_required(view_func: Any) -> Any:
     """Restrict access to admin users only."""
 

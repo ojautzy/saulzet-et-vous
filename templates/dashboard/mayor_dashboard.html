@@ -1,0 +1,183 @@
+{% extends "base.html" %}
+{% load i18n dashboard_tags %}
+
+{% block title %}{% trans "Tableau de bord Maire" %} — Saulzet &amp; Vous{% endblock %}
+
+{% block content %}
+<section class="bg-creme py-8">
+  <div class="max-w-5xl mx-auto px-4">
+    <div class="flex items-center justify-between mb-6">
+      <h1 class="font-playfair text-2xl md:text-3xl text-vert-foret font-bold">
+        {% trans "Tableau de bord Maire" %}
+      </h1>
+      <a href="{% url 'dashboard:dashboard' %}" class="btn btn-sm btn-ghost text-vert-prairie">
+        {% trans "Vue élus" %} &rarr;
+      </a>
+    </div>
+
+    <!-- Indicateurs globaux -->
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 mb-8">
+      <div class="card-saulzet p-4 text-center">
+        <p class="text-3xl font-bold text-vert-foret">{{ total }}</p>
+        <p class="text-xs text-gris-pierre uppercase tracking-wide mt-1">{% trans "Total" %}</p>
+      </div>
+      <div class="card-saulzet p-4 text-center border-l-4 border-blue-500">
+        <p class="text-3xl font-bold text-blue-600">{{ counts.new }}</p>
+        <p class="text-xs text-gris-pierre uppercase tracking-wide mt-1">{% trans "Nouvelles" %}</p>
+      </div>
+      <div class="card-saulzet p-4 text-center border-l-4 border-yellow-500">
+        <p class="text-3xl font-bold text-yellow-600">{{ counts.assigned }}</p>
+        <p class="text-xs text-gris-pierre uppercase tracking-wide mt-1">{% trans "Affectées" %}</p>
+      </div>
+      <div class="card-saulzet p-4 text-center border-l-4 border-orange-500">
+        <p class="text-3xl font-bold text-orange-600">{{ counts.in_progress }}</p>
+        <p class="text-xs text-gris-pierre uppercase tracking-wide mt-1">{% trans "En cours" %}</p>
+      </div>
+      <div class="card-saulzet p-4 text-center border-l-4 border-green-500">
+        <p class="text-3xl font-bold text-green-600">{{ counts.resolved }}</p>
+        <p class="text-xs text-gris-pierre uppercase tracking-wide mt-1">{% trans "Résolues" %}</p>
+      </div>
+      <div class="card-saulzet p-4 text-center border-l-4 border-gray-400">
+        <p class="text-3xl font-bold text-gris-pierre">{{ counts.cancelled }}</p>
+        <p class="text-xs text-gris-pierre uppercase tracking-wide mt-1">{% trans "Annulées" %}</p>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <!-- Charge par élu -->
+      <div class="card-saulzet p-6">
+        <h2 class="font-playfair text-xl font-bold text-vert-foret mb-4">{% trans "Charge par élu" %}</h2>
+        <div class="overflow-x-auto">
+          <table class="table table-sm w-full">
+            <thead>
+              <tr class="text-xs text-gris-pierre uppercase">
+                <th>{% trans "Élu" %}</th>
+                <th class="text-center">{% trans "Affectées" %}</th>
+                <th class="text-center">{% trans "En cours" %}</th>
+                <th class="text-center">{% trans "Résolues" %}</th>
+                <th class="text-center font-bold">{% trans "Actives" %}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for item in elected_workload %}
+              <tr class="hover:bg-vert-tres-clair/30">
+                <td class="font-medium">
+                  {{ item.user.get_full_name }}
+                  {% if item.user.function_title %}
+                  <span class="text-xs text-gris-pierre block">{{ item.user.function_title }}</span>
+                  {% endif %}
+                </td>
+                <td class="text-center">
+                  {% if item.assigned %}
+                  <span class="badge badge-sm bg-yellow-100 text-yellow-800 border-none">{{ item.assigned }}</span>
+                  {% else %}-{% endif %}
+                </td>
+                <td class="text-center">
+                  {% if item.in_progress %}
+                  <span class="badge badge-sm bg-orange-100 text-orange-800 border-none">{{ item.in_progress }}</span>
+                  {% else %}-{% endif %}
+                </td>
+                <td class="text-center">
+                  {% if item.resolved %}
+                  <span class="badge badge-sm bg-green-100 text-green-800 border-none">{{ item.resolved }}</span>
+                  {% else %}-{% endif %}
+                </td>
+                <td class="text-center font-bold">
+                  {% if item.total_active %}
+                  <span class="badge badge-sm bg-vert-foret text-white border-none">{{ item.total_active }}</span>
+                  {% else %}-{% endif %}
+                </td>
+              </tr>
+              {% empty %}
+              <tr><td colspan="5" class="text-center text-gris-pierre italic">{% trans "Aucun élu enregistré." %}</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Statistiques -->
+      <div class="card-saulzet p-6">
+        <h2 class="font-playfair text-xl font-bold text-vert-foret mb-4">{% trans "Statistiques" %}</h2>
+        <div class="space-y-4">
+          <!-- Délai moyen -->
+          <div class="flex items-center justify-between p-3 bg-vert-tres-clair/30 rounded-lg">
+            <span class="text-sm font-medium text-vert-foret">{% trans "Délai moyen de résolution" %}</span>
+            <span class="text-lg font-bold text-vert-foret">
+              {% if avg_resolution is not None %}
+              {{ avg_resolution }} {% trans "jours" %}
+              {% else %}
+              —
+              {% endif %}
+            </span>
+          </div>
+
+          <!-- Par type -->
+          <div>
+            <h3 class="text-sm font-semibold text-gris-pierre uppercase tracking-wide mb-2">{% trans "Par type" %}</h3>
+            {% for value, label in report_types %}
+            <div class="flex items-center justify-between py-1">
+              <span class="text-sm">{{ label }}</span>
+              <span class="font-semibold text-vert-foret">{{ type_counts|dict_get:value }}</span>
+            </div>
+            {% endfor %}
+          </div>
+
+          <!-- Par village -->
+          <div>
+            <h3 class="text-sm font-semibold text-gris-pierre uppercase tracking-wide mb-2">{% trans "Par village" %}</h3>
+            {% for value, label in village_choices %}
+            <div class="flex items-center justify-between py-1">
+              <span class="text-sm">{{ label }}</span>
+              <span class="font-semibold text-vert-foret">{{ village_counts|dict_get:value }}</span>
+            </div>
+            {% endfor %}
+          </div>
+
+          <!-- Par mois -->
+          <div>
+            <h3 class="text-sm font-semibold text-gris-pierre uppercase tracking-wide mb-2">{% trans "Par mois (6 derniers)" %}</h3>
+            {% for entry in monthly_reports %}
+            <div class="flex items-center justify-between py-1">
+              <span class="text-sm">{{ entry.month }}</span>
+              <span class="font-semibold text-vert-foret">{{ entry.count }}</span>
+            </div>
+            {% empty %}
+            <p class="text-sm text-gris-pierre italic">{% trans "Aucune donnée." %}</p>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sollicitations orphelines -->
+    {% if orphan_reports %}
+    <div class="card-saulzet p-6 mt-8">
+      <h2 class="font-playfair text-xl font-bold text-red-700 mb-4">
+        {% trans "Sollicitations sans prise en charge" %}
+        <span class="badge bg-red-100 text-red-700 border-none ml-2">{{ orphan_reports|length }}</span>
+      </h2>
+      <p class="text-sm text-gris-pierre mb-4">{% trans "Nouvelles sollicitations depuis plus de 7 jours sans affectation." %}</p>
+      <div class="space-y-3">
+        {% for report in orphan_reports %}
+        <div class="flex items-center justify-between p-3 bg-red-50 rounded-lg">
+          <div>
+            <a href="{% url 'dashboard:detail' pk=report.pk %}" class="font-medium text-vert-foret hover:underline">
+              {{ report.title }}
+            </a>
+            <p class="text-xs text-gris-pierre">
+              {{ report.author.get_full_name }} — {{ report.created_at|date:"d/m/Y" }}
+              {% if report.author.village %}({{ report.author.get_village_display }}){% endif %}
+            </p>
+          </div>
+          <a href="{% url 'dashboard:detail' pk=report.pk %}" class="btn btn-sm btn-primary-saulzet">
+            {% trans "Affecter" %}
+          </a>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

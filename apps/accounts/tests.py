@@ -104,7 +104,7 @@ class TestRegistration(TestCase):
 
     def test_register_creates_unapproved_user(self):
         response = self.client.post(
-            "/accounts/register/",
+            "/comptes/register/",
             {
                 "email": "new@example.com",
                 "first_name": "Nouveau",
@@ -124,7 +124,7 @@ class TestRegistration(TestCase):
 
     def test_register_with_password(self):
         response = self.client.post(
-            "/accounts/register/",
+            "/comptes/register/",
             {
                 "email": "withpass@example.com",
                 "first_name": "Avec",
@@ -143,7 +143,7 @@ class TestRegistration(TestCase):
 
     def test_register_password_mismatch(self):
         response = self.client.post(
-            "/accounts/register/",
+            "/comptes/register/",
             {
                 "email": "mismatch@example.com",
                 "first_name": "Test",
@@ -172,7 +172,7 @@ class TestMagicLink(TestCase):
 
     def test_magic_link_generation(self):
         response = self.client.post(
-            "/accounts/magic/request/",
+            "/comptes/magic/request/",
             {"email": "magic@example.com"},
         )
         assert response.status_code == 302
@@ -187,7 +187,7 @@ class TestMagicLink(TestCase):
         self.user.magic_link_expires = timezone.now() + timezone.timedelta(minutes=15)
         self.user.save()
 
-        response = self.client.get(f"/accounts/magic/{raw_token}/")
+        response = self.client.get(f"/comptes/magic/{raw_token}/")
         assert response.status_code == 302
         assert response.url == "/"
 
@@ -202,12 +202,12 @@ class TestMagicLink(TestCase):
         self.user.magic_link_expires = timezone.now() - timezone.timedelta(minutes=1)
         self.user.save()
 
-        response = self.client.get(f"/accounts/magic/{raw_token}/")
+        response = self.client.get(f"/comptes/magic/{raw_token}/")
         assert response.status_code == 302
         assert "login" in response.url
 
     def test_magic_link_invalid_token(self):
-        response = self.client.get("/accounts/magic/invalid-token/")
+        response = self.client.get("/comptes/magic/invalid-token/")
         assert response.status_code == 302
         assert "login" in response.url
 
@@ -219,11 +219,11 @@ class TestMagicLink(TestCase):
         self.user.save()
 
         # First use
-        self.client.get(f"/accounts/magic/{raw_token}/")
+        self.client.get(f"/comptes/magic/{raw_token}/")
         self.client.logout()
 
         # Second use should fail
-        response = self.client.get(f"/accounts/magic/{raw_token}/")
+        response = self.client.get(f"/comptes/magic/{raw_token}/")
         assert response.status_code == 302
         assert "login" in response.url
 
@@ -237,13 +237,13 @@ class TestMagicLink(TestCase):
         self.user.magic_link_expires = timezone.now() + timezone.timedelta(minutes=15)
         self.user.save()
 
-        response = self.client.get(f"/accounts/magic/{raw_token}/")
+        response = self.client.get(f"/comptes/magic/{raw_token}/")
         assert response.status_code == 302
         assert "pending" in response.url
 
     def test_magic_link_nonexistent_email(self):
         response = self.client.post(
-            "/accounts/magic/request/",
+            "/comptes/magic/request/",
             {"email": "doesntexist@example.com"},
         )
         # Should not reveal that user doesn't exist
@@ -271,18 +271,18 @@ class TestApprovalMiddleware(TestCase):
 
     def test_unapproved_redirected_to_pending(self):
         self.client.login(email="unapproved@example.com", password="testpass123")
-        response = self.client.get("/accounts/profile/")
+        response = self.client.get("/comptes/profile/")
         assert response.status_code == 302
         assert "pending" in response.url
 
     def test_approved_user_can_access(self):
         self.client.login(email="approved@example.com", password="testpass123")
-        response = self.client.get("/accounts/profile/")
+        response = self.client.get("/comptes/profile/")
         assert response.status_code == 200
 
     def test_unapproved_can_access_exempt_urls(self):
         self.client.login(email="unapproved@example.com", password="testpass123")
-        response = self.client.get("/accounts/pending/")
+        response = self.client.get("/comptes/pending/")
         assert response.status_code == 200
 
     def test_anonymous_not_affected(self):
@@ -304,7 +304,7 @@ class TestPasswordLogin(TestCase):
 
     def test_valid_login(self):
         response = self.client.post(
-            "/accounts/login/password/",
+            "/comptes/login/password/",
             {"username": "passlogin@example.com", "password": "testpass123"},
         )
         assert response.status_code == 302
@@ -312,7 +312,7 @@ class TestPasswordLogin(TestCase):
 
     def test_invalid_login(self):
         response = self.client.post(
-            "/accounts/login/password/",
+            "/comptes/login/password/",
             {"username": "passlogin@example.com", "password": "wrongpassword"},
         )
         assert response.status_code == 200  # re-renders form
@@ -321,7 +321,7 @@ class TestPasswordLogin(TestCase):
         self.user.is_approved = False
         self.user.save()
         response = self.client.post(
-            "/accounts/login/password/",
+            "/comptes/login/password/",
             {"username": "passlogin@example.com", "password": "testpass123"},
         )
         assert response.status_code == 302
@@ -333,7 +333,7 @@ class TestVillageField(TestCase):
 
     def test_register_with_village_required(self):
         response = self.client.post(
-            "/accounts/register/",
+            "/comptes/register/",
             {
                 "email": "village@example.com",
                 "first_name": "Test",
@@ -351,7 +351,7 @@ class TestVillageField(TestCase):
 
     def test_register_with_village_success(self):
         response = self.client.post(
-            "/accounts/register/",
+            "/comptes/register/",
             {
                 "email": "village@example.com",
                 "first_name": "Test",
@@ -379,7 +379,7 @@ class TestVillageField(TestCase):
         )
         self.client.login(email="profile@example.com", password="testpass123")
         response = self.client.post(
-            "/accounts/profile/",
+            "/comptes/profile/",
             {
                 "first_name": "Pro",
                 "last_name": "File",
