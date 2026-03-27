@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% load pages_tags %}
+
+{% block title %}{{ page.title }} — Saulzet-le-Froid{% endblock %}
+{% block meta_description %}{{ page.meta_description|default:"Site officiel de la commune de Saulzet-le-Froid" }}{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto px-4 py-8">
+  {% breadcrumb page %}
+
+  {% if page.featured_image %}
+  <img src="{{ page.featured_image.url }}" alt="{{ page.title }}"
+       class="w-full h-64 object-cover rounded-xl mb-8">
+  {% endif %}
+
+  <h1 class="text-3xl font-playfair font-bold text-vert-foret mb-6">
+    {{ page.title }}
+  </h1>
+
+  {% block page_content %}{% endblock %}
+</div>
+{% endblock %}

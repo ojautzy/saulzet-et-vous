@@ -19,3 +19,11 @@ def assigned_count(context: dict) -> int:
         assigned_to=request.user,
         status__in=[Report.Status.ASSIGNED, Report.Status.IN_PROGRESS],
     ).count()
+
+
+@register.filter
+def dict_get(d, key):
+    """Get a value from a dictionary by key."""
+    if isinstance(d, dict):
+        return d.get(key, 0)
+    return 0

@@ -4,7 +4,7 @@ from datetime import timedelta
 
 from django.contrib import messages
 from django.contrib.auth import get_user_model
-from django.db.models import Case, IntegerField, Value, When
+from django.db.models import Avg, Case, Count, F, IntegerField, Value, When
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
@@ -13,7 +13,7 @@ from django.views.decorators.http import require_POST
 
 from apps.reports.models import Comment, Report
 
-from .decorators import admin_required, elected_required
+from .decorators import admin_required, elected_required, mayor_required
 
 User = get_user_model()
 
@@ -437,4 +437,97 @@ def admin_cleanup_view(request: HttpRequest) -> HttpResponse:
         "cancelled_count": Report.objects.filter(status=Report.Status.CANCELLED).count(),
         "resolved_count": _get_resolved_count(30),
         "default_days": 30,
+    })
+
+
+@mayor_required
+def mayor_dashboard_view(request: HttpRequest) -> HttpResponse:
+    """Dashboard enrichi pour le maire avec indicateurs et charge par élu."""
+    # Indicateurs globaux
+    counts = {}
+    for status_value, status_label in Report.Status.choices:
+        counts[status_value] = Report.objects.filter(status=status_value).count()
+    total = sum(counts.values())
+
+    # Charge par élu
+    elected_users = User.objects.filter(
+        role__in=[User.Role.MAYOR, User.Role.ELECTED],
+        is_approved=True,
+    ).order_by("function_order", "last_name")
+
+    elected_workload = []
+    for user in elected_users:
+        workload = {
+            "user": user,
+            "assigned": Report.objects.filter(
+                assigned_to=user, status=Report.Status.ASSIGNED
+            ).count(),
+            "in_progress": Report.objects.filter(
+                assigned_to=user, status=Report.Status.IN_PROGRESS
+            ).count(),
+            "resolved": Report.objects.filter(
+                assigned_to=user, status=Report.Status.RESOLVED
+            ).count(),
+        }
+        workload["total_active"] = workload["assigned"] + workload["in_progress"]
+        elected_workload.append(workload)
+
+    # Sollicitations orphelines (NEW depuis plus de 7 jours)
+    orphan_threshold = timezone.now() - timedelta(days=7)
+    orphan_reports = Report.objects.filter(
+        status=Report.Status.NEW,
+        created_at__lt=orphan_threshold,
+    ).select_related("author").order_by("created_at")
+
+    # Statistiques
+    # Délai moyen de résolution (en jours)
+    resolved_reports = Report.objects.filter(
+        status=Report.Status.RESOLVED,
+        resolved_at__isnull=False,
+    )
+    avg_resolution = None
+    if resolved_reports.exists():
+        avg_delta = resolved_reports.aggregate(
+            avg_days=Avg(F("resolved_at") - F("created_at"))
+        )["avg_days"]
+        if avg_delta:
+            avg_resolution = avg_delta.days
+
+    # Répartition par type
+    type_counts = dict(
+        Report.objects.values_list("report_type").annotate(
+            count=Count("id")
+        ).values_list("report_type", "count")
+    )
+
+    # Répartition par village (de l'auteur)
+    village_counts = dict(
+        Report.objects.exclude(
+            author__village=""
+        ).values_list("author__village").annotate(
+            count=Count("id")
+        ).values_list("author__village", "count")
+    )
+
+    # Nombre par mois (6 derniers mois)
+    six_months_ago = timezone.now() - timedelta(days=180)
+    monthly_reports = (
+        Report.objects.filter(created_at__gte=six_months_ago)
+        .extra(select={"month": "strftime('%%Y-%%m', created_at)"})
+        .values("month")
+        .annotate(count=Count("id"))
+        .order_by("month")
+    )
+
+    return render(request, "dashboard/mayor_dashboard.html", {
+        "counts": counts,
+        "total": total,
+        "elected_workload": elected_workload,
+        "orphan_reports": orphan_reports,
+        "avg_resolution": avg_resolution,
+        "type_counts": type_counts,
+        "village_counts": village_counts,
+        "monthly_reports": monthly_reports,
+        "report_types": Report.Type.choices,
+        "village_choices": User.Village.choices,
     })
