@@ -2,13 +2,21 @@
 <nav class="bg-vert-foret text-white" x-data="{ mobileOpen: false }">
   <div class="max-w-5xl mx-auto px-4">
     <div class="flex items-center justify-between h-16">
-      <!-- Logo / Nom du site -->
-      <a href="{% url 'home' %}" class="flex items-center gap-2 no-underline">
-        <span class="font-playfair font-black text-xl text-white">{% trans "Accueil" %}</span>
+      <!-- Mobile: logo accueil -->
+      <a href="{% url 'home' %}" class="lg:hidden font-sans font-bold text-sm text-white no-underline">
+        {% trans "Accueil" %}
       </a>
 
       <!-- Desktop nav -->
       <div class="hidden lg:flex items-center gap-1 font-sans text-sm tracking-wide">
+        <!-- Accueil -->
+        <a href="{% url 'home' %}" class="px-3 py-2 font-bold hover:text-vert-tres-clair transition-colors no-underline">
+          {% trans "Accueil" %}
+        </a>
+
+        <!-- Séparateur Accueil / Menu -->
+        <span class="text-white/30 mx-1">|</span>
+
         <!-- Menu CMS dynamique -->
         {% site_menu %}
 

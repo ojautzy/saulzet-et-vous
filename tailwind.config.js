@@ -12,6 +12,34 @@ module.exports = {
         sans: ['"Source Sans 3"', "system-ui", "sans-serif"],
         serif: ['"Source Serif 4"', "Georgia", "serif"],
       },
+      typography: {
+        DEFAULT: {
+          css: {
+            "--tw-prose-body": "#1A1A18",
+            "--tw-prose-headings": "#2D5016",
+            "--tw-prose-links": "#2D5016",
+            "--tw-prose-bold": "#1A1A18",
+            "--tw-prose-counters": "#6B6560",
+            "--tw-prose-bullets": "#4A7C28",
+            "--tw-prose-hr": "#F5EDE0",
+            "--tw-prose-quotes": "#2D5016",
+            "--tw-prose-quote-borders": "#4A7C28",
+            "--tw-prose-captions": "#6B6560",
+            "--tw-prose-th-borders": "#F5EDE0",
+            "--tw-prose-td-borders": "#F5EDE0",
+            "h1, h2, h3": {
+              fontFamily: '"Playfair Display", serif',
+            },
+            a: {
+              textDecoration: "underline",
+              textUnderlineOffset: "2px",
+              "&:hover": {
+                color: "#4A7C28",
+              },
+            },
+          },
+        },
+      },
       colors: {
         "vert-foret": "#2D5016",
         "vert-prairie": "#4A7C28",
@@ -27,7 +55,7 @@ module.exports = {
       },
     },
   },
-  plugins: [require("daisyui")],
+  plugins: [require("@tailwindcss/typography"), require("daisyui")],
   daisyui: {
     themes: [
       {
