@@ -1,13 +1,16 @@
 # Saulzet & Vous
 
-Plateforme de démocratie participative pour la commune de **Saulzet-le-Froid** (284 hab., Puy-de-Dôme).
+Site communal et plateforme de démocratie participative pour la commune de **Saulzet-le-Froid** (284 hab., Puy-de-Dôme).
 
-Les habitants écrivent à leurs élus (questions, idées, signalements) via un formulaire web. Les élus disposent d'un tableau de bord pour prendre en charge, suivre et répondre aux sollicitations.
+Le site comprend :
+- Un **site communal** avec pages éditables (CMS intégré), documents officiels, page de contact et équipe municipale
+- Une **plateforme participative** « Saulzet & Vous » où les habitants écrivent à leurs élus (questions, idées, signalements)
 
 ## Stack technique
 
 - **Backend** : Django 5.2 (Python 3.12+)
 - **Frontend** : HTMX 2.x + Alpine.js 3.x + Tailwind CSS 3.x + DaisyUI 4.x
+- **CMS** : django-tinymce 5.x (éditeur WYSIWYG)
 - **Cartographie** : Leaflet.js + OpenStreetMap
 - **BDD** : SQLite (dev) / PostgreSQL (prod)
 
@@ -71,22 +74,32 @@ L'application est exposée sur Internet via un tunnel Cloudflare à l'adresse :
 
 **https://saulzet.jautzy.com**
 
-Le tunnel est déjà configuré côté Cloudflare. Il suffit de lancer le serveur Django sur `0.0.0.0:8000` pour que l'application soit accessible.
+Domaine de production : **saulzet-le-froid.com**
 
 ## Rôles utilisateur
 
 | Rôle | Description |
 |------|-------------|
 | `admin` | Administrateur technique |
-| `mayor` | Maire et 1er Adjoint |
+| `secretary` | Secrétaire de mairie — édition des pages et documents |
+| `mayor` | Maire et 1er Adjoint — pilotage, affectation |
 | `elected` | Adjoint ou Conseiller municipal |
 | `citizen` | Habitant |
 
 ## Fonctionnalités
 
+### Site communal
+- **Pages CMS** : pages éditables avec TinyMCE, menu dynamique, fil d'Ariane
+- **Documents** : PV de conseil, bulletins, arrêtés, documents PLU
+- **Équipe municipale** : page avec photos et fonctions des élus
+- **Contact** : formulaire de contact avec envoi par email
+- **Page d'accueil** : portail communal avec accès rapides et actualités
+
+### Module participatif (Saulzet & Vous)
 - **Authentification** : inscription avec validation admin, connexion par magic link ou mot de passe
 - **Sollicitations** : les habitants créent des questions, idées ou signalements avec photos et géolocalisation
 - **Tableau de bord élus** : vue d'ensemble avec filtres, compteurs par statut, page « Mes tâches »
+- **Dashboard Maire** : indicateurs globaux, charge par élu, sollicitations orphelines, statistiques
 - **Workflow** : prise en charge, affectation (maire), suivi, clôture avec réponse
 - **Commentaires** : timeline chronologique des échanges et changements de statut
 

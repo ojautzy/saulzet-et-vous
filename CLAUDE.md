@@ -2,14 +2,15 @@
 
 ## Projet
 
-Plateforme de démocratie participative pour Saulzet-le-Froid (284 hab., Puy-de-Dôme).
-Les habitants écrivent à leurs élus (questions, idées, signalements) via un formulaire web.
+Site communal et plateforme de démocratie participative pour Saulzet-le-Froid (284 hab., Puy-de-Dôme).
+Le site comprend un CMS intégré (pages éditables, documents) et un module participatif « Saulzet & Vous » où les habitants écrivent à leurs élus (questions, idées, signalements).
 Logiciel libre MIT — repo `ojautzy/saulzet-et-vous`.
 
 ## Stack
 
 - **Backend** : Django 5.2, Python 3.12+
 - **Frontend** : HTMX 2.x + Alpine.js 3.x + Tailwind CSS 3.x + DaisyUI 4.x (thème custom "saulzet")
+- **CMS** : django-tinymce 5.x (éditeur WYSIWYG pour les pages), app `pages`
 - **Cartographie** : Leaflet.js + OpenStreetMap
 - **BDD dev** : SQLite
 - **Tests** : pytest + pytest-django
@@ -48,7 +49,8 @@ python manage.py makemigrations && python manage.py migrate
 ## Architecture des rôles
 
 - `admin` : gestion technique, validation inscriptions, nettoyage (suppression sollicitations annulées/résolues)
-- `mayor` : supervision, affectation des sollicitations
+- `secretary` : secrétaire de mairie — édition des pages CMS et documents via l'admin Django (accès `is_staff`, permissions limitées à `pages.*`)
+- `mayor` : supervision, affectation/réaffectation des sollicitations, dashboard de pilotage
 - `elected` : prise en charge, commentaires, clôture, bascule public/privé
 - `citizen` : création, suivi, modification de ses sollicitations, choix public/privé (tant que statut NEW)
 
@@ -57,10 +59,22 @@ python manage.py makemigrations && python manage.py migrate
 - **Visibilité** : une sollicitation peut être publique ou privée (`is_public`). L'habitant peut changer la visibilité tant que le statut est NEW. Après prise en charge, seul l'élu peut basculer la visibilité.
 - **Modification** : l'habitant peut modifier localisation, photos et visibilité tant que la sollicitation n'est pas résolue ou annulée. Le titre et la description ne sont pas modifiables.
 - **Tableau de bord public** : affiche les sollicitations publiques avec statut ASSIGNED ou IN_PROGRESS, visible par tous les utilisateurs connectés.
+- **Pages CMS** : les pages publiées sont accessibles à tous (visiteurs non connectés). L'édition est réservée aux rôles `secretary`, `mayor` et `admin` via l'admin Django.
+- **Module participatif** : sous le préfixe `/etvous/`, requiert une connexion et un compte approuvé.
+
+## Structure des URLs
+
+- `/` : page d'accueil portail communal (publique)
+- `/comptes/` : authentification (login, inscription, magic link)
+- `/etvous/` : module participatif (sollicitations)
+- `/etvous/tableau-de-bord/` : dashboard élus et maire
+- `/contact/`, `/documents/` : pages CMS spéciales
+- `/<slug>/`, `/<parent>/<slug>/` : pages CMS catch-all
 
 ## Accès dev
 
 - URL tunnel Cloudflare : https://saulzet.jautzy.com
+- Domaine de production : saulzet-le-froid.com
 - Coordonnées Saulzet-le-Froid : lat 45.6565, lng 2.9162
 
 ## Versioning
@@ -72,6 +86,6 @@ python manage.py makemigrations && python manage.py migrate
 
 ## État du projet
 
-- **Version actuelle** : 0.4.0 (Phase 3bis — Retours utilisateurs)
-- Plan complet dans `saulzet-et-vous-plan-v2.md`. Prompts par phase dans `prompt-phase*-claude-code.md`.
-- Phases 1 à 3bis implémentées. Prochaine étape : Phase 4 (Interface Maire).
+- **Version actuelle** : 0.5.0 (Phase 4 — Interface Maire, CMS intégré, page d'accueil portail)
+- Plan complet dans `saulzet-et-vous-plan-v3.md`. Prompts par phase dans `prompt-phase*-claude-code.md`.
+- Phases 1 à 4 implémentées. Prochaine étape : Phase 5.

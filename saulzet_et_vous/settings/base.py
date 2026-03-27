@@ -16,10 +16,13 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    # Third-party apps
+    "tinymce",
     # Local apps
     "apps.accounts",
     "apps.reports",
     "apps.dashboard",
+    "apps.pages",
 ]
 
 MIDDLEWARE = [
@@ -93,9 +96,30 @@ MEDIA_ROOT = BASE_DIR / "media"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # Login/Logout URLs
-LOGIN_URL = "/accounts/login/"
+LOGIN_URL = "/comptes/login/"
 LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = "/"
 
 # Magic link settings
 MAGIC_LINK_EXPIRY_MINUTES = 15
+
+# TinyMCE configuration
+TINYMCE_DEFAULT_CONFIG = {
+    "theme": "silver",
+    "height": 500,
+    "menubar": "file edit view insert format table",
+    "plugins": "advlist autolink lists link image charmap preview anchor "
+               "searchreplace visualblocks code fullscreen "
+               "insertdatetime media table help wordcount",
+    "toolbar": "undo redo | styles | bold italic underline | "
+               "alignleft aligncenter alignright alignjustify | "
+               "bullist numlist outdent indent | link image | "
+               "table | removeformat | help",
+    "content_css": "default",
+    "branding": False,
+    "promotion": False,
+    "license_key": "gpl",
+}
+
+# Contact email
+CONTACT_EMAIL = "mairie@saulzet-le-froid.com"

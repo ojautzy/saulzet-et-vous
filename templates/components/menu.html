@@ -1,0 +1,23 @@
+<ul class="flex items-center gap-1">
+  {% for item in menu_items %}
+    {% if item.children %}
+      <li class="relative" x-data="{ open: false }" @mouseenter="open = true" @mouseleave="open = false">
+        <button class="px-3 py-2 hover:text-vert-tres-clair transition-colors flex items-center gap-1"
+                @click="open = !open">
+          {{ item.page.title }}
+          <svg class="w-3 h-3 transition-transform" :class="{ 'rotate-180': open }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+          </svg>
+        </button>
+        <ul x-show="open" x-transition
+            class="absolute left-0 mt-0 w-52 bg-white text-vert-foret rounded-lg shadow-lg py-2 z-50">
+          {% for child in item.children %}
+            <li><a href="{{ child.get_absolute_url }}" class="block px-4 py-2 hover:bg-vert-tres-clair transition-colors">{{ child.title }}</a></li>
+          {% endfor %}
+        </ul>
+      </li>
+    {% else %}
+      <li><a href="{{ item.page.get_absolute_url }}" class="px-3 py-2 hover:text-vert-tres-clair transition-colors">{{ item.page.title }}</a></li>
+    {% endif %}
+  {% endfor %}
+</ul>

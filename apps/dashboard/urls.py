@@ -8,6 +8,7 @@ app_name = "dashboard"
 
 urlpatterns = [
     path("", views.dashboard_view, name="dashboard"),
+    path("maire/", views.mayor_dashboard_view, name="mayor_dashboard"),
     path("my-tasks/", views.my_tasks_view, name="my_tasks"),
     path("<uuid:pk>/", views.detail_view, name="detail"),
     path("<uuid:pk>/assign/", views.assign_view, name="assign"),
