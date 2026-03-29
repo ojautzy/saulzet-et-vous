@@ -1,0 +1,12 @@
+Nouveau message via le formulaire de contact.
+
+Nom : {{ name }}
+Email : {{ email }}
+{% if phone %}Téléphone : {{ phone }}{% endif %}
+
+Message :
+{{ message_text }}
+
+--
+{{ site_settings.commune_name }} — {{ site_settings.address }}
+Tél. {{ site_settings.phone }}

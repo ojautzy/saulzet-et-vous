@@ -23,6 +23,8 @@ INSTALLED_APPS = [
     "apps.reports",
     "apps.dashboard",
     "apps.pages",
+    "apps.settings_app",
+    "apps.notifications",
 ]
 
 MIDDLEWARE = [
@@ -51,6 +53,8 @@ TEMPLATES = [
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
                 "saulzet_et_vous.context_processors.version",
+                "apps.settings_app.context_processors.site_settings",
+                "apps.notifications.context_processors.notifications",
             ],
         },
     },
@@ -121,5 +125,5 @@ TINYMCE_DEFAULT_CONFIG = {
     "license_key": "gpl",
 }
 
-# Contact email
-CONTACT_EMAIL = "mairie@saulzet-le-froid.com"
+# Email backend — reads SMTP config from SiteSettings (database)
+EMAIL_BACKEND = "apps.settings_app.email_backend.DatabaseEmailBackend"

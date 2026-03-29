@@ -87,13 +87,16 @@ def magic_link_request_view(request: HttpRequest) -> HttpResponse:
     magic_url = f"{site_url}/accounts/magic/{raw_token}/"
 
     # Send email
+    from apps.settings_app.models import SiteSettings
+
+    config = SiteSettings.load()
     send_mail(
         subject=_("Votre lien de connexion — Saulzet & Vous"),
         message=render_to_string(
             "accounts/emails/magic_link.txt",
             {"user": user, "magic_url": magic_url, "expiry_minutes": settings.MAGIC_LINK_EXPIRY_MINUTES},
         ),
-        from_email=settings.DEFAULT_FROM_EMAIL,
+        from_email=config.from_email,
         recipient_list=[user.email],
         fail_silently=False,
     )
@@ -180,24 +183,10 @@ def register_view(request: HttpRequest) -> HttpResponse:
         if form.is_valid():
             user = form.save()
 
-            # Notify admins
-            admin_emails = list(
-                User.objects.filter(
-                    role__in=[User.Role.ADMIN, User.Role.MAYOR],
-                    is_approved=True,
-                ).values_list("email", flat=True)
-            )
-            if admin_emails:
-                send_mail(
-                    subject=_("Nouvelle inscription — Saulzet & Vous"),
-                    message=render_to_string(
-                        "accounts/emails/new_registration.txt",
-                        {"user": user},
-                    ),
-                    from_email=settings.DEFAULT_FROM_EMAIL,
-                    recipient_list=admin_emails,
-                    fail_silently=True,
-                )
+            # Notify admins/mayor via notification service
+            from apps.notifications.services import notify_new_registration
+
+            notify_new_registration(user)
 
             messages.success(
                 request,

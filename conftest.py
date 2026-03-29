@@ -3,11 +3,22 @@
 import pytest
 from django.contrib.auth import get_user_model
 
+from apps.settings_app.models import Village
+
 User = get_user_model()
 
 
 @pytest.fixture
-def citizen(db):
+def village_bourg(db):
+    """Create the Le Bourg village."""
+    return Village.objects.get_or_create(
+        slug="bourg",
+        defaults={"name": "Le Bourg", "latitude": 45.6415, "longitude": 2.9178, "order": 1},
+    )[0]
+
+
+@pytest.fixture
+def citizen(db, village_bourg):
     """Create an approved citizen user."""
     return User.objects.create_user(
         email="habitant@test.fr",
@@ -16,7 +27,7 @@ def citizen(db):
         last_name="Dupont",
         role=User.Role.CITIZEN,
         is_approved=True,
-        village="bourg",
+        village=village_bourg,
     )
 
 

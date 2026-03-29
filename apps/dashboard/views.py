@@ -12,6 +12,7 @@ from django.utils.translation import gettext_lazy as _
 from django.views.decorators.http import require_POST
 
 from apps.reports.models import Comment, Report
+from apps.settings_app.models import Village
 
 from .decorators import admin_required, elected_required, mayor_required
 
@@ -165,6 +166,12 @@ def assign_view(request: HttpRequest, pk: str) -> HttpResponse:
             old_status=old_status,
             new_status=Report.Status.ASSIGNED,
         )
+
+        from apps.notifications.services import log_action, notify_assignment, notify_status_change
+
+        notify_assignment(report, assign_to, request.user)
+        notify_status_change(report, old_status, Report.Status.ASSIGNED, request.user)
+        log_action(request, "assign", report, {"assigned_to": assign_to.email})
         messages.success(request, _("Sollicitation affectée avec succès."))
     else:
         # Self-assign (take ownership)
@@ -186,6 +193,11 @@ def assign_view(request: HttpRequest, pk: str) -> HttpResponse:
             old_status=old_status,
             new_status=Report.Status.ASSIGNED,
         )
+
+        from apps.notifications.services import log_action, notify_status_change
+
+        notify_status_change(report, old_status, Report.Status.ASSIGNED, request.user)
+        log_action(request, "assign", report, {"assigned_to": request.user.email})
         messages.success(request, _("Sollicitation prise en charge."))
 
     return redirect("dashboard:detail", pk=report.pk)
@@ -226,6 +238,11 @@ def status_view(request: HttpRequest, pk: str) -> HttpResponse:
             old_status=old_status,
             new_status=Report.Status.IN_PROGRESS,
         )
+
+        from apps.notifications.services import log_action, notify_status_change
+
+        notify_status_change(report, old_status, Report.Status.IN_PROGRESS, request.user)
+        log_action(request, "status_change", report, {"old": old_status, "new": Report.Status.IN_PROGRESS})
         messages.success(request, _("Sollicitation passée en cours de traitement."))
 
     elif new_status == Report.Status.RESOLVED:
@@ -254,6 +271,11 @@ def status_view(request: HttpRequest, pk: str) -> HttpResponse:
             old_status=old_status,
             new_status=Report.Status.RESOLVED,
         )
+
+        from apps.notifications.services import log_action, notify_status_change
+
+        notify_status_change(report, old_status, Report.Status.RESOLVED, request.user)
+        log_action(request, "status_change", report, {"old": old_status, "new": Report.Status.RESOLVED})
         messages.success(request, _("Sollicitation clôturée avec succès."))
     else:
         messages.error(request, _("Statut non valide."))
@@ -315,6 +337,10 @@ def reassign_view(request: HttpRequest, pk: str) -> HttpResponse:
         new_status=Report.Status.ASSIGNED,
     )
 
+    from apps.notifications.services import log_action, notify_assignment
+
+    notify_assignment(report, new_assigned, request.user)
+    log_action(request, "assign", report, {"reassigned_from": old_assigned.email if old_assigned else None, "assigned_to": new_assigned.email})
     messages.success(request, _("Sollicitation réaffectée avec succès."))
     return redirect("dashboard:detail", pk=report.pk)
 
@@ -334,13 +360,16 @@ def comment_view(request: HttpRequest, pk: str) -> HttpResponse:
         messages.error(request, _("Le commentaire ne peut pas être vide."))
         return redirect("dashboard:detail", pk=report.pk)
 
-    Comment.objects.create(
+    comment = Comment.objects.create(
         report=report,
         author=request.user,
         content=content,
         is_status_change=False,
     )
 
+    from apps.notifications.services import notify_new_comment
+
+    notify_new_comment(report, comment, request.user)
     messages.success(request, _("Commentaire ajouté."))
     return redirect("dashboard:detail", pk=report.pk)
 
@@ -384,10 +413,13 @@ def admin_cleanup_cancelled_view(request: HttpRequest) -> HttpResponse:
         )
         return redirect("dashboard:admin_cleanup")
 
+    from apps.settings_app.models import SiteSettings
+
+    config = SiteSettings.load()
     return render(request, "dashboard/admin_cleanup.html", {
         "cancelled_count": count,
-        "resolved_count": _get_resolved_count(30),
-        "default_days": 30,
+        "resolved_count": _get_resolved_count(config.cleanup_days),
+        "default_days": config.cleanup_days,
     })
 
 
@@ -433,10 +465,13 @@ def _get_resolved_count(days: int) -> int:
 @admin_required
 def admin_cleanup_view(request: HttpRequest) -> HttpResponse:
     """Display the admin cleanup page."""
+    from apps.settings_app.models import SiteSettings
+
+    config = SiteSettings.load()
     return render(request, "dashboard/admin_cleanup.html", {
         "cancelled_count": Report.objects.filter(status=Report.Status.CANCELLED).count(),
-        "resolved_count": _get_resolved_count(30),
-        "default_days": 30,
+        "resolved_count": _get_resolved_count(config.cleanup_days),
+        "default_days": config.cleanup_days,
     })
 
 
@@ -472,8 +507,11 @@ def mayor_dashboard_view(request: HttpRequest) -> HttpResponse:
         workload["total_active"] = workload["assigned"] + workload["in_progress"]
         elected_workload.append(workload)
 
-    # Sollicitations orphelines (NEW depuis plus de 7 jours)
-    orphan_threshold = timezone.now() - timedelta(days=7)
+    # Sollicitations orphelines
+    from apps.settings_app.models import SiteSettings
+
+    config = SiteSettings.load()
+    orphan_threshold = timezone.now() - timedelta(days=config.orphan_days)
     orphan_reports = Report.objects.filter(
         status=Report.Status.NEW,
         created_at__lt=orphan_threshold,
@@ -503,14 +541,14 @@ def mayor_dashboard_view(request: HttpRequest) -> HttpResponse:
     # Répartition par village (de l'auteur)
     village_counts = dict(
         Report.objects.exclude(
-            author__village=""
-        ).values_list("author__village").annotate(
+            author__village__isnull=True
+        ).values_list("author__village__name").annotate(
             count=Count("id")
-        ).values_list("author__village", "count")
+        ).values_list("author__village__name", "count")
     )
 
-    # Nombre par mois (6 derniers mois)
-    six_months_ago = timezone.now() - timedelta(days=180)
+    # Nombre par mois (période configurable)
+    six_months_ago = timezone.now() - timedelta(days=config.stats_period_days)
     monthly_reports = (
         Report.objects.filter(created_at__gte=six_months_ago)
         .extra(select={"month": "strftime('%%Y-%%m', created_at)"})
@@ -529,5 +567,145 @@ def mayor_dashboard_view(request: HttpRequest) -> HttpResponse:
         "village_counts": village_counts,
         "monthly_reports": monthly_reports,
         "report_types": Report.Type.choices,
-        "village_choices": User.Village.choices,
+        "village_choices": [(v.slug, v.name) for v in Village.objects.filter(is_active=True)],
+    })
+
+
+# --- Administration améliorée ---
+
+
+@mayor_required
+def registration_list_view(request: HttpRequest) -> HttpResponse:
+    """Liste des inscriptions en attente d'approbation."""
+    pending_users = User.objects.filter(is_approved=False).order_by("-created_at")
+    return render(request, "dashboard/registration_list.html", {
+        "pending_users": pending_users,
+    })
+
+
+@mayor_required
+@require_POST
+def registration_approve_view(request: HttpRequest, pk: int) -> HttpResponse:
+    """Approuver un compte utilisateur."""
+    user = get_object_or_404(User, pk=pk, is_approved=False)
+    user.is_approved = True
+    user.save(update_fields=["is_approved"])
+
+    # Send approval email
+    from apps.settings_app.models import SiteSettings
+
+    config = SiteSettings.load()
+    from django.core.mail import send_mail
+    from django.template.loader import render_to_string
+
+    send_mail(
+        subject=_("Votre compte a été validé — Saulzet & Vous"),
+        message=render_to_string("accounts/emails/account_approved.txt", {"user": user}),
+        from_email=config.from_email,
+        recipient_list=[user.email],
+        fail_silently=True,
+    )
+
+    from apps.notifications.services import log_action
+
+    log_action(request, "approve", user)
+    messages.success(request, _("Compte de %(name)s approuvé.") % {"name": user.get_full_name()})
+
+    if request.headers.get("HX-Request"):
+        return HttpResponse("")
+    return redirect("dashboard:registration_list")
+
+
+@mayor_required
+@require_POST
+def registration_reject_view(request: HttpRequest, pk: int) -> HttpResponse:
+    """Rejeter (supprimer) un compte utilisateur en attente."""
+    user = get_object_or_404(User, pk=pk, is_approved=False)
+    name = user.get_full_name()
+    user.delete()
+
+    messages.success(request, _("Inscription de %(name)s rejetée.") % {"name": name})
+
+    if request.headers.get("HX-Request"):
+        return HttpResponse("")
+    return redirect("dashboard:registration_list")
+
+
+@mayor_required
+def export_csv_view(request: HttpRequest) -> HttpResponse:
+    """Export CSV des sollicitations."""
+    import codecs
+    import csv
+
+    status_filter = request.GET.get("status", "")
+    date_from = request.GET.get("date_from", "")
+    date_to = request.GET.get("date_to", "")
+
+    reports = Report.objects.select_related("author", "assigned_to").order_by("-created_at")
+
+    if status_filter:
+        reports = reports.filter(status=status_filter)
+    if date_from:
+        reports = reports.filter(created_at__date__gte=date_from)
+    if date_to:
+        reports = reports.filter(created_at__date__lte=date_to)
+
+    response = HttpResponse(content_type="text/csv; charset=utf-8")
+    response["Content-Disposition"] = 'attachment; filename="sollicitations.csv"'
+
+    # UTF-8 BOM for Excel
+    response.write(codecs.BOM_UTF8.decode("utf-8"))
+
+    writer = csv.writer(response, delimiter=";")
+    writer.writerow([
+        "ID", "Titre", "Type", "Statut", "Auteur", "Village",
+        "Élu assigné", "Date création", "Date affectation",
+        "Date résolution", "Public/Privé",
+    ])
+
+    for report in reports:
+        writer.writerow([
+            str(report.pk)[:8],
+            report.title,
+            report.get_report_type_display(),
+            report.get_status_display(),
+            report.author.get_full_name() if report.author else "",
+            str(report.author.village) if report.author and report.author.village else "",
+            report.assigned_to.get_full_name() if report.assigned_to else "",
+            report.created_at.strftime("%d/%m/%Y %H:%M") if report.created_at else "",
+            report.assigned_at.strftime("%d/%m/%Y %H:%M") if report.assigned_at else "",
+            report.resolved_at.strftime("%d/%m/%Y %H:%M") if report.resolved_at else "",
+            "Public" if report.is_public else "Privé",
+        ])
+
+    return response
+
+
+@admin_required
+def audit_log_view(request: HttpRequest) -> HttpResponse:
+    """Journal d'audit."""
+    from django.core.paginator import Paginator
+
+    from apps.notifications.models import AuditLog
+
+    logs = AuditLog.objects.select_related("user").order_by("-created_at")
+
+    # Filters
+    action_filter = request.GET.get("action", "")
+    user_filter = request.GET.get("user", "")
+
+    if action_filter:
+        logs = logs.filter(action=action_filter)
+    if user_filter:
+        logs = logs.filter(user_id=user_filter)
+
+    paginator = Paginator(logs, 30)
+    page_obj = paginator.get_page(request.GET.get("page"))
+
+    return render(request, "dashboard/audit_log.html", {
+        "page_obj": page_obj,
+        "current_action": action_filter,
+        "current_user": user_filter,
+        "action_choices": AuditLog.Action.choices,
+        "staff_users": User.objects.filter(is_approved=True).order_by("last_name"),
     })

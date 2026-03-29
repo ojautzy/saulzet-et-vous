@@ -1,5 +1,5 @@
 {% extends "pages/page_base.html" %}
-{% load i18n %}
+{% load i18n l10n %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
@@ -30,15 +30,15 @@
         integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-  // Centre de la commune (entre tous les villages)
-  const map = L.map('access-map').setView([45.6415, 2.9100], 14);
+  // Centre de la commune
+  const map = L.map('access-map').setView([{{ site_settings.map_center_lat|unlocalize }}, {{ site_settings.map_center_lng|unlocalize }}], {{ site_settings.map_default_zoom }});
 
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
     maxZoom: 18
   }).addTo(map);
 
-  // Marqueur Mairie — 22 rue des Anciennes Écoles, Le Bourg
+  // Marqueur Mairie
   const mairieIcon = L.divIcon({
     html: '<div style="background:#2D5016;color:white;border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-size:16px;border:2px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.3);">&#127963;</div>',
     iconSize: [32, 32],
@@ -46,19 +46,16 @@ document.addEventListener('DOMContentLoaded', function() {
     className: ''
   });
 
-  L.marker([45.6415, 2.9178], {icon: mairieIcon})
+  L.marker([{{ site_settings.mairie_lat|unlocalize }}, {{ site_settings.mairie_lng|unlocalize }}], {icon: mairieIcon})
     .addTo(map)
-    .bindPopup('<strong>Mairie de Saulzet-le-Froid</strong><br>22, rue des Anciennes Écoles<br>63970 Saulzet-le-Froid<br><small>Tél. 04 73 79 33 65</small>')
+    .bindPopup('<strong>Mairie de {{ site_settings.commune_name }}</strong><br>{{ site_settings.address }}<br><small>Tél. {{ site_settings.phone }}</small>')
     .openPopup();
 
-  // Les 6 villages de la commune (coordonnées OpenStreetMap Nominatim)
+  // Villages de la commune
   const villages = [
-    {name: 'Saulzet-le-Froid',  lat: 45.6415, lng: 2.9178},
-    {name: 'Zanières',          lat: 45.6407, lng: 2.9406},
-    {name: 'Espinasse',         lat: 45.6525, lng: 2.9159},
-    {name: 'Souverand',         lat: 45.6403, lng: 2.9219},
-    {name: 'Pessade',           lat: 45.6347, lng: 2.8895},
-    {name: 'La Martre',         lat: 45.6466, lng: 2.9059}
+    {% for village in villages %}
+    {name: '{{ village.name }}', lat: {{ village.latitude|unlocalize }}, lng: {{ village.longitude|unlocalize }}}{% if not forloop.last %},{% endif %}
+    {% endfor %}
   ];
 
   const villageIcon = L.divIcon({
@@ -76,7 +73,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Ajuster la vue pour que tous les marqueurs soient visibles
   const allPoints = villages.map(function(v) { return [v.lat, v.lng]; });
-  allPoints.push([45.6345, 2.8898]); // Mairie
+  allPoints.push([{{ site_settings.mairie_lat|unlocalize }}, {{ site_settings.mairie_lng|unlocalize }}]);
   map.fitBounds(allPoints, {padding: [30, 30]});
 });
 </script>

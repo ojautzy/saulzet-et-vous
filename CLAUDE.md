@@ -27,7 +27,12 @@ ruff check .                               # Linting
 pytest                                     # Tests
 python manage.py makemigrations && python manage.py migrate
 
-# Migration de contenu (Phase 5)
+# Notifications
+python manage.py send_reminders            # Relances sollicitations orphelines
+python manage.py send_reminders --dry-run  # Prévisualisation sans envoi
+python manage.py send_reminders --days 3   # Seuil personnalisé
+
+# Migration de contenu (Phase 5 — référence)
 python manage.py build_inventory           # Inventaire du site aspiré
 python manage.py migrate_content           # Dry run migration
 python manage.py migrate_content --execute # Migration effective
@@ -44,6 +49,7 @@ python manage.py create_initial_pages      # Arborescence initiale des pages
 - Composants réutilisables dans `templates/components/`
 - Settings séparés : `saulzet_et_vous/settings/{base,dev,prod}.py`
 - Utiliser `settings.AUTH_USER_MODEL` pour les ForeignKey vers User
+- **Zéro valeur en dur** : ne jamais coder en dur dans les templates ou le code Python des valeurs susceptibles de changer (coordonnées mairie, téléphone, horaires, email, seuils métier, coordonnées GPS…). Toutes ces valeurs doivent être stockées dans le modèle `SiteSettings` (singleton, app `settings_app`) et accessibles via `SiteSettings.load()` dans le code Python ou `{{ site_settings.* }}` dans les templates. Ce principe garantit que le site reste administrable par un non-technicien (secrétaire, maire) sans intervention développeur, et qu'il survit aux changements d'équipe municipale.
 
 ## Charte visuelle
 
@@ -74,8 +80,12 @@ python manage.py create_initial_pages      # Arborescence initiale des pages
 - `/comptes/` : authentification (login, inscription, magic link)
 - `/etvous/` : module participatif (sollicitations)
 - `/etvous/tableau-de-bord/` : dashboard élus et maire
+- `/etvous/tableau-de-bord/inscriptions/` : validation des inscriptions (maire/admin)
+- `/etvous/tableau-de-bord/export/` : export CSV des sollicitations (maire/admin)
+- `/etvous/tableau-de-bord/journal/` : journal d'audit (admin)
+- `/etvous/notifications/` : centre de notifications
+- `/etvous/notifications/preferences/` : préférences email
 - `/contact/`, `/documents/` : pages CMS spéciales
-- `/gestion/migration/` : interface de validation migration (admin/maire)
 - `/<slug>/`, `/<parent>/<slug>/` : pages CMS catch-all
 
 ### Arborescence des pages CMS
@@ -107,8 +117,34 @@ python manage.py create_initial_pages      # Arborescence initiale des pages
 - **Images des pages** : stockées dans `media/pages/images/`. Référencer dans les pages CMS avec `<img src="/media/pages/images/nom.jpg">`.
 - **Templates spéciaux** : certaines pages utilisent des templates dédiés (`habitants` pour la courbe démographique Chart.js, `acces` pour la carte Leaflet, `equipe`, `contact`, `documents`).
 
+## SiteSettings (singleton)
+
+Le modèle `SiteSettings` (app `settings_app`) centralise tous les paramètres éditables du site :
+- **Identité** : nom du site, commune, population
+- **Coordonnées** : adresse, téléphone, horaires
+- **Email** : expéditeur, contact, configuration SMTP
+- **Cartographie** : centre carte, coordonnées mairie, zoom
+- **Seuils métier** : orphan_days, cleanup_days, stats_period_days, reminder_interval_days
+
+Accès : `SiteSettings.load()` en Python, `{{ site_settings.* }}` dans les templates (context processor).
+Le backend email (`DatabaseEmailBackend`) lit la config SMTP depuis SiteSettings — pas de SMTP = mode console (dev).
+
+Les **villages** sont stockés dans le modèle `Village` (même app), avec coordonnées GPS. Le champ `User.village` est une ForeignKey vers `Village`.
+
+## Notifications
+
+L'app `notifications` gère :
+- **Notifications in-app** : modèle `Notification` avec 7 types (status_change, new_comment, assignment, new_report, new_registration, contact_form, reminder)
+- **Emails HTML** : templates dans `templates/notifications/emails/` (HTML + TXT), charte Saulzet
+- **Préférences** : modèle `NotificationPreference` (par utilisateur), page `/etvous/notifications/preferences/`
+- **Centre de notifications** : cloche dans la navbar avec badge, dropdown, page paginée
+- **Relances** : commande `send_reminders` pour les sollicitations orphelines
+- **Journal d'audit** : modèle `AuditLog` pour tracer les actions (création, affectation, approbation, connexion)
+
+Le service `notify()` dans `apps/notifications/services.py` crée la notification in-app ET envoie l'email si les préférences de l'utilisateur l'autorisent.
+
 ## État du projet
 
-- **Version actuelle** : 0.7.0 (Phase 5 — Migration du contenu existant)
+- **Version actuelle** : 0.8.0 (Phase 6 — Notifications email et administration)
 - Plan complet dans `saulzet-et-vous-plan-v3.md`. Prompts par phase dans `prompt-phase*-claude-code.md`.
-- Phases 1 à 5 implémentées. Migration du contenu de l'ancien site e-monsite effectuée (99 documents, 44 images, 30+ pages CMS). Prochaine étape : Phase 6.
+- Phases 1 à 6 implémentées. Prochaine étape : Phase 7.
