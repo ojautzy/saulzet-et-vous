@@ -71,6 +71,9 @@
               <a href="{% url 'dashboard:audit_log' %}" class="block px-4 py-2 hover:bg-vert-tres-clair transition-colors text-sm">
                 {% trans "Journal d'audit" %}
               </a>
+              <a href="/admin/" class="block px-4 py-2 hover:bg-vert-tres-clair transition-colors text-sm">
+                {% trans "Administration" %}
+              </a>
               {% endif %}
             </div>
           </div>
@@ -93,14 +96,8 @@
             <!-- Dropdown -->
             <div x-show="notifOpen" x-transition
                  class="absolute right-0 mt-2 w-80 bg-white text-vert-foret rounded-lg shadow-lg py-2 z-50 max-h-96 overflow-y-auto">
-              <div class="flex items-center justify-between px-4 py-2 border-b border-gray-100">
+              <div class="px-4 py-2 border-b border-gray-100">
                 <span class="font-semibold text-sm">{% trans "Notifications" %}</span>
-                {% if unread_notifications_count > 0 %}
-                <form method="post" action="{% url 'notifications:notification_mark_all_read' %}">
-                  {% csrf_token %}
-                  <button type="submit" class="text-xs text-vert-prairie hover:underline">{% trans "Tout lire" %}</button>
-                </form>
-                {% endif %}
               </div>
               {% load notification_tags %}
               {% recent_notifications as recent_notifs %}
@@ -109,7 +106,7 @@
                 {% csrf_token %}
                 <button type="submit" class="w-full text-left px-4 py-2 hover:bg-vert-tres-clair/50 transition-colors {% if not n.is_read %}bg-vert-tres-clair/20{% endif %}">
                   <p class="text-xs font-semibold truncate">{{ n.title }}</p>
-                  <p class="text-[11px] text-gris-clair">{{ n.created_at|timesince }} {% trans "il y a" %}</p>
+                  <p class="text-[11px] text-gris-clair">{% trans "il y a" %} {{ n.created_at|timesince }}</p>
                 </button>
               </form>
               {% empty %}
