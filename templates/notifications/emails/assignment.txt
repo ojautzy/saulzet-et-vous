@@ -1,0 +1,14 @@
+Bonjour {{ recipient.first_name }},
+
+Vous avez été désigné(e) pour traiter la sollicitation « {{ report.title }} ».
+
+Type : {{ report.get_report_type_display }}
+Auteur : {{ report.author.get_full_name }}
+{% if report.description %}
+{{ report.description|truncatechars:200 }}
+{% endif %}
+Voir la sollicitation : {{ site_url }}/etvous/tableau-de-bord/{{ report.pk }}/
+
+--
+{{ site_settings.commune_name }} — {{ site_settings.address }}
+Tél. {{ site_settings.phone }}

@@ -1,0 +1,13 @@
+Bonjour {{ recipient.first_name }},
+
+Nouvelle inscription de {{ new_user.first_name }} {{ new_user.last_name }}.
+
+Email : {{ new_user.email }}
+{% if new_user.phone %}Téléphone : {{ new_user.phone }}{% endif %}
+{% if new_user.village %}Village : {{ new_user.village }}{% endif %}
+
+Gérer les inscriptions : {{ site_url }}/admin/accounts/user/?is_approved__exact=0
+
+--
+{{ site_settings.commune_name }} — {{ site_settings.address }}
+Tél. {{ site_settings.phone }}

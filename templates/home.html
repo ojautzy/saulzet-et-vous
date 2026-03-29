@@ -15,7 +15,7 @@
       Saulzet-le-Froid
     </h1>
     <p class="font-sans text-white/80 text-lg mt-2 tracking-wide">
-      {% trans "Entre Monts Dore et Monts Dômes — 284 habitants" %}
+      {% blocktrans with pop=site_settings.population %}Entre Monts Dore et Monts Dômes — {{ pop }}{% endblocktrans %}
     </p>
   </div>
 </section>
@@ -104,8 +104,7 @@
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
         </svg>
         <h3 class="text-sm font-semibold text-vert-foret mb-1">{% trans "Horaires de la mairie" %}</h3>
-        <p class="text-xs text-gris-pierre">{% trans "Lundi, mardi, jeudi et vendredi" %}</p>
-        <p class="text-sm font-semibold text-vert-foret mt-1">{% trans "8h30 — 12h00" %}</p>
+        <p class="text-xs text-gris-pierre">{{ site_settings.opening_hours|linebreaksbr }}</p>
       </div>
       <div class="card-saulzet p-6 text-center flex flex-col items-center">
         <svg width="36" height="36" class="mb-3 text-vert-prairie" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -113,14 +112,14 @@
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
         </svg>
         <h3 class="text-sm font-semibold text-vert-foret mb-1">{% trans "Adresse" %}</h3>
-        <p class="text-xs text-gris-pierre">Le Bourg<br>63710 Saulzet-le-Froid</p>
+        <p class="text-xs text-gris-pierre">{{ site_settings.address }}</p>
       </div>
       <div class="card-saulzet p-6 text-center flex flex-col items-center">
         <svg width="36" height="36" class="mb-3 text-vert-prairie" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
         </svg>
         <h3 class="text-sm font-semibold text-vert-foret mb-1">{% trans "Téléphone" %}</h3>
-        <p class="text-xs text-gris-pierre">04 73 22 81 65</p>
+        <p class="text-xs text-gris-pierre">{{ site_settings.phone }}</p>
       </div>
     </div>
 

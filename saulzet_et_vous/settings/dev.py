@@ -29,9 +29,5 @@ DATABASES = {
     }
 }
 
-# Email
-EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
-DEFAULT_FROM_EMAIL = "Saulzet & Vous <noreply@saulzet.jautzy.com>"
-
 # Site URL for magic links
 SITE_URL = "https://saulzet.jautzy.com"

@@ -1,14 +1,7 @@
 """Views for the CMS pages app."""
 
-import json
-from pathlib import Path
-
-from django.conf import settings
 from django.contrib import messages as django_messages
-from django.contrib.auth.decorators import login_required
-from django.core.mail import send_mail
-from django.http import HttpResponseForbidden
-from django.shortcuts import get_object_or_404, redirect, render
+from django.shortcuts import get_object_or_404, render
 from django.utils.translation import gettext_lazy as _
 
 from .forms import ContactForm
@@ -63,12 +56,13 @@ def contact_view(request):
     if request.method == "POST":
         form = ContactForm(request.POST)
         if form.is_valid():
-            send_mail(
-                subject=f"[Saulzet-le-Froid] {form.cleaned_data['subject']}",
-                message=form.cleaned_data["message"],
-                from_email=settings.DEFAULT_FROM_EMAIL,
-                recipient_list=[settings.CONTACT_EMAIL],
-                fail_silently=False,
+            from apps.notifications.services import notify_contact_form
+
+            notify_contact_form(
+                name=form.cleaned_data["name"],
+                email=form.cleaned_data["email"],
+                phone="",
+                message_text=f"[{form.cleaned_data['subject']}]\n\n{form.cleaned_data['message']}",
             )
             django_messages.success(request, _("Votre message a bien été envoyé."))
             form = ContactForm()
@@ -92,67 +86,4 @@ def document_list_view(request, category=None):
     })
 
 
-@login_required
-def migration_review_view(request):
-    """Interface de revue de l'inventaire de migration."""
-    if not (request.user.is_admin or request.user.is_mayor):
-        return HttpResponseForbidden()
-
-    inventory_path = Path("migration/migration_inventory.json")
-    if not inventory_path.exists():
-        django_messages.error(
-            request, _("L'inventaire n'existe pas. Lancez d'abord build_inventory.")
-        )
-        return redirect("home")
-
-    inventory = json.loads(inventory_path.read_text())
-
-    decisions_path = Path("migration/migration_decisions.json")
-
-    if request.method == "POST":
-        decisions = []
-        for i, item in enumerate(inventory):
-            status = request.POST.get(f"status_{i}", item["suggested_status"])
-            target = request.POST.get(f"target_{i}", item.get("target_page", ""))
-            notes = request.POST.get(f"notes_{i}", item.get("notes", ""))
-            decisions.append(
-                {
-                    **item,
-                    "final_status": status,
-                    "final_target": target,
-                    "final_notes": notes,
-                }
-            )
-        decisions_path.write_text(
-            json.dumps(decisions, indent=2, ensure_ascii=False)
-        )
-        django_messages.success(request, _("Décisions de migration enregistrées."))
-
-    # Apply saved decisions to inventory (both after POST and on GET)
-    if decisions_path.exists():
-        saved_decisions = json.loads(decisions_path.read_text())
-        saved_by_url = {d.get("source_url"): d for d in saved_decisions}
-        for item in inventory:
-            saved = saved_by_url.get(item.get("source_url"))
-            if saved:
-                item["suggested_status"] = saved.get(
-                    "final_status", item.get("suggested_status")
-                )
-                item["target_page"] = saved.get(
-                    "final_target", item.get("target_page", "")
-                )
-                item["notes"] = saved.get(
-                    "final_notes", item.get("notes", "")
-                )
-
-    # Compute stats after applying decisions
-    stats = {"conserver": 0, "mettre_a_jour": 0, "supprimer": 0, "fusionner": 0}
-    for item in inventory:
-        status = item.get("suggested_status", "conserver")
-        if status in stats:
-            stats[status] += 1
-
-    return render(
-        request, "migration/review.html", {"inventory": inventory, "stats": stats}
-    )
 

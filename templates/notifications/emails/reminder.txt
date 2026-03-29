@@ -1,0 +1,13 @@
+Bonjour {{ recipient.first_name }},
+
+La sollicitation « {{ report.title }} » attend une prise en charge depuis {{ days_since_creation }} jours.
+
+Type : {{ report.get_report_type_display }}
+Auteur : {{ report.author.get_full_name }}
+Date : {{ report.created_at|date:"d/m/Y" }}
+
+Affecter cette sollicitation : {{ site_url }}/etvous/tableau-de-bord/{{ report.pk }}/
+
+--
+{{ site_settings.commune_name }} — {{ site_settings.address }}
+Tél. {{ site_settings.phone }}

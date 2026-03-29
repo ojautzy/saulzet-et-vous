@@ -60,6 +60,10 @@ def report_create_view(request: HttpRequest) -> HttpResponse:
                 photo.process_image()
                 photo.save()
 
+            from apps.notifications.services import log_action, notify_new_report
+
+            notify_new_report(report)
+            log_action(request, "create", report)
             messages.success(request, _("Votre sollicitation a bien été envoyée."))
             return redirect("reports:detail", pk=report.pk)
     else:

@@ -20,4 +20,10 @@ urlpatterns = [
     path("admin/cleanup/cancelled/", views.admin_cleanup_cancelled_view, name="admin_cleanup_cancelled"),
     path("admin/cleanup/resolved/", views.admin_cleanup_resolved_view, name="admin_cleanup_resolved"),
     path("admin/cleanup/resolved/count/", views.admin_cleanup_resolved_count_view, name="admin_cleanup_resolved_count"),
+    # Administration améliorée
+    path("inscriptions/", views.registration_list_view, name="registration_list"),
+    path("inscriptions/<int:pk>/approve/", views.registration_approve_view, name="registration_approve"),
+    path("inscriptions/<int:pk>/reject/", views.registration_reject_view, name="registration_reject"),
+    path("export/", views.export_csv_view, name="export_csv"),
+    path("journal/", views.audit_log_view, name="audit_log"),
 ]

@@ -10,9 +10,11 @@
       <h1 class="font-playfair text-2xl md:text-3xl text-vert-foret font-bold">
         {% trans "Tableau de bord Maire" %}
       </h1>
-      <a href="{% url 'dashboard:dashboard' %}" class="btn btn-sm btn-ghost text-vert-prairie">
-        {% trans "Vue élus" %} &rarr;
-      </a>
+      <div class="flex flex-wrap gap-2">
+        <a href="{% url 'dashboard:registration_list' %}" class="btn btn-sm btn-outline">{% trans "Inscriptions" %}</a>
+        <a href="{% url 'dashboard:export_csv' %}" class="btn btn-sm btn-outline">{% trans "Export CSV" %}</a>
+        <a href="{% url 'dashboard:dashboard' %}" class="btn btn-sm btn-ghost text-vert-prairie">{% trans "Vue élus" %} &rarr;</a>
+      </div>
     </div>
 
     <!-- Indicateurs globaux -->
@@ -167,7 +169,7 @@
             </a>
             <p class="text-xs text-gris-pierre">
               {{ report.author.get_full_name }} — {{ report.created_at|date:"d/m/Y" }}
-              {% if report.author.village %}({{ report.author.get_village_display }}){% endif %}
+              {% if report.author.village %}({{ report.author.village }}){% endif %}
             </p>
           </div>
           <a href="{% url 'dashboard:detail' pk=report.pk %}" class="btn btn-sm btn-primary-saulzet">

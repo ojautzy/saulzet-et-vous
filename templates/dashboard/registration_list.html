@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Inscriptions en attente" %} — Saulzet & Vous{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto px-4 py-8">
+  <h1 class="text-2xl font-playfair font-bold text-vert-foret mb-6">
+    {% trans "Inscriptions en attente" %}
+  </h1>
+
+  {% if pending_users %}
+  <div class="space-y-3">
+    {% for u in pending_users %}
+    <div class="card-saulzet p-4 flex items-center justify-between" id="user-{{ u.pk }}">
+      <div>
+        <p class="font-semibold text-vert-foret">{{ u.get_full_name }}</p>
+        <p class="text-sm text-gris-pierre">{{ u.email }}</p>
+        <p class="text-xs text-gris-clair">
+          {% if u.village %}{{ u.village }} — {% endif %}
+          {% trans "Inscrit le" %} {{ u.created_at|date:"d/m/Y" }}
+        </p>
+      </div>
+      <div class="flex gap-2">
+        <form method="post" action="{% url 'dashboard:registration_approve' pk=u.pk %}"
+              hx-post="{% url 'dashboard:registration_approve' pk=u.pk %}"
+              hx-target="#user-{{ u.pk }}"
+              hx-swap="outerHTML">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-sm btn-primary-saulzet">
+            {% trans "Approuver" %}
+          </button>
+        </form>
+        <form method="post" action="{% url 'dashboard:registration_reject' pk=u.pk %}"
+              hx-post="{% url 'dashboard:registration_reject' pk=u.pk %}"
+              hx-target="#user-{{ u.pk }}"
+              hx-swap="outerHTML"
+              hx-confirm="{% trans 'Voulez-vous vraiment rejeter cette inscription ?' %}">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-sm btn-outline text-red-600 border-red-300 hover:bg-red-50">
+            {% trans "Rejeter" %}
+          </button>
+        </form>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="text-center py-12 text-gris-pierre">
+    <p>{% trans "Aucune inscription en attente." %}</p>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
