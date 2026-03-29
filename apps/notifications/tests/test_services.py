@@ -128,9 +128,11 @@ class TestNotifyAssignment:
 
 @pytest.mark.django_db
 class TestNotifyNewRegistration:
-    def test_notifies_admins_and_mayor(self, admin_user, mayor):
+    def test_notifies_admins_only(self, admin_user, mayor):
         new_user = User.objects.create_user(
             email="new@test.fr", first_name="New", last_name="User",
         )
         notify_new_registration(new_user)
-        assert Notification.objects.filter(notification_type="new_registration").count() == 2
+        notifs = Notification.objects.filter(notification_type="new_registration")
+        assert notifs.count() == 1
+        assert notifs.first().recipient == admin_user

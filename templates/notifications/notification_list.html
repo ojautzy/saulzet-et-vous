@@ -74,7 +74,7 @@
           </button>
         </form>
         <p class="text-xs text-gris-pierre mt-1 line-clamp-2">{{ notification.message }}</p>
-        <p class="text-xs text-gris-clair mt-1">{{ notification.created_at|timesince }} {% trans "il y a" %}</p>
+        <p class="text-xs text-gris-clair mt-1">{% trans "il y a" %} {{ notification.created_at|timesince }}</p>
       </div>
     </div>
     {% empty %}

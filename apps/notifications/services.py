@@ -174,9 +174,9 @@ def notify_new_report(report):
 
 
 def notify_new_registration(new_user):
-    """Notifie les admins/maire d'une nouvelle inscription."""
+    """Notifie les admins d'une nouvelle inscription."""
     recipients = User.objects.filter(
-        role__in=[User.Role.ADMIN, User.Role.MAYOR],
+        role=User.Role.ADMIN,
         is_approved=True,
     )
     for recipient in recipients:
@@ -201,9 +201,9 @@ def notify_contact_form(name, email, phone, message_text):
 
     config = SiteSettings.load()
 
-    # Notify admin/mayor users
+    # Notify secretary only (in-app)
     recipients = User.objects.filter(
-        role__in=[User.Role.ADMIN, User.Role.MAYOR, User.Role.SECRETARY],
+        role=User.Role.SECRETARY,
         is_approved=True,
     )
     for recipient in recipients:
