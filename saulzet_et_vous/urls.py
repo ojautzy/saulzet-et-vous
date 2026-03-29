@@ -20,9 +20,7 @@ urlpatterns = [
     # Module participatif "Saulzet & Vous" sous /etvous/
     path("etvous/", include("apps.reports.urls")),
     path("etvous/tableau-de-bord/", include("apps.dashboard.urls")),
-
-    # Migration review (admin/mayor only)
-    path("gestion/migration/", pages_views.migration_review_view, name="migration_review"),
+    path("etvous/notifications/", include("apps.notifications.urls")),
 
     # Pages CMS spéciales
     path("contact/", pages_views.contact_view, name="contact"),

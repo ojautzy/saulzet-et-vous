@@ -17,7 +17,7 @@
         <div class="flex flex-wrap items-center gap-3 mt-2 text-xs text-gris-clair">
           <span>{{ report.created_at|date:"d/m/Y" }}</span>
           {% if report.author.village %}
-          <span>&#127968; {{ report.author.get_village_display }}</span>
+          <span>&#127968; {{ report.author.village }}</span>
           {% endif %}
           {% if report.location_text %}
           <span>&#128205; {{ report.location_text }}</span>

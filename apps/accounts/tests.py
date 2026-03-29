@@ -8,7 +8,16 @@ from django.contrib.auth import get_user_model
 from django.test import Client, TestCase
 from django.utils import timezone
 
+from apps.settings_app.models import Village
+
 User = get_user_model()
+
+
+def _get_or_create_village(slug="bourg", name="Le Bourg", lat=45.6415, lng=2.9178):
+    """Helper to get or create a village for tests."""
+    return Village.objects.get_or_create(
+        slug=slug, defaults={"name": name, "latitude": lat, "longitude": lng, "order": 1}
+    )[0]
 
 
 @pytest.fixture
@@ -111,7 +120,7 @@ class TestRegistration(TestCase):
                 "last_name": "Habitant",
                 "phone": "0612345678",
                 "address": "3 rue du Bourg",
-                "village": "bourg",
+                "village": _get_or_create_village().pk,
                 "password1": "",
                 "password2": "",
             },
@@ -131,7 +140,7 @@ class TestRegistration(TestCase):
                 "last_name": "Motdepasse",
                 "phone": "0698765432",
                 "address": "5 place de l'Église",
-                "village": "bourg",
+                "village": _get_or_create_village().pk,
                 "password1": "SecurePass123!",
                 "password2": "SecurePass123!",
             },
@@ -150,7 +159,7 @@ class TestRegistration(TestCase):
                 "last_name": "User",
                 "phone": "0611111111",
                 "address": "1 rue Test",
-                "village": "bourg",
+                "village": _get_or_create_village().pk,
                 "password1": "pass1",
                 "password2": "pass2",
             },
@@ -350,6 +359,7 @@ class TestVillageField(TestCase):
         assert not User.objects.filter(email="village@example.com").exists()
 
     def test_register_with_village_success(self):
+        village = _get_or_create_village()
         response = self.client.post(
             "/comptes/register/",
             {
@@ -358,24 +368,26 @@ class TestVillageField(TestCase):
                 "last_name": "Village",
                 "phone": "0612345678",
                 "address": "3 rue du Bourg",
-                "village": "bourg",
+                "village": village.pk,
                 "password1": "",
                 "password2": "",
             },
         )
         assert response.status_code == 302
         user = User.objects.get(email="village@example.com")
-        assert user.village == "bourg"
-        assert user.get_village_display() == "Le Bourg"
+        assert user.village == village
+        assert str(user.village) == "Le Bourg"
 
     def test_profile_update_village(self):
+        village_bourg = _get_or_create_village()
+        village_pessade = _get_or_create_village("pessade", "Pessade", 45.6347, 2.8895)
         user = User.objects.create_user(
             email="profile@example.com",
             password="testpass123",
             first_name="Pro",
             last_name="File",
             is_approved=True,
-            village="bourg",
+            village=village_bourg,
         )
         self.client.login(email="profile@example.com", password="testpass123")
         response = self.client.post(
@@ -385,21 +397,22 @@ class TestVillageField(TestCase):
                 "last_name": "File",
                 "phone": "0612345678",
                 "address": "5 rue haute",
-                "village": "pessade",
+                "village": village_pessade.pk,
             },
         )
         assert response.status_code == 302
         user.refresh_from_db()
-        assert user.village == "pessade"
+        assert user.village == village_pessade
 
     def test_village_displayed_in_dashboard_detail(self):
+        village_z = _get_or_create_village("zanieres", "Zanières", 45.6407, 2.9406)
         citizen = User.objects.create_user(
             email="citizen_v@test.com",
             password="testpass123",
             first_name="Jean",
             last_name="Dupont",
             is_approved=True,
-            village="zanieres",
+            village=village_z,
         )
         User.objects.create_user(
             email="elected_v@test.com",

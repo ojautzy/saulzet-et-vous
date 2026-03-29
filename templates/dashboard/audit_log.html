@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Journal d'audit" %} — Saulzet & Vous{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto px-4 py-8">
+  <h1 class="text-2xl font-playfair font-bold text-vert-foret mb-6">
+    {% trans "Journal d'audit" %}
+  </h1>
+
+  <!-- Filters -->
+  <form method="get" class="flex flex-wrap gap-3 mb-6">
+    <select name="action" class="select select-bordered select-sm">
+      <option value="">{% trans "Toutes les actions" %}</option>
+      {% for value, label in action_choices %}
+      <option value="{{ value }}" {% if current_action == value %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+    <select name="user" class="select select-bordered select-sm">
+      <option value="">{% trans "Tous les utilisateurs" %}</option>
+      {% for u in staff_users %}
+      <option value="{{ u.pk }}" {% if current_user == u.pk|stringformat:"d" %}selected{% endif %}>{{ u.get_full_name }}</option>
+      {% endfor %}
+    </select>
+    <button type="submit" class="btn btn-sm btn-primary-saulzet">{% trans "Filtrer" %}</button>
+  </form>
+
+  <!-- Log entries -->
+  <div class="overflow-x-auto">
+    <table class="table table-sm w-full">
+      <thead>
+        <tr class="text-xs text-gris-clair uppercase">
+          <th>{% trans "Date" %}</th>
+          <th>{% trans "Utilisateur" %}</th>
+          <th>{% trans "Action" %}</th>
+          <th>{% trans "Cible" %}</th>
+          <th>{% trans "IP" %}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for log in page_obj %}
+        <tr class="hover">
+          <td class="text-xs">{{ log.created_at|date:"d/m/Y H:i" }}</td>
+          <td class="text-sm">{% if log.user %}{{ log.user.get_full_name }}{% else %}—{% endif %}</td>
+          <td>
+            <span class="badge badge-sm
+              {% if log.action == 'create' %}badge-success
+              {% elif log.action == 'delete' %}badge-error
+              {% elif log.action == 'approve' %}badge-info
+              {% else %}badge-ghost{% endif %}">
+              {{ log.get_action_display }}
+            </span>
+          </td>
+          <td class="text-sm">
+            <span class="text-gris-clair text-xs">{{ log.target_type }}</span>
+            {{ log.target_label|truncatechars:40 }}
+          </td>
+          <td class="text-xs text-gris-clair">{{ log.ip_address|default:"—" }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="5" class="text-center py-6 text-gris-pierre">{% trans "Aucune entrée dans le journal." %}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Pagination -->
+  {% if page_obj.has_other_pages %}
+  <div class="flex justify-center mt-6 gap-2">
+    {% if page_obj.has_previous %}
+    <a href="?page={{ page_obj.previous_page_number }}{% if current_action %}&action={{ current_action }}{% endif %}{% if current_user %}&user={{ current_user }}{% endif %}"
+       class="btn btn-sm btn-outline">{% trans "Précédent" %}</a>
+    {% endif %}
+    <span class="btn btn-sm btn-disabled">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+    {% if page_obj.has_next %}
+    <a href="?page={{ page_obj.next_page_number }}{% if current_action %}&action={{ current_action }}{% endif %}{% if current_user %}&user={{ current_user }}{% endif %}"
+       class="btn btn-sm btn-outline">{% trans "Suivant" %}</a>
+    {% endif %}
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

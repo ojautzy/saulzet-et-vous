@@ -13,8 +13,9 @@ User = get_user_model()
 @admin.action(description=_("Approuver les comptes sélectionnés"))
 def approve_users(modeladmin, request, queryset) -> None:
     """Approve selected user accounts and notify them by email."""
-    from django.conf import settings
+    from apps.settings_app.models import SiteSettings
 
+    config = SiteSettings.load()
     updated = queryset.filter(is_approved=False)
     for user in updated:
         user.is_approved = True
@@ -25,7 +26,7 @@ def approve_users(modeladmin, request, queryset) -> None:
                 "accounts/emails/account_approved.txt",
                 {"user": user},
             ),
-            from_email=settings.DEFAULT_FROM_EMAIL,
+            from_email=config.from_email,
             recipient_list=[user.email],
             fail_silently=True,
         )
