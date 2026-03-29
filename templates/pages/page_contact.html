@@ -52,7 +52,7 @@
             </svg>
             <div>
               <p class="font-semibold">{% trans "Adresse" %}</p>
-              <p class="text-gris-pierre">Le Bourg, 63710 Saulzet-le-Froid</p>
+              <p class="text-gris-pierre">{{ site_settings.address }}</p>
             </div>
           </div>
           <div class="flex items-start gap-3">
@@ -61,7 +61,7 @@
             </svg>
             <div>
               <p class="font-semibold">{% trans "Téléphone" %}</p>
-              <p class="text-gris-pierre">04 73 22 81 65</p>
+              <p class="text-gris-pierre">{{ site_settings.phone }}</p>
             </div>
           </div>
           <div class="flex items-start gap-3">
@@ -70,7 +70,7 @@
             </svg>
             <div>
               <p class="font-semibold">{% trans "Horaires" %}</p>
-              <p class="text-gris-pierre">{% trans "Lundi, mardi, jeudi et vendredi" %}<br>{% trans "8h30 — 12h00" %}</p>
+              <p class="text-gris-pierre">{{ site_settings.opening_hours|linebreaksbr }}</p>
             </div>
           </div>
         </div>

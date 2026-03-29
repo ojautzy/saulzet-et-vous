@@ -1,0 +1,13 @@
+Bonjour {{ recipient.first_name }},
+
+Nouvelle sollicitation de {{ report.author.get_full_name }} : « {{ report.title }} »
+
+Type : {{ report.get_report_type_display }}
+{% if report.description %}
+{{ report.description|truncatechars:200 }}
+{% endif %}
+Voir dans le tableau de bord : {{ site_url }}/etvous/tableau-de-bord/{{ report.pk }}/
+
+--
+{{ site_settings.commune_name }} — {{ site_settings.address }}
+Tél. {{ site_settings.phone }}

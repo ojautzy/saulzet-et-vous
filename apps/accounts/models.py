@@ -50,7 +50,8 @@ class User(AbstractUser):
         ELECTED = "elected", _("Adjoint / Conseiller")
         CITIZEN = "citizen", _("Habitant")
 
-    class Village(models.TextChoices):
+    class VillageChoices(models.TextChoices):
+        """Legacy choices — kept for data migration reference only."""
         BOURG = "bourg", _("Le Bourg")
         SOUVERAND = "souverand", _("Souverand")
         ZANIERES = "zanieres", _("Zanières")
@@ -93,11 +94,13 @@ class User(AbstractUser):
     )
     phone = models.CharField(_("téléphone"), max_length=20, blank=True)
     address = models.CharField(_("adresse à Saulzet-le-Froid"), max_length=255, blank=True)
-    village = models.CharField(
-        _("village"),
-        max_length=20,
-        choices=Village.choices,
+    village = models.ForeignKey(
+        "settings_app.Village",
+        on_delete=models.SET_NULL,
+        null=True,
         blank=True,
+        verbose_name=_("village"),
+        related_name="residents",
         help_text=_("Village ou hameau de résidence à Saulzet-le-Froid."),
     )
     magic_link_token = models.CharField(max_length=64, null=True, blank=True)

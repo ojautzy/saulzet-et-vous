@@ -1,0 +1,35 @@
+{% extends "notifications/emails/base_email.html" %}
+
+{% block content %}
+<p style="margin:0 0 15px 0;">Bonjour {{ recipient.first_name }},</p>
+
+<p style="margin:0 0 15px 0;">
+  Nouvelle sollicitation de <strong>{{ report.author.get_full_name }}</strong> :
+  <strong>« {{ report.title }} »</strong>
+</p>
+
+<table role="presentation" cellpadding="0" cellspacing="0" style="margin:15px 0;font-size:14px;">
+  <tr>
+    <td style="padding:4px 12px 4px 0;color:#999;font-weight:600;">Type</td>
+    <td style="padding:4px 0;">{{ report.get_report_type_display }}</td>
+  </tr>
+</table>
+
+{% if report.description %}
+<div style="background-color:#f5f0e8;padding:12px 16px;margin:15px 0;border-radius:4px;">
+  <p style="margin:0;">{{ report.description|truncatechars:200 }}</p>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block cta %}
+<table role="presentation" cellpadding="0" cellspacing="0" style="margin:20px auto;">
+  <tr>
+    <td style="background-color:#4A7C28;border-radius:6px;">
+      <a href="{{ site_url }}/etvous/tableau-de-bord/{{ report.pk }}/" style="display:inline-block;padding:12px 28px;color:#ffffff;text-decoration:none;font-weight:600;font-size:14px;">
+        Voir dans le tableau de bord
+      </a>
+    </td>
+  </tr>
+</table>
+{% endblock %}

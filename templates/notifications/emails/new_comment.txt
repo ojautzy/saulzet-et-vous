@@ -1,0 +1,11 @@
+Bonjour {{ recipient.first_name }},
+
+{{ author.get_full_name }} a commenté la sollicitation « {{ report.title }} ».
+
+« {{ comment.content|truncatechars:200 }} »
+
+Voir la discussion : {{ site_url }}/etvous/{{ report.pk }}/
+
+--
+{{ site_settings.commune_name }} — {{ site_settings.address }}
+Tél. {{ site_settings.phone }}

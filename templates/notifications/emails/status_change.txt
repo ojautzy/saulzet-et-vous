@@ -1,0 +1,12 @@
+Bonjour {{ recipient.first_name }},
+
+Votre sollicitation « {{ report.title }} » est passée de {{ old_status }} à {{ new_status }}.
+{% if report.resolution_text %}
+Réponse de l'élu :
+{{ report.resolution_text }}
+{% endif %}
+Voir ma sollicitation : {{ site_url }}/etvous/{{ report.pk }}/
+
+--
+{{ site_settings.commune_name }} — {{ site_settings.address }}
+Tél. {{ site_settings.phone }}

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block subject %}{{ site_settings.site_name }}{% endblock %}</title>
+</head>
+<body style="margin:0;padding:0;background-color:#f5f0e8;font-family:'Source Sans 3',Arial,sans-serif;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f5f0e8;">
+    <tr>
+      <td align="center" style="padding:20px 10px;">
+        <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background-color:#FDF8F0;border-radius:8px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.1);">
+          <!-- Header -->
+          <tr>
+            <td style="background-color:#2D5016;padding:24px 30px;text-align:center;">
+              <span style="font-family:'Playfair Display',Georgia,serif;font-size:22px;font-weight:700;color:#ffffff;">
+                {{ site_settings.site_name }}
+              </span>
+            </td>
+          </tr>
+          <!-- Body -->
+          <tr>
+            <td style="padding:30px;color:#4A4A4A;font-size:15px;line-height:1.6;">
+              {% block content %}{% endblock %}
+
+              {% block cta %}{% endblock %}
+            </td>
+          </tr>
+          <!-- Footer -->
+          <tr>
+            <td style="padding:20px 30px;border-top:1px solid #e5e0d5;text-align:center;font-size:12px;color:#999999;line-height:1.5;">
+              <p style="margin:0 0 8px 0;">
+                {{ site_settings.commune_name }} — {{ site_settings.address }}<br>
+                Tél. {{ site_settings.phone }}
+              </p>
+              <p style="margin:0;">
+                <a href="{{ site_url }}/etvous/notifications/preferences/" style="color:#4A7C28;text-decoration:underline;">Gérer mes notifications</a>
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

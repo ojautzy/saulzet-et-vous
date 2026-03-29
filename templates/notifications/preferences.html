@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Préférences de notification" %} — Saulzet & Vous{% endblock %}
+
+{% block content %}
+<div class="max-w-xl mx-auto px-4 py-8">
+  <h1 class="text-2xl font-playfair font-bold text-vert-foret mb-2">
+    {% trans "Préférences de notification" %}
+  </h1>
+  <p class="text-sm text-gris-pierre mb-6">
+    {% trans "Choisissez les notifications que vous souhaitez recevoir par email." %}
+  </p>
+
+  <form method="post" class="card-saulzet p-6 space-y-4">
+    {% csrf_token %}
+    {% for field in form %}
+    <label class="flex items-center gap-3 cursor-pointer">
+      {{ field }}
+      <span class="text-sm text-vert-foret">{{ field.label }}</span>
+    </label>
+    {% endfor %}
+    <div class="pt-4">
+      <button type="submit" class="btn btn-primary-saulzet">
+        {% trans "Enregistrer" %}
+      </button>
+      <a href="{% url 'notifications:notification_list' %}" class="btn btn-outline ml-2">
+        {% trans "Retour" %}
+      </a>
+    </div>
+  </form>
+</div>
+{% endblock %}

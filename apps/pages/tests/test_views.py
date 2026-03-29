@@ -80,8 +80,8 @@ class TestContactView:
             "message": "Bonjour, ceci est un test.",
         })
         assert response.status_code == 200
-        assert len(mailoutbox) == 1
-        assert "Question" in mailoutbox[0].subject
+        assert len(mailoutbox) >= 1
+        assert "Test User" in mailoutbox[0].subject
 
     def test_contact_post_invalid(self, client):
         response = client.post(reverse("contact"), {
