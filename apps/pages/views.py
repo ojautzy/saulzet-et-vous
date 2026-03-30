@@ -46,6 +46,10 @@ def page_detail_view(request, slug, parent_slug=None):
             role__in=[User.Role.MAYOR, User.Role.ELECTED],
             is_approved=True,
         ).order_by("function_order", "last_name")
+    elif page.template == Page.Template.GALERIE:
+        context["gallery_photos"] = page.gallery_photos.filter(
+            is_published=True
+        ).order_by("order", "-uploaded_at")
 
     return render(request, template_name, context)
 
