@@ -240,7 +240,7 @@ PAGES = {
             },
             "galerie": {
                 "title": "Galerie photos",
-                "template": "default",
+                "template": "galerie",
                 "menu_order": 30,
                 "excerpt": "Photos de Saulzet-le-Froid et ses environs.",
                 "content": PLACEHOLDER_CONTENT,

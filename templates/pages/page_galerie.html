@@ -1,0 +1,178 @@
+{% extends "pages/page_base.html" %}
+{% load i18n %}
+
+{% block extra_css %}
+<style>[x-cloak] { display: none !important; }</style>
+{% endblock %}
+
+{% block page_content %}
+{% if page.content %}
+<div class="prose prose-lg max-w-none font-serif mb-8">
+  {{ page.content|safe }}
+</div>
+{% endif %}
+
+{% if gallery_photos %}
+<div x-data="gallery()" class="mb-8">
+
+  {# Photo cards grid #}
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+    {% for photo in gallery_photos %}
+    <figure class="group cursor-pointer" @click="open({{ forloop.counter0 }})">
+      <div class="relative overflow-hidden rounded-xl shadow-md
+                  hover:shadow-xl transition-shadow duration-300">
+        <img src="{{ photo.thumbnail.url }}"
+             alt="{{ photo.title|default:'' }}"
+             class="w-full aspect-[4/3] object-cover
+                    transition-transform duration-500 group-hover:scale-110"
+             loading="lazy" />
+        <div class="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent
+                    opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+        <div class="absolute bottom-3 left-3 right-3
+                    opacity-0 group-hover:opacity-100
+                    translate-y-2 group-hover:translate-y-0
+                    transition-all duration-300">
+          <span class="inline-flex items-center gap-1.5 text-white text-xs font-sans
+                       bg-black/40 backdrop-blur-sm rounded-full px-3 py-1">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"/>
+            </svg>
+            {% trans "Agrandir" %}
+          </span>
+        </div>
+      </div>
+      <figcaption class="mt-2.5 px-1">
+        {% if photo.title %}
+        <p class="text-sm font-semibold text-vert-foret font-sans leading-snug">{{ photo.title }}</p>
+        {% endif %}
+        {% if photo.credit %}
+        <p class="text-xs text-gris-clair font-sans mt-0.5">&copy; {{ photo.credit }}</p>
+        {% endif %}
+      </figcaption>
+    </figure>
+    {% endfor %}
+  </div>
+
+  {# Lightbox #}
+  <div x-cloak x-show="shown"
+       x-transition:enter="transition ease-out duration-300"
+       x-transition:enter-start="opacity-0"
+       x-transition:enter-end="opacity-100"
+       x-transition:leave="transition ease-in duration-200"
+       x-transition:leave-start="opacity-100"
+       x-transition:leave-end="opacity-0"
+       class="fixed inset-0 z-50 bg-black/95"
+       @keydown.escape.window="close()"
+       @keydown.arrow-left.window="prev()"
+       @keydown.arrow-right.window="next()"
+       role="dialog"
+       aria-modal="true"
+       aria-label="{% trans 'Photo en grand format' %}">
+
+    {# Backdrop click catcher — full area behind everything #}
+    <div class="absolute inset-0" @click="close()"></div>
+
+    {# Top bar: counter + close #}
+    <div class="relative z-10 flex items-center justify-between px-4 py-3
+                bg-gradient-to-b from-black/60 to-transparent">
+      <span class="text-white/70 text-sm font-sans"
+            x-text="`${index + 1} / ${photos.length}`"></span>
+      <button class="text-white/70 hover:text-white transition-colors p-1"
+              @click="close()"
+              aria-label="{% trans 'Fermer' %}">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </button>
+    </div>
+
+    {# Center area: nav + image #}
+    <div class="absolute inset-0 flex items-center justify-center
+                px-12 sm:px-20 py-16 pointer-events-none">
+
+      {# Navigation: prev #}
+      <template x-if="photos.length > 1">
+        <button class="pointer-events-auto absolute left-2 sm:left-4 top-1/2 -translate-y-1/2
+                       text-white/50 hover:text-white transition-colors p-2"
+                @click.stop="prev()"
+                aria-label="{% trans 'Photo précédente' %}">
+          <svg class="w-8 h-8 sm:w-10 sm:h-10" fill="none" stroke="currentColor"
+               stroke-width="1.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+          </svg>
+        </button>
+      </template>
+
+      {# Navigation: next #}
+      <template x-if="photos.length > 1">
+        <button class="pointer-events-auto absolute right-2 sm:right-4 top-1/2 -translate-y-1/2
+                       text-white/50 hover:text-white transition-colors p-2"
+                @click.stop="next()"
+                aria-label="{% trans 'Photo suivante' %}">
+          <svg class="w-8 h-8 sm:w-10 sm:h-10" fill="none" stroke="currentColor"
+               stroke-width="1.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+          </svg>
+        </button>
+      </template>
+
+      {# Main image #}
+      <img :src="current.url"
+           :alt="current.title"
+           @click.stop
+           class="pointer-events-auto max-w-full max-h-full rounded-lg object-contain shadow-2xl" />
+    </div>
+
+    {# Bottom bar: caption & credit #}
+    <div class="absolute bottom-0 inset-x-0 z-10 px-4 py-3
+                bg-gradient-to-t from-black/60 to-transparent"
+         x-show="current.title || current.credit">
+      <div class="text-center max-w-2xl mx-auto">
+        <p x-show="current.title" x-text="current.title"
+           class="text-white text-sm sm:text-base font-sans"></p>
+        <p x-show="current.credit" class="text-white/60 text-xs sm:text-sm font-sans mt-0.5">
+          &copy; <span x-text="current.credit"></span>
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+{% else %}
+<p class="text-gris-pierre italic">{% trans "Aucune photo pour le moment." %}</p>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function gallery() {
+  return {
+    photos: [
+      {% for photo in gallery_photos %}
+      { url: '{{ photo.image.url }}', title: '{{ photo.title|escapejs }}', credit: '{{ photo.credit|escapejs }}' }{% if not forloop.last %},{% endif %}
+      {% endfor %}
+    ],
+    index: 0,
+    shown: false,
+    get current() {
+      return this.photos[this.index] || { url: '', title: '', credit: '' };
+    },
+    open(i) {
+      this.index = i;
+      this.shown = true;
+      document.body.style.overflow = 'hidden';
+    },
+    close() {
+      this.shown = false;
+      document.body.style.overflow = '';
+    },
+    next() {
+      if (this.shown) this.index = (this.index + 1) % this.photos.length;
+    },
+    prev() {
+      if (this.shown) this.index = (this.index - 1 + this.photos.length) % this.photos.length;
+    }
+  };
+}
+</script>
+{% endblock %}
