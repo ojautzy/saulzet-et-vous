@@ -1,9 +1,13 @@
 """Models for the CMS pages app."""
 
+from io import BytesIO
+
 from django.conf import settings
+from django.core.files.base import ContentFile
 from django.db import models
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
+from PIL import Image
 from tinymce.models import HTMLField
 
 
@@ -16,6 +20,7 @@ class Page(models.Model):
         EQUIPE = "equipe", _("Équipe municipale")
         HABITANTS = "habitants", _("Habitants")
         ACCES = "acces", _("Accès et plan")
+        GALERIE = "galerie", _("Galerie photos")
 
     title = models.CharField(_("titre"), max_length=200)
     slug = models.SlugField(
@@ -170,3 +175,86 @@ class Document(models.Model):
                 return f"{size:.1f} {unit}"
             size /= 1024
         return f"{size:.1f} To"
+
+
+class GalleryPhoto(models.Model):
+    """A photo in the commune gallery."""
+
+    MAX_WIDTH = 1920
+    JPEG_QUALITY = 85
+    THUMB_SIZE = (400, 300)
+    THUMB_QUALITY = 75
+
+    page = models.ForeignKey(
+        Page,
+        on_delete=models.CASCADE,
+        related_name="gallery_photos",
+        verbose_name=_("page"),
+    )
+    image = models.ImageField(_("image"), upload_to="gallery/photos/%Y/%m/")
+    thumbnail = models.ImageField(
+        _("miniature"), upload_to="gallery/thumbnails/%Y/%m/", blank=True
+    )
+    title = models.CharField(_("légende"), max_length=200, blank=True)
+    credit = models.CharField(
+        _("crédits photo"),
+        max_length=200,
+        blank=True,
+        help_text=_("Nom du photographe ou source."),
+    )
+    order = models.PositiveIntegerField(_("ordre"), default=0)
+    is_published = models.BooleanField(_("publiée"), default=True)
+    uploaded_at = models.DateTimeField(_("ajoutée le"), auto_now_add=True)
+
+    class Meta:
+        verbose_name = _("photo de galerie")
+        verbose_name_plural = _("photos de galerie")
+        ordering = ["order", "-uploaded_at"]
+
+    def __str__(self):
+        return self.title or f"Photo #{self.pk}"
+
+    def save(self, *args, **kwargs):
+        is_new = self._state.adding
+        if is_new and self.image:
+            self.process_image()
+        super().save(*args, **kwargs)
+
+    def process_image(self):
+        """Compress, resize the image, and generate a thumbnail."""
+        if not self.image:
+            return
+
+        img = Image.open(self.image)
+
+        if img.mode in ("RGBA", "P"):
+            img = img.convert("RGB")
+        elif img.mode != "RGB":
+            img = img.convert("RGB")
+
+        # Resize if wider than MAX_WIDTH
+        if img.width > self.MAX_WIDTH:
+            ratio = self.MAX_WIDTH / img.width
+            new_height = int(img.height * ratio)
+            img = img.resize((self.MAX_WIDTH, new_height), Image.LANCZOS)
+
+        # Save compressed image
+        buffer = BytesIO()
+        img.save(buffer, format="JPEG", quality=self.JPEG_QUALITY, optimize=True)
+        buffer.seek(0)
+        original_name = self.image.name.rsplit("/", 1)[-1]
+        filename = original_name.rsplit(".", 1)[0] + ".jpg"
+        self.image.save(filename, ContentFile(buffer.read()), save=False)
+
+        # Generate thumbnail
+        buffer.seek(0)
+        thumb = Image.open(BytesIO(buffer.getvalue()))
+        thumb.thumbnail(self.THUMB_SIZE, Image.LANCZOS)
+        thumb_buffer = BytesIO()
+        thumb.save(
+            thumb_buffer, format="JPEG", quality=self.THUMB_QUALITY, optimize=True
+        )
+        thumb_buffer.seek(0)
+        self.thumbnail.save(
+            f"thumb_{filename}", ContentFile(thumb_buffer.read()), save=False
+        )
