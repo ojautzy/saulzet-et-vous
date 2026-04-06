@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Guide de l'Habitant — Saulzet & Vous</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Source+Sans+3:wght@300;400;600;700&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --vert-foret: #2D5016;
+      --vert-prairie: #4A7C28;
+      --vert-clair: #7BAE4E;
+      --vert-tres-clair: #E8F3DC;
+      --terre-claire: #C49A2A;
+      --creme: #FDF8F0;
+      --creme-fonce: #F5EDE0;
+      --encre: #1A1A18;
+      --blanc: #FFFFFF;
+      --gris-pierre: #6B6560;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Source Sans 3', 'Segoe UI', Arial, sans-serif;
+      background: var(--creme);
+      color: var(--encre);
+      font-size: 18px;
+      line-height: 1.8;
+      padding: 0;
+    }
+
+    /* Header */
+    .doc-header {
+      background: var(--vert-foret);
+      color: white;
+      padding: 2.5rem 1.5rem;
+      text-align: center;
+    }
+    .doc-header h1 {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 2.2rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+    .doc-header .subtitle {
+      font-size: 1.1rem;
+      opacity: 0.9;
+    }
+
+    /* Navigation */
+    .doc-nav {
+      background: var(--blanc);
+      border-bottom: 3px solid var(--vert-tres-clair);
+      padding: 1rem 1.5rem;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    .doc-nav h2 {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 1.1rem;
+      color: var(--vert-foret);
+      margin-bottom: 0.75rem;
+    }
+    .doc-nav ul {
+      list-style: none;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    .doc-nav a {
+      display: inline-block;
+      background: var(--vert-tres-clair);
+      color: var(--vert-foret);
+      padding: 0.4rem 1rem;
+      border-radius: 2rem;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.95rem;
+      transition: background 0.2s;
+    }
+    .doc-nav a:hover, .doc-nav a:focus {
+      background: var(--vert-prairie);
+      color: white;
+    }
+
+    /* Main content */
+    .doc-content {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem 4rem;
+    }
+
+    /* Sections */
+    .section {
+      margin-bottom: 3rem;
+    }
+    .section h2 {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 1.7rem;
+      color: var(--vert-foret);
+      border-bottom: 3px solid var(--vert-clair);
+      padding-bottom: 0.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .section h3 {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 1.3rem;
+      color: var(--vert-prairie);
+      margin: 1.5rem 0 0.75rem;
+    }
+    .section p, .section li {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 1.05rem;
+      line-height: 1.9;
+      margin-bottom: 0.75rem;
+    }
+
+    /* Steps */
+    .steps {
+      counter-reset: step;
+      list-style: none;
+      padding: 0;
+    }
+    .steps li {
+      counter-increment: step;
+      position: relative;
+      padding-left: 3.5rem;
+      margin-bottom: 1.2rem;
+      min-height: 2.5rem;
+    }
+    .steps li::before {
+      content: counter(step);
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 2.5rem;
+      height: 2.5rem;
+      background: var(--vert-foret);
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 1.1rem;
+      font-family: 'Source Sans 3', sans-serif;
+    }
+
+    /* Info boxes */
+    .info-box {
+      background: var(--vert-tres-clair);
+      border-left: 4px solid var(--vert-clair);
+      padding: 1.2rem 1.5rem;
+      border-radius: 0 0.75rem 0.75rem 0;
+      margin: 1.5rem 0;
+    }
+    .info-box strong {
+      color: var(--vert-foret);
+    }
+
+    .warning-box {
+      background: #FFF8E1;
+      border-left: 4px solid var(--terre-claire);
+      padding: 1.2rem 1.5rem;
+      border-radius: 0 0.75rem 0.75rem 0;
+      margin: 1.5rem 0;
+    }
+    .warning-box strong {
+      color: #8B6914;
+    }
+
+    /* Cards */
+    .card {
+      background: var(--blanc);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      margin: 1rem 0;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+    .card h4 {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 1.15rem;
+      color: var(--vert-foret);
+      margin-bottom: 0.5rem;
+    }
+
+    /* Status badges */
+    .badge {
+      display: inline-block;
+      padding: 0.2rem 0.75rem;
+      border-radius: 1rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      font-family: 'Source Sans 3', sans-serif;
+    }
+    .badge-new { background: #DBEAFE; color: #1D4ED8; }
+    .badge-assigned { background: #FEF3C7; color: #92400E; }
+    .badge-progress { background: #E0E7FF; color: #4338CA; }
+    .badge-resolved { background: var(--vert-tres-clair); color: var(--vert-foret); }
+    .badge-cancelled { background: #F3F4F6; color: #6B7280; }
+
+    /* Table */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0;
+      font-size: 1rem;
+    }
+    th, td {
+      text-align: left;
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid var(--creme-fonce);
+    }
+    th {
+      background: var(--vert-tres-clair);
+      color: var(--vert-foret);
+      font-weight: 600;
+      font-family: 'Source Sans 3', sans-serif;
+    }
+    tr:hover { background: var(--creme-fonce); }
+
+    /* Footer */
+    .doc-footer {
+      background: var(--vert-foret);
+      color: white;
+      text-align: center;
+      padding: 1.5rem;
+      font-size: 0.9rem;
+      opacity: 0.9;
+    }
+
+    /* Print */
+    @media print {
+      .doc-nav { display: none; }
+      body { font-size: 14px; }
+      .doc-header { padding: 1rem; }
+      .section { page-break-inside: avoid; }
+    }
+
+    /* Responsive */
+    @media (max-width: 640px) {
+      body { font-size: 16px; }
+      .doc-header h1 { font-size: 1.6rem; }
+      .section h2 { font-size: 1.4rem; }
+      .doc-content { padding: 1rem; }
+      .doc-nav ul { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Bandeau retour au site -->
+  <div style="position:fixed;top:0;left:0;right:0;z-index:9999;background:#2D5016;padding:0.5rem 1.5rem;display:flex;align-items:center;gap:0.75rem;box-shadow:0 2px 8px rgba(0,0,0,0.2);">
+    <a href="/etvous/" style="color:white;text-decoration:none;font-family:'Source Sans 3',sans-serif;font-size:0.95rem;font-weight:600;display:flex;align-items:center;gap:0.5rem;">
+      <svg style="width:1.2rem;height:1.2rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+      Retour au site
+    </a>
+  </div>
+  <div style="height:2.5rem;"></div>
+
+<header class="doc-header">
+  <h1>Guide de l'Habitant</h1>
+  <div class="subtitle">Saulzet & Vous — Plateforme participative de Saulzet-le-Froid</div>
+</header>
+
+<nav class="doc-nav" aria-label="Sommaire">
+  <h2>Sommaire</h2>
+  <ul>
+    <li><a href="#presentation">Pr&eacute;sentation</a></li>
+    <li><a href="#inscription">S'inscrire</a></li>
+    <li><a href="#connexion">Se connecter</a></li>
+    <li><a href="#profil">Mon profil</a></li>
+    <li><a href="#site">Consulter le site</a></li>
+    <li><a href="#sollicitation">Envoyer une sollicitation</a></li>
+    <li><a href="#suivi">Suivre mes sollicitations</a></li>
+    <li><a href="#modifier">Modifier une sollicitation</a></li>
+    <li><a href="#notifications">Notifications</a></li>
+    <li><a href="#faq">Questions fr&eacute;quentes</a></li>
+  </ul>
+</nav>
+
+<div class="doc-content">
+
+  <!-- Présentation -->
+  <section class="section" id="presentation">
+    <h2>Bienvenue sur Saulzet & Vous</h2>
+    <p>
+      <strong>Saulzet & Vous</strong> est le site internet de la commune de Saulzet-le-Froid.
+      Il vous permet de :
+    </p>
+    <ul style="list-style: disc; padding-left: 2rem;">
+      <li>Consulter les <strong>informations de la commune</strong> (horaires de la mairie, &eacute;quipe municipale, documents officiels, &eacute;v&eacute;nements...)</li>
+      <li>Contacter la mairie via le <strong>formulaire de contact</strong></li>
+      <li>Utiliser le module <strong>Saulzet & Vous</strong> pour &eacute;crire directement &agrave; vos &eacute;lus : poser une question, proposer une id&eacute;e, ou signaler un probl&egrave;me</li>
+    </ul>
+    <div class="info-box">
+      <strong>Bon &agrave; savoir :</strong> La consultation du site (pages d'information, documents, galerie photos) est <strong>accessible &agrave; tous</strong>, sans inscription.
+      Seul le module participatif &laquo; Saulzet & Vous &raquo; n&eacute;cessite de cr&eacute;er un compte.
+    </div>
+  </section>
+
+  <!-- Inscription -->
+  <section class="section" id="inscription">
+    <h2>S'inscrire sur la plateforme</h2>
+    <p>Pour utiliser le module participatif, vous devez d'abord cr&eacute;er un compte. Voici comment faire :</p>
+    <ol class="steps">
+      <li>Rendez-vous sur le site <strong>saulzet-le-froid.com</strong></li>
+      <li>Cliquez sur le bouton <strong>&laquo; Connexion &raquo;</strong> en haut &agrave; droite de la page</li>
+      <li>Cliquez sur <strong>&laquo; Cr&eacute;er un compte &raquo;</strong></li>
+      <li>Remplissez le formulaire :
+        <ul style="list-style: disc; padding-left: 1.5rem; margin-top: 0.5rem;">
+          <li>Votre <strong>adresse email</strong> (obligatoire)</li>
+          <li>Votre <strong>pr&eacute;nom</strong> et <strong>nom</strong></li>
+          <li>Votre <strong>t&eacute;l&eacute;phone</strong> (facultatif)</li>
+          <li>Votre <strong>village</strong> (Le Bourg, Chabannes, etc.)</li>
+          <li>Un <strong>mot de passe</strong> (facultatif &mdash; vous pouvez aussi vous connecter par email, voir ci-dessous)</li>
+        </ul>
+      </li>
+      <li>Cliquez sur <strong>&laquo; S'inscrire &raquo;</strong></li>
+    </ol>
+    <div class="warning-box">
+      <strong>Important :</strong> Apr&egrave;s votre inscription, votre compte doit &ecirc;tre <strong>valid&eacute; par la mairie</strong>.
+      Vous recevrez un email lorsque votre compte sera approuv&eacute;. Cela peut prendre un &agrave; deux jours ouvrables.
+      En attendant, vous verrez un message vous indiquant que votre inscription est en cours de validation.
+    </div>
+  </section>
+
+  <!-- Connexion -->
+  <section class="section" id="connexion">
+    <h2>Se connecter</h2>
+    <p>Deux m&eacute;thodes de connexion sont disponibles :</p>
+
+    <div class="card">
+      <h4>M&eacute;thode 1 : Connexion par lien magique (recommand&eacute;e)</h4>
+      <p>C'est la m&eacute;thode la plus simple, <strong>pas besoin de retenir un mot de passe</strong>.</p>
+      <ol class="steps">
+        <li>Allez sur la page de connexion</li>
+        <li>Entrez votre <strong>adresse email</strong></li>
+        <li>Cliquez sur <strong>&laquo; Recevoir un lien de connexion &raquo;</strong></li>
+        <li>Ouvrez votre bo&icirc;te email et cliquez sur le lien re&ccedil;u</li>
+        <li>Vous &ecirc;tes connect&eacute; !</li>
+      </ol>
+      <div class="info-box">
+        <strong>Le lien est valable 15 minutes.</strong> Si vous ne le trouvez pas, v&eacute;rifiez votre dossier &laquo; Spam &raquo; ou &laquo; Courrier ind&eacute;sirable &raquo;.
+      </div>
+    </div>
+
+    <div class="card">
+      <h4>M&eacute;thode 2 : Connexion par mot de passe</h4>
+      <p>Si vous avez choisi un mot de passe lors de votre inscription :</p>
+      <ol class="steps">
+        <li>Allez sur la page de connexion</li>
+        <li>Cliquez sur l'onglet <strong>&laquo; Mot de passe &raquo;</strong></li>
+        <li>Entrez votre <strong>email</strong> et votre <strong>mot de passe</strong></li>
+        <li>Cliquez sur <strong>&laquo; Se connecter &raquo;</strong></li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- Profil -->
+  <section class="section" id="profil">
+    <h2>Mon profil</h2>
+    <p>Vous pouvez modifier vos informations personnelles &agrave; tout moment :</p>
+    <ol class="steps">
+      <li>Cliquez sur votre <strong>nom</strong> en haut &agrave; droite de la page</li>
+      <li>Choisissez <strong>&laquo; Mon profil &raquo;</strong></li>
+      <li>Modifiez les champs souhait&eacute;s (t&eacute;l&eacute;phone, adresse, village...)</li>
+      <li>Cliquez sur <strong>&laquo; Enregistrer &raquo;</strong></li>
+    </ol>
+    <div class="warning-box">
+      <strong>Suppression du compte :</strong> En bas de la page &laquo; Mon profil &raquo;, vous pouvez supprimer votre compte.
+      <strong>Cette action est d&eacute;finitive</strong> et supprime toutes vos donn&eacute;es.
+    </div>
+  </section>
+
+  <!-- Consulter le site -->
+  <section class="section" id="site">
+    <h2>Consulter le site communal</h2>
+    <p>Le site de la commune est accessible &agrave; tous, <strong>sans inscription</strong>. Vous y trouverez :</p>
+
+    <div class="card">
+      <h4>La mairie</h4>
+      <p>Horaires d'ouverture, coordonn&eacute;es, &eacute;quipe municipale (maire, adjoints, conseillers), commissions.</p>
+    </div>
+
+    <div class="card">
+      <h4>La commune</h4>
+      <p>Pr&eacute;sentation de Saulzet-le-Froid, ses villages (Le Bourg, Chabannes, Chadrat...), plan d'acc&egrave;s avec carte interactive, associations locales.</p>
+    </div>
+
+    <div class="card">
+      <h4>D&eacute;marches administratives</h4>
+      <p>&Eacute;tat civil, identit&eacute;, urbanisme, d&eacute;marches en ligne.</p>
+    </div>
+
+    <div class="card">
+      <h4>Documents officiels</h4>
+      <p>Proc&egrave;s-verbaux des conseils municipaux, bulletins communaux, PLU, arr&ecirc;t&eacute;s. Vous pouvez les t&eacute;l&eacute;charger librement.</p>
+    </div>
+
+    <div class="card">
+      <h4>Galerie photos</h4>
+      <p>Photos de la commune et de ses &eacute;v&eacute;nements. Cliquez sur une photo pour l'agrandir.</p>
+    </div>
+
+    <div class="card">
+      <h4>Contact</h4>
+      <p>Formulaire de contact pour &eacute;crire &agrave; la mairie. Vous n'avez pas besoin d'&ecirc;tre inscrit pour l'utiliser.</p>
+    </div>
+  </section>
+
+  <!-- Créer une sollicitation -->
+  <section class="section" id="sollicitation">
+    <h2>Envoyer une sollicitation &agrave; vos &eacute;lus</h2>
+    <p>
+      Le c&oelig;ur du module <strong>Saulzet & Vous</strong> : vous pouvez &eacute;crire directement &agrave; vos &eacute;lus
+      pour leur poser une question, proposer une id&eacute;e, ou signaler un probl&egrave;me.
+    </p>
+
+    <h3>Les trois types de sollicitation</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Quand l'utiliser ?</th>
+          <th>Exemples</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Question</strong></td>
+          <td>Vous avez besoin d'une information</td>
+          <td>&laquo; Quand sera r&eacute;par&eacute;e la route du col ? &raquo;</td>
+        </tr>
+        <tr>
+          <td><strong>Id&eacute;e</strong></td>
+          <td>Vous avez une suggestion &agrave; faire</td>
+          <td>&laquo; Installer un banc pr&egrave;s de l'&eacute;glise &raquo;</td>
+        </tr>
+        <tr>
+          <td><strong>Signalement</strong></td>
+          <td>Vous constatez un probl&egrave;me</td>
+          <td>&laquo; Nid de poule dangereux route de Chadrat &raquo;</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>Comment envoyer une sollicitation</h3>
+    <ol class="steps">
+      <li>Connectez-vous &agrave; votre compte</li>
+      <li>Cliquez sur <strong>&laquo; Saulzet & Vous &raquo;</strong> dans le menu, puis sur <strong>&laquo; Nouvelle sollicitation &raquo;</strong></li>
+      <li>Choisissez le <strong>type</strong> : Question, Id&eacute;e ou Signalement</li>
+      <li>R&eacute;digez un <strong>titre clair et court</strong> (par exemple : &laquo; Fuite d'eau chemin des Pratz &raquo;)</li>
+      <li>D&eacute;crivez votre demande en d&eacute;tail dans le champ <strong>description</strong></li>
+      <li><strong>Localisez sur la carte</strong> (facultatif) : cliquez sur la carte pour indiquer l'endroit concern&eacute;</li>
+      <li><strong>Ajoutez des photos</strong> (facultatif) : jusqu'&agrave; 5 photos pour illustrer votre demande</li>
+      <li>Choisissez la <strong>visibilit&eacute;</strong> :
+        <ul style="list-style: disc; padding-left: 1.5rem; margin-top: 0.5rem;">
+          <li><strong>Publique</strong> : votre sollicitation sera visible par les autres habitants inscrits (une fois prise en charge)</li>
+          <li><strong>Priv&eacute;e</strong> : seuls vous et les &eacute;lus pourrez la voir</li>
+        </ul>
+      </li>
+      <li>Cliquez sur <strong>&laquo; Envoyer &raquo;</strong></li>
+    </ol>
+    <div class="info-box">
+      <strong>Conseil :</strong> Soyez pr&eacute;cis dans votre titre et votre description. Cela aidera les &eacute;lus &agrave; traiter votre demande plus rapidement.
+      Les photos sont particuli&egrave;rement utiles pour les signalements (d&eacute;g&acirc;ts, probl&egrave;mes de voirie...).
+    </div>
+  </section>
+
+  <!-- Suivi -->
+  <section class="section" id="suivi">
+    <h2>Suivre mes sollicitations</h2>
+    <p>Apr&egrave;s l'envoi, vous pouvez suivre l'avancement de votre demande.</p>
+
+    <h3>O&ugrave; voir mes sollicitations ?</h3>
+    <p>Cliquez sur <strong>&laquo; Saulzet & Vous &raquo;</strong> dans le menu. Vous verrez la liste de toutes vos sollicitations avec leur statut actuel.</p>
+
+    <h3>Les diff&eacute;rents statuts</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Statut</th>
+          <th>Ce que cela signifie</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="badge badge-new">Nouvelle</span></td>
+          <td>Votre sollicitation a &eacute;t&eacute; envoy&eacute;e. Un &eacute;lu va bient&ocirc;t la prendre en charge.</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-assigned">Affect&eacute;e</span></td>
+          <td>Un &eacute;lu a &eacute;t&eacute; d&eacute;sign&eacute; pour s'en occuper.</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-progress">En cours</span></td>
+          <td>L'&eacute;lu travaille sur votre demande.</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-resolved">R&eacute;solue</span></td>
+          <td>Votre demande a re&ccedil;u une r&eacute;ponse. Consultez la r&eacute;ponse dans le d&eacute;tail de la sollicitation.</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-cancelled">Annul&eacute;e</span></td>
+          <td>La sollicitation a &eacute;t&eacute; annul&eacute;e (par vous ou par un &eacute;lu).</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>Consulter le d&eacute;tail et les commentaires</h3>
+    <p>Cliquez sur une sollicitation pour voir :</p>
+    <ul style="list-style: disc; padding-left: 2rem;">
+      <li>Le <strong>d&eacute;tail complet</strong> de votre demande</li>
+      <li>Les <strong>commentaires</strong> &eacute;chang&eacute;s avec l'&eacute;lu</li>
+      <li>L'<strong>historique des changements</strong> de statut</li>
+      <li>La <strong>r&eacute;ponse finale</strong> lorsque la sollicitation est r&eacute;solue</li>
+    </ul>
+
+    <h3>Le tableau de bord public</h3>
+    <p>
+      Les sollicitations <strong>publiques</strong> prises en charge ou en cours de traitement sont visibles par tous les habitants inscrits
+      dans le <strong>tableau de bord public</strong>. Cela permet de savoir ce qui se passe dans la commune et d'&eacute;viter les doublons.
+    </p>
+  </section>
+
+  <!-- Modifier -->
+  <section class="section" id="modifier">
+    <h2>Modifier ou annuler une sollicitation</h2>
+
+    <h3>Ce que vous pouvez modifier</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>El&eacute;ment</th>
+          <th>Modifiable ?</th>
+          <th>Conditions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Titre et description</td>
+          <td><strong>Non</strong></td>
+          <td>Jamais modifiables apr&egrave;s l'envoi</td>
+        </tr>
+        <tr>
+          <td>Localisation sur la carte</td>
+          <td>Oui</td>
+          <td>Tant que la sollicitation n'est pas r&eacute;solue ou annul&eacute;e</td>
+        </tr>
+        <tr>
+          <td>Photos</td>
+          <td>Oui (ajouter/supprimer)</td>
+          <td>Tant que la sollicitation n'est pas r&eacute;solue ou annul&eacute;e</td>
+        </tr>
+        <tr>
+          <td>Visibilit&eacute; (publique/priv&eacute;e)</td>
+          <td>Oui</td>
+          <td>Uniquement tant que le statut est &laquo; Nouvelle &raquo;</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>Comment modifier</h3>
+    <ol class="steps">
+      <li>Allez dans <strong>&laquo; Saulzet & Vous &raquo;</strong></li>
+      <li>Cliquez sur la sollicitation &agrave; modifier</li>
+      <li>Cliquez sur le bouton <strong>&laquo; Modifier &raquo;</strong></li>
+      <li>Effectuez vos changements</li>
+      <li>Cliquez sur <strong>&laquo; Enregistrer &raquo;</strong></li>
+    </ol>
+
+    <h3>Annuler une sollicitation</h3>
+    <p>
+      Vous pouvez annuler une sollicitation <strong>uniquement si son statut est &laquo; Nouvelle &raquo;</strong>
+      (c'est-&agrave;-dire avant qu'un &eacute;lu ne la prenne en charge).
+    </p>
+    <ol class="steps">
+      <li>Ouvrez la sollicitation concern&eacute;e</li>
+      <li>Cliquez sur le bouton <strong>&laquo; Annuler &raquo;</strong></li>
+      <li>Confirmez l'annulation</li>
+    </ol>
+  </section>
+
+  <!-- Notifications -->
+  <section class="section" id="notifications">
+    <h2>Notifications</h2>
+    <p>Vous &ecirc;tes pr&eacute;venu automatiquement lorsqu'il se passe quelque chose sur vos sollicitations.</p>
+
+    <h3>Notifications sur le site</h3>
+    <p>
+      Une <strong>cloche</strong> appara&icirc;t en haut &agrave; droite de la page avec un <strong>badge rouge</strong>
+      indiquant le nombre de notifications non lues. Cliquez dessus pour les consulter.
+    </p>
+
+    <h3>Notifications par email</h3>
+    <p>Vous recevez aussi des emails quand :</p>
+    <ul style="list-style: disc; padding-left: 2rem;">
+      <li>Le <strong>statut</strong> de votre sollicitation change (affect&eacute;e, en cours, r&eacute;solue...)</li>
+      <li>Un <strong>&eacute;lu a comment&eacute;</strong> votre sollicitation</li>
+    </ul>
+
+    <h3>G&eacute;rer vos pr&eacute;f&eacute;rences email</h3>
+    <p>Si vous ne souhaitez pas recevoir certains emails :</p>
+    <ol class="steps">
+      <li>Cliquez sur la <strong>cloche</strong> en haut de page</li>
+      <li>Cliquez sur <strong>&laquo; Pr&eacute;f&eacute;rences &raquo;</strong></li>
+      <li>D&eacute;cochez les types d'emails que vous ne souhaitez pas recevoir</li>
+      <li>Cliquez sur <strong>&laquo; Enregistrer &raquo;</strong></li>
+    </ol>
+    <div class="info-box">
+      <strong>Note :</strong> M&ecirc;me si vous d&eacute;sactivez les emails, vous continuerez &agrave; recevoir les notifications sur le site (cloche).
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="section" id="faq">
+    <h2>Questions fr&eacute;quentes</h2>
+
+    <div class="card">
+      <h4>Je n'arrive pas &agrave; me connecter, que faire ?</h4>
+      <p>Essayez la connexion par <strong>lien magique</strong> : entrez votre email et cliquez sur &laquo; Recevoir un lien de connexion &raquo;. V&eacute;rifiez votre dossier spam si vous ne recevez pas le lien. Si le probl&egrave;me persiste, contactez la mairie.</p>
+    </div>
+
+    <div class="card">
+      <h4>Mon compte n'est pas encore valid&eacute;</h4>
+      <p>La validation est effectu&eacute;e manuellement par la mairie. Si cela fait plus de 2 jours, contactez la mairie par t&eacute;l&eacute;phone ou via le formulaire de contact du site.</p>
+    </div>
+
+    <div class="card">
+      <h4>Puis-je modifier le titre de ma sollicitation ?</h4>
+      <p>Non. Le titre et la description ne sont pas modifiables apr&egrave;s l'envoi. Prenez le temps de bien les r&eacute;diger avant d'envoyer.</p>
+    </div>
+
+    <div class="card">
+      <h4>Qui peut voir ma sollicitation ?</h4>
+      <p>Si elle est <strong>priv&eacute;e</strong> : uniquement vous et les &eacute;lus. Si elle est <strong>publique</strong> et prise en charge : tous les habitants inscrits peuvent la voir dans le tableau de bord public.</p>
+    </div>
+
+    <div class="card">
+      <h4>Comment savoir si un &eacute;lu a r&eacute;pondu ?</h4>
+      <p>Vous recevrez une <strong>notification</strong> (sur le site et par email). Le statut de votre sollicitation passera &agrave; &laquo; R&eacute;solue &raquo; et la r&eacute;ponse sera visible dans le d&eacute;tail.</p>
+    </div>
+
+    <div class="card">
+      <h4>Quels formats de photos sont accept&eacute;s ?</h4>
+      <p>Les formats JPG, PNG, HEIC (iPhone) et WEBP sont accept&eacute;s. Chaque photo ne doit pas d&eacute;passer <strong>10 Mo</strong>, et vous pouvez en ajouter jusqu'&agrave; <strong>5 par sollicitation</strong>.</p>
+    </div>
+  </section>
+
+</div>
+
+<footer class="doc-footer">
+  Saulzet & Vous &mdash; Guide de l'Habitant &mdash; Mairie de Saulzet-le-Froid
+</footer>
+
+</body>
+</html>

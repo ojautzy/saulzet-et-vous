@@ -26,4 +26,5 @@ urlpatterns = [
     path("inscriptions/<int:pk>/reject/", views.registration_reject_view, name="registration_reject"),
     path("export/", views.export_csv_view, name="export_csv"),
     path("journal/", views.audit_log_view, name="audit_log"),
+    path("documentation/", views.documentation_view, name="documentation"),
 ]

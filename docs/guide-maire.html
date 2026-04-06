@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Guide du Maire — Saulzet & Vous</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Source+Sans+3:wght@300;400;600;700&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --vert-foret: #2D5016;
+      --vert-prairie: #4A7C28;
+      --vert-clair: #7BAE4E;
+      --vert-tres-clair: #E8F3DC;
+      --terre-claire: #C49A2A;
+      --terre: #8B6914;
+      --creme: #FDF8F0;
+      --creme-fonce: #F5EDE0;
+      --encre: #1A1A18;
+      --blanc: #FFFFFF;
+      --gris-pierre: #6B6560;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Source Sans 3', 'Segoe UI', Arial, sans-serif;
+      background: var(--creme);
+      color: var(--encre);
+      font-size: 17px;
+      line-height: 1.75;
+    }
+    .doc-header {
+      background: var(--vert-foret);
+      color: white;
+      padding: 2.5rem 1.5rem;
+      text-align: center;
+    }
+    .doc-header h1 {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 2.2rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+    .doc-header .subtitle { font-size: 1.1rem; opacity: 0.9; }
+
+    .doc-nav {
+      background: var(--blanc);
+      border-bottom: 3px solid var(--vert-tres-clair);
+      padding: 1rem 1.5rem;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    .doc-nav h2 {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 1.1rem;
+      color: var(--vert-foret);
+      margin-bottom: 0.75rem;
+    }
+    .doc-nav ul { list-style: none; display: flex; flex-wrap: wrap; gap: 0.5rem; }
+    .doc-nav a {
+      display: inline-block;
+      background: var(--vert-tres-clair);
+      color: var(--vert-foret);
+      padding: 0.4rem 1rem;
+      border-radius: 2rem;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.95rem;
+      transition: background 0.2s;
+    }
+    .doc-nav a:hover, .doc-nav a:focus { background: var(--vert-prairie); color: white; }
+
+    .doc-content { max-width: 860px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+
+    .section { margin-bottom: 3rem; }
+    .section h2 {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 1.7rem;
+      color: var(--vert-foret);
+      border-bottom: 3px solid var(--vert-clair);
+      padding-bottom: 0.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .section h3 {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 1.25rem;
+      color: var(--vert-prairie);
+      margin: 1.5rem 0 0.75rem;
+    }
+    .section p, .section li {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 1.02rem;
+      line-height: 1.85;
+      margin-bottom: 0.6rem;
+    }
+
+    .steps { counter-reset: step; list-style: none; padding: 0; }
+    .steps li {
+      counter-increment: step;
+      position: relative;
+      padding-left: 3.5rem;
+      margin-bottom: 1.2rem;
+      min-height: 2.5rem;
+    }
+    .steps li::before {
+      content: counter(step);
+      position: absolute;
+      left: 0; top: 0;
+      width: 2.5rem; height: 2.5rem;
+      background: var(--vert-foret);
+      color: white;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 1.1rem;
+      font-family: 'Source Sans 3', sans-serif;
+    }
+
+    .info-box {
+      background: var(--vert-tres-clair);
+      border-left: 4px solid var(--vert-clair);
+      padding: 1.2rem 1.5rem;
+      border-radius: 0 0.75rem 0.75rem 0;
+      margin: 1.5rem 0;
+    }
+    .info-box strong { color: var(--vert-foret); }
+    .warning-box {
+      background: #FFF8E1;
+      border-left: 4px solid var(--terre-claire);
+      padding: 1.2rem 1.5rem;
+      border-radius: 0 0.75rem 0.75rem 0;
+      margin: 1.5rem 0;
+    }
+    .warning-box strong { color: var(--terre); }
+
+    .card {
+      background: var(--blanc);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      margin: 1rem 0;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+    .card h4 {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 1.12rem;
+      color: var(--vert-foret);
+      margin-bottom: 0.5rem;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 0.2rem 0.75rem;
+      border-radius: 1rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      font-family: 'Source Sans 3', sans-serif;
+    }
+    .badge-new { background: #DBEAFE; color: #1D4ED8; }
+    .badge-assigned { background: #FEF3C7; color: #92400E; }
+    .badge-progress { background: #E0E7FF; color: #4338CA; }
+    .badge-resolved { background: var(--vert-tres-clair); color: var(--vert-foret); }
+    .badge-orphan { background: #FEE2E2; color: #991B1B; }
+
+    table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 0.98rem; }
+    th, td { text-align: left; padding: 0.75rem 1rem; border-bottom: 1px solid var(--creme-fonce); }
+    th { background: var(--vert-tres-clair); color: var(--vert-foret); font-weight: 600; font-family: 'Source Sans 3', sans-serif; }
+    tr:hover { background: var(--creme-fonce); }
+
+    .doc-footer {
+      background: var(--vert-foret);
+      color: white;
+      text-align: center;
+      padding: 1.5rem;
+      font-size: 0.9rem;
+      opacity: 0.9;
+    }
+
+    @media print {
+      .doc-nav { display: none; }
+      body { font-size: 13px; }
+      .doc-header { padding: 1rem; }
+      .section { page-break-inside: avoid; }
+    }
+    @media (max-width: 640px) {
+      body { font-size: 15px; }
+      .doc-header h1 { font-size: 1.5rem; }
+      .section h2 { font-size: 1.3rem; }
+      .doc-content { padding: 1rem; }
+      .doc-nav ul { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+
+<header class="doc-header">
+  <h1>Guide du Maire</h1>
+  <div class="subtitle">Saulzet & Vous — Pilotage et supervision de la plateforme participative</div>
+</header>
+
+<nav class="doc-nav" aria-label="Sommaire">
+  <h2>Sommaire</h2>
+  <ul>
+    <li><a href="#role">Votre r&ocirc;le</a></li>
+    <li><a href="#dashboard-elu">Tableau de bord &eacute;lu</a></li>
+    <li><a href="#dashboard-maire">Tableau de bord maire</a></li>
+    <li><a href="#affecter">Affecter les sollicitations</a></li>
+    <li><a href="#inscriptions">Valider les inscriptions</a></li>
+    <li><a href="#orphelines">Sollicitations orphelines</a></li>
+    <li><a href="#statistiques">Statistiques</a></li>
+    <li><a href="#export">Export des donn&eacute;es</a></li>
+    <li><a href="#traiter">Traiter comme un &eacute;lu</a></li>
+    <li><a href="#notifications">Notifications</a></li>
+  </ul>
+</nav>
+
+<div class="doc-content">
+
+  <!-- Rôle -->
+  <section class="section" id="role">
+    <h2>Votre r&ocirc;le en tant que maire</h2>
+    <p>
+      En tant que maire, vous disposez de <strong>toutes les fonctionnalit&eacute;s d'un conseiller municipal</strong>
+      (prendre en charge, commenter, r&eacute;soudre...) plus des <strong>fonctions de pilotage</strong> sp&eacute;cifiques :
+    </p>
+    <ul style="list-style: disc; padding-left: 2rem;">
+      <li><strong>Affecter</strong> les sollicitations &agrave; n'importe quel &eacute;lu (pas seulement &agrave; vous-m&ecirc;me)</li>
+      <li><strong>Valider ou refuser</strong> les inscriptions des nouveaux habitants</li>
+      <li><strong>Superviser</strong> la charge de travail des &eacute;lus</li>
+      <li><strong>D&eacute;tecter</strong> les sollicitations orphelines (non prises en charge)</li>
+      <li><strong>Consulter</strong> les statistiques globales de la plateforme</li>
+      <li><strong>Exporter</strong> les donn&eacute;es en CSV</li>
+    </ul>
+  </section>
+
+  <!-- Tableau de bord élu -->
+  <section class="section" id="dashboard-elu">
+    <h2>Tableau de bord des &eacute;lus</h2>
+    <p>
+      Comme les conseillers, vous acc&eacute;dez au <strong>tableau de bord g&eacute;n&eacute;ral</strong> et &agrave; l'onglet
+      <strong>&laquo; Mes t&acirc;ches &raquo;</strong> pour traiter les sollicitations qui vous sont affect&eacute;es.
+    </p>
+    <p>
+      Consultez le <strong>Guide du Conseiller Municipal</strong> pour le d&eacute;tail de ces fonctionnalit&eacute;s
+      (prise en charge, changement de statut, commentaires, r&eacute;solution).
+    </p>
+  </section>
+
+  <!-- Tableau de bord maire -->
+  <section class="section" id="dashboard-maire">
+    <h2>Tableau de bord du maire</h2>
+    <p>
+      Le <strong>tableau de bord du maire</strong> est votre outil de pilotage. Il est accessible via le menu
+      <strong>&laquo; Tableau de bord &raquo; &rarr; &laquo; Vue maire &raquo;</strong>.
+    </p>
+    <p>Il affiche :</p>
+
+    <div class="card">
+      <h4>Indicateurs globaux</h4>
+      <p>
+        Le nombre total de sollicitations par statut : nouvelles, affect&eacute;es, en cours, r&eacute;solues, annul&eacute;es.
+        Cela vous donne une vue d'ensemble imm&eacute;diate de l'activit&eacute; sur la plateforme.
+      </p>
+    </div>
+
+    <div class="card">
+      <h4>Charge de travail par &eacute;lu</h4>
+      <p>
+        Un tableau r&eacute;capitulant pour chaque &eacute;lu le nombre de sollicitations affect&eacute;es,
+        en cours, et r&eacute;solues. Cela vous permet de r&eacute;partir &eacute;quitablement le travail
+        et d'identifier les &eacute;lus surcharg&eacute;s.
+      </p>
+    </div>
+
+    <div class="card">
+      <h4>Sollicitations orphelines</h4>
+      <p>
+        Les sollicitations au statut <span class="badge badge-new">Nouvelle</span> depuis plus de
+        <strong>7 jours</strong> (par d&eacute;faut) sont signal&eacute;es en rouge.
+        Ce sont des demandes d'habitants qui n'ont pas encore &eacute;t&eacute; prises en charge.
+      </p>
+    </div>
+  </section>
+
+  <!-- Affecter -->
+  <section class="section" id="affecter">
+    <h2>Affecter une sollicitation &agrave; un &eacute;lu</h2>
+    <p>
+      Contrairement aux conseillers (qui ne peuvent que se prendre eux-m&ecirc;mes en charge),
+      le maire peut <strong>d&eacute;signer n'importe quel &eacute;lu</strong> pour traiter une sollicitation.
+    </p>
+    <ol class="steps">
+      <li>Ouvrez la sollicitation dans le tableau de bord</li>
+      <li>Dans la section <strong>&laquo; Affectation &raquo;</strong>, s&eacute;lectionnez l'&eacute;lu &agrave; qui confier la demande</li>
+      <li>Cliquez sur <strong>&laquo; Affecter &raquo;</strong></li>
+    </ol>
+    <p>L'&eacute;lu d&eacute;sign&eacute; re&ccedil;oit une notification et l'habitant est inform&eacute; que sa demande a &eacute;t&eacute; prise en charge.</p>
+
+    <div class="info-box">
+      <strong>Conseil :</strong> Consultez la <strong>charge de travail</strong> dans le tableau de bord du maire
+      avant d'affecter, pour &eacute;viter de surcharger un &eacute;lu en particulier.
+    </div>
+
+    <h3>R&eacute;affecter une sollicitation</h3>
+    <p>
+      Vous pouvez &eacute;galement <strong>r&eacute;affecter</strong> une sollicitation d&eacute;j&agrave; prise en charge
+      &agrave; un autre &eacute;lu. La proc&eacute;dure est la m&ecirc;me : ouvrez la sollicitation et choisissez un nouvel &eacute;lu.
+    </p>
+  </section>
+
+  <!-- Inscriptions -->
+  <section class="section" id="inscriptions">
+    <h2>Valider les inscriptions des habitants</h2>
+    <p>
+      Chaque nouvel habitant qui cr&eacute;e un compte doit &ecirc;tre <strong>approuv&eacute;</strong>
+      avant de pouvoir utiliser le module participatif. Cela garantit que seuls les v&eacute;ritables
+      habitants de la commune y acc&egrave;dent.
+    </p>
+
+    <h3>Comment valider</h3>
+    <ol class="steps">
+      <li>Rendez-vous dans <strong>&laquo; Tableau de bord &raquo; &rarr; &laquo; Inscriptions &raquo;</strong></li>
+      <li>Vous voyez la liste des comptes en attente avec le nom, l'email, le village et la date d'inscription</li>
+      <li>Pour chaque inscription :
+        <ul style="list-style: disc; padding-left: 1.5rem; margin-top: 0.5rem;">
+          <li>Cliquez sur <strong>&laquo; Approuver &raquo;</strong> si vous reconnaissez l'habitant</li>
+          <li>Cliquez sur <strong>&laquo; Refuser &raquo;</strong> si l'inscription semble suspecte</li>
+        </ul>
+      </li>
+    </ol>
+    <p>L'habitant approuv&eacute; re&ccedil;oit un email de confirmation et peut imm&eacute;diatement utiliser la plateforme.</p>
+
+    <div class="warning-box">
+      <strong>Attention :</strong> Le refus <strong>supprime d&eacute;finitivement</strong> le compte de l'inscrit.
+      En cas de doute, il est pr&eacute;f&eacute;rable de contacter la personne avant de refuser.
+    </div>
+  </section>
+
+  <!-- Orphelines -->
+  <section class="section" id="orphelines">
+    <h2>Sollicitations orphelines et relances</h2>
+    <p>
+      Une sollicitation est dite <strong>&laquo; orpheline &raquo;</strong> lorsqu'elle reste au statut
+      <span class="badge badge-new">Nouvelle</span> pendant plus de 7 jours sans qu'aucun &eacute;lu
+      ne la prenne en charge.
+    </p>
+
+    <h3>O&ugrave; les voir ?</h3>
+    <p>
+      Le tableau de bord du maire affiche une section d&eacute;di&eacute;e
+      <strong>&laquo; Sollicitations orphelines &raquo;</strong> avec un indicateur
+      <span class="badge badge-orphan">visuel rouge</span>.
+    </p>
+
+    <h3>Que faire ?</h3>
+    <ul style="list-style: disc; padding-left: 2rem;">
+      <li><strong>Affecter</strong> la sollicitation &agrave; un &eacute;lu comp&eacute;tent</li>
+      <li>Ou la <strong>prendre en charge vous-m&ecirc;me</strong></li>
+    </ul>
+
+    <h3>Relances automatiques</h3>
+    <p>
+      Le syst&egrave;me envoie automatiquement des <strong>emails de rappel</strong> aux &eacute;lus
+      pour les sollicitations non prises en charge. L'intervalle de rappel est configurable
+      dans les param&egrave;tres du site (par d&eacute;faut : 7 jours entre chaque relance).
+    </p>
+  </section>
+
+  <!-- Statistiques -->
+  <section class="section" id="statistiques">
+    <h2>Statistiques</h2>
+    <p>Le tableau de bord du maire affiche des statistiques pour vous aider &agrave; piloter :</p>
+
+    <div class="card">
+      <h4>Temps moyen de r&eacute;solution</h4>
+      <p>Combien de temps en moyenne entre l'envoi d'une sollicitation et sa r&eacute;solution.</p>
+    </div>
+
+    <div class="card">
+      <h4>R&eacute;partition par type</h4>
+      <p>Proportion de questions, id&eacute;es et signalements. Permet de voir quels types de demandes sont les plus fr&eacute;quents.</p>
+    </div>
+
+    <div class="card">
+      <h4>R&eacute;partition par village</h4>
+      <p>D'o&ugrave; viennent les sollicitations (Le Bourg, Chabannes, Chadrat...). Utile pour d&eacute;tecter des probl&egrave;mes localis&eacute;s.</p>
+    </div>
+
+    <div class="card">
+      <h4>&Eacute;volution mensuelle</h4>
+      <p>Graphique montrant le nombre de sollicitations cr&eacute;&eacute;es chaque mois sur les 6 derniers mois.</p>
+    </div>
+  </section>
+
+  <!-- Export -->
+  <section class="section" id="export">
+    <h2>Exporter les donn&eacute;es</h2>
+    <p>
+      Vous pouvez exporter l'ensemble des sollicitations au format <strong>CSV</strong>
+      (compatible Excel, LibreOffice Calc).
+    </p>
+    <ol class="steps">
+      <li>Rendez-vous dans <strong>&laquo; Tableau de bord &raquo; &rarr; &laquo; Export &raquo;</strong></li>
+      <li>Filtrez si n&eacute;cessaire par <strong>statut</strong> ou <strong>p&eacute;riode</strong></li>
+      <li>Cliquez sur <strong>&laquo; Exporter en CSV &raquo;</strong></li>
+      <li>Le fichier se t&eacute;l&eacute;charge sur votre ordinateur</li>
+    </ol>
+    <p>Le fichier CSV contient :</p>
+    <table>
+      <thead><tr><th>Colonne</th><th>Contenu</th></tr></thead>
+      <tbody>
+        <tr><td>ID</td><td>Identifiant unique de la sollicitation</td></tr>
+        <tr><td>Titre</td><td>Intitul&eacute; de la demande</td></tr>
+        <tr><td>Type</td><td>Question, id&eacute;e ou signalement</td></tr>
+        <tr><td>Statut</td><td>Nouvelle, affect&eacute;e, en cours, r&eacute;solue, annul&eacute;e</td></tr>
+        <tr><td>Auteur</td><td>Nom de l'habitant</td></tr>
+        <tr><td>Village</td><td>Village de l'auteur</td></tr>
+        <tr><td>Affect&eacute; &agrave;</td><td>Nom de l'&eacute;lu responsable</td></tr>
+        <tr><td>Dates</td><td>Cr&eacute;ation, affectation, r&eacute;solution</td></tr>
+        <tr><td>Visibilit&eacute;</td><td>Publique ou priv&eacute;e</td></tr>
+      </tbody>
+    </table>
+    <div class="info-box">
+      <strong>Astuce :</strong> L'export CSV est utile pour pr&eacute;parer un bilan pour le conseil municipal
+      ou pour analyser les demandes re&ccedil;ues sur une p&eacute;riode donn&eacute;e.
+    </div>
+  </section>
+
+  <!-- Traiter comme un élu -->
+  <section class="section" id="traiter">
+    <h2>Traiter les sollicitations</h2>
+    <p>
+      En plus de vos fonctions de pilotage, vous pouvez traiter les sollicitations exactement comme un conseiller :
+      prendre en charge, commenter, passer en cours, r&eacute;soudre, basculer la visibilit&eacute;.
+    </p>
+    <p>
+      Consultez le <strong>Guide du Conseiller Municipal</strong> pour le d&eacute;tail de ces op&eacute;rations.
+    </p>
+  </section>
+
+  <!-- Notifications -->
+  <section class="section" id="notifications">
+    <h2>Notifications</h2>
+    <p>En tant que maire, vous recevez les m&ecirc;mes notifications que les conseillers, plus :</p>
+    <table>
+      <thead><tr><th>&Eacute;v&eacute;nement</th><th>Notification</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>Chaque nouvelle sollicitation d'un habitant</td>
+          <td>Notification + email</td>
+        </tr>
+        <tr>
+          <td>Nouvelle inscription en attente de validation</td>
+          <td>Notification + email</td>
+        </tr>
+        <tr>
+          <td>Sollicitation affect&eacute;e au maire</td>
+          <td>Notification + email</td>
+        </tr>
+        <tr>
+          <td>Commentaire sur une sollicitation dont vous &ecirc;tes responsable</td>
+          <td>Notification + email</td>
+        </tr>
+        <tr>
+          <td>Relance pour sollicitations orphelines</td>
+          <td>Email de rappel</td>
+        </tr>
+      </tbody>
+    </table>
+    <p>
+      Vous pouvez g&eacute;rer vos pr&eacute;f&eacute;rences d'email via la <strong>cloche</strong>
+      &rarr; <strong>&laquo; Pr&eacute;f&eacute;rences &raquo;</strong>.
+    </p>
+  </section>
+
+</div>
+
+<footer class="doc-footer">
+  Saulzet & Vous &mdash; Guide du Maire &mdash; Mairie de Saulzet-le-Froid
+</footer>
+
+</body>
+</html>

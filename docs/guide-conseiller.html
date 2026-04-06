@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Guide du Conseiller Municipal — Saulzet & Vous</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Source+Sans+3:wght@300;400;600;700&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --vert-foret: #2D5016;
+      --vert-prairie: #4A7C28;
+      --vert-clair: #7BAE4E;
+      --vert-tres-clair: #E8F3DC;
+      --terre-claire: #C49A2A;
+      --terre: #8B6914;
+      --creme: #FDF8F0;
+      --creme-fonce: #F5EDE0;
+      --encre: #1A1A18;
+      --blanc: #FFFFFF;
+      --gris-pierre: #6B6560;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Source Sans 3', 'Segoe UI', Arial, sans-serif;
+      background: var(--creme);
+      color: var(--encre);
+      font-size: 17px;
+      line-height: 1.75;
+    }
+    .doc-header {
+      background: var(--vert-foret);
+      color: white;
+      padding: 2.5rem 1.5rem;
+      text-align: center;
+    }
+    .doc-header h1 {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 2.2rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+    .doc-header .subtitle { font-size: 1.1rem; opacity: 0.9; }
+
+    .doc-nav {
+      background: var(--blanc);
+      border-bottom: 3px solid var(--vert-tres-clair);
+      padding: 1rem 1.5rem;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    .doc-nav h2 {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 1.1rem;
+      color: var(--vert-foret);
+      margin-bottom: 0.75rem;
+    }
+    .doc-nav ul { list-style: none; display: flex; flex-wrap: wrap; gap: 0.5rem; }
+    .doc-nav a {
+      display: inline-block;
+      background: var(--vert-tres-clair);
+      color: var(--vert-foret);
+      padding: 0.4rem 1rem;
+      border-radius: 2rem;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.95rem;
+      transition: background 0.2s;
+    }
+    .doc-nav a:hover, .doc-nav a:focus { background: var(--vert-prairie); color: white; }
+
+    .doc-content { max-width: 860px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+
+    .section { margin-bottom: 3rem; }
+    .section h2 {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 1.7rem;
+      color: var(--vert-foret);
+      border-bottom: 3px solid var(--vert-clair);
+      padding-bottom: 0.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .section h3 {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 1.25rem;
+      color: var(--vert-prairie);
+      margin: 1.5rem 0 0.75rem;
+    }
+    .section p, .section li {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 1.02rem;
+      line-height: 1.85;
+      margin-bottom: 0.6rem;
+    }
+
+    .steps { counter-reset: step; list-style: none; padding: 0; }
+    .steps li {
+      counter-increment: step;
+      position: relative;
+      padding-left: 3.5rem;
+      margin-bottom: 1.2rem;
+      min-height: 2.5rem;
+    }
+    .steps li::before {
+      content: counter(step);
+      position: absolute;
+      left: 0; top: 0;
+      width: 2.5rem; height: 2.5rem;
+      background: var(--vert-foret);
+      color: white;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 1.1rem;
+      font-family: 'Source Sans 3', sans-serif;
+    }
+
+    .info-box {
+      background: var(--vert-tres-clair);
+      border-left: 4px solid var(--vert-clair);
+      padding: 1.2rem 1.5rem;
+      border-radius: 0 0.75rem 0.75rem 0;
+      margin: 1.5rem 0;
+    }
+    .info-box strong { color: var(--vert-foret); }
+    .warning-box {
+      background: #FFF8E1;
+      border-left: 4px solid var(--terre-claire);
+      padding: 1.2rem 1.5rem;
+      border-radius: 0 0.75rem 0.75rem 0;
+      margin: 1.5rem 0;
+    }
+    .warning-box strong { color: var(--terre); }
+
+    .card {
+      background: var(--blanc);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      margin: 1rem 0;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+    .card h4 {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 1.12rem;
+      color: var(--vert-foret);
+      margin-bottom: 0.5rem;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 0.2rem 0.75rem;
+      border-radius: 1rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      font-family: 'Source Sans 3', sans-serif;
+    }
+    .badge-new { background: #DBEAFE; color: #1D4ED8; }
+    .badge-assigned { background: #FEF3C7; color: #92400E; }
+    .badge-progress { background: #E0E7FF; color: #4338CA; }
+    .badge-resolved { background: var(--vert-tres-clair); color: var(--vert-foret); }
+
+    table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 0.98rem; }
+    th, td { text-align: left; padding: 0.75rem 1rem; border-bottom: 1px solid var(--creme-fonce); }
+    th { background: var(--vert-tres-clair); color: var(--vert-foret); font-weight: 600; font-family: 'Source Sans 3', sans-serif; }
+    tr:hover { background: var(--creme-fonce); }
+
+    .doc-footer {
+      background: var(--vert-foret);
+      color: white;
+      text-align: center;
+      padding: 1.5rem;
+      font-size: 0.9rem;
+      opacity: 0.9;
+    }
+
+    @media print {
+      .doc-nav { display: none; }
+      body { font-size: 13px; }
+      .doc-header { padding: 1rem; }
+      .section { page-break-inside: avoid; }
+    }
+    @media (max-width: 640px) {
+      body { font-size: 15px; }
+      .doc-header h1 { font-size: 1.5rem; }
+      .section h2 { font-size: 1.3rem; }
+      .doc-content { padding: 1rem; }
+      .doc-nav ul { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+
+<header class="doc-header">
+  <h1>Guide du Conseiller Municipal</h1>
+  <div class="subtitle">Saulzet & Vous — Traitement des sollicitations citoyennes</div>
+</header>
+
+<nav class="doc-nav" aria-label="Sommaire">
+  <h2>Sommaire</h2>
+  <ul>
+    <li><a href="#role">Votre r&ocirc;le</a></li>
+    <li><a href="#connexion">Connexion</a></li>
+    <li><a href="#dashboard">Tableau de bord</a></li>
+    <li><a href="#prendre-en-charge">Prendre en charge</a></li>
+    <li><a href="#traiter">Traiter une sollicitation</a></li>
+    <li><a href="#commenter">Commenter</a></li>
+    <li><a href="#resoudre">R&eacute;soudre</a></li>
+    <li><a href="#visibilite">Visibilit&eacute;</a></li>
+    <li><a href="#notifications">Notifications</a></li>
+    <li><a href="#bonnes-pratiques">Bonnes pratiques</a></li>
+  </ul>
+</nav>
+
+<div class="doc-content">
+
+  <!-- Rôle -->
+  <section class="section" id="role">
+    <h2>Votre r&ocirc;le en tant que conseiller</h2>
+    <p>
+      En tant que conseiller municipal, vous avez acc&egrave;s au <strong>tableau de bord des &eacute;lus</strong>
+      qui vous permet de traiter les sollicitations envoy&eacute;es par les habitants de Saulzet-le-Froid.
+    </p>
+    <p>Concr&egrave;tement, vous pouvez :</p>
+    <ul style="list-style: disc; padding-left: 2rem;">
+      <li><strong>Prendre en charge</strong> une sollicitation (vous l'attribuer &agrave; vous-m&ecirc;me)</li>
+      <li><strong>Changer le statut</strong> (en cours, r&eacute;solue)</li>
+      <li><strong>Commenter</strong> pour &eacute;changer avec l'habitant</li>
+      <li><strong>R&eacute;pondre</strong> &agrave; l'habitant et cl&ocirc;turer la sollicitation</li>
+      <li><strong>Basculer la visibilit&eacute;</strong> entre public et priv&eacute;</li>
+      <li><strong>R&eacute;affecter</strong> une sollicitation &agrave; un autre &eacute;lu</li>
+    </ul>
+    <div class="info-box">
+      <strong>Diff&eacute;rence avec le maire :</strong> Le maire a des fonctionnalit&eacute;s suppl&eacute;mentaires :
+      il peut <strong>affecter</strong> une sollicitation &agrave; n'importe quel &eacute;lu (pas seulement &agrave; lui-m&ecirc;me),
+      valider les inscriptions des habitants, exporter les donn&eacute;es, et voir des statistiques globales.
+    </div>
+  </section>
+
+  <!-- Connexion -->
+  <section class="section" id="connexion">
+    <h2>Se connecter</h2>
+    <p>La connexion fonctionne comme pour les habitants :</p>
+    <ol class="steps">
+      <li>Rendez-vous sur <strong>saulzet-le-froid.com</strong></li>
+      <li>Cliquez sur <strong>&laquo; Connexion &raquo;</strong> en haut &agrave; droite</li>
+      <li>Utilisez le <strong>lien magique</strong> (entrez votre email, recevez un lien) ou votre <strong>mot de passe</strong></li>
+    </ol>
+    <p>
+      Une fois connect&eacute;, le menu affiche un lien suppl&eacute;mentaire :
+      <strong>&laquo; Tableau de bord &raquo;</strong> qui vous donne acc&egrave;s &agrave; l'espace &eacute;lus.
+    </p>
+  </section>
+
+  <!-- Tableau de bord -->
+  <section class="section" id="dashboard">
+    <h2>Le tableau de bord</h2>
+    <p>Le tableau de bord est votre espace de travail principal. Il pr&eacute;sente :</p>
+
+    <div class="card">
+      <h4>Vue d'ensemble</h4>
+      <p>
+        Toutes les sollicitations des habitants, avec des <strong>compteurs par statut</strong>
+        (nouvelles, affect&eacute;es, en cours, r&eacute;solues). Vous pouvez filtrer par type
+        (question, id&eacute;e, signalement), par statut, ou par &eacute;lu responsable.
+      </p>
+    </div>
+
+    <div class="card">
+      <h4>Mes t&acirc;ches</h4>
+      <p>
+        L'onglet <strong>&laquo; Mes t&acirc;ches &raquo;</strong> affiche uniquement les sollicitations
+        qui vous sont <strong>personnellement affect&eacute;es</strong> et qui sont en attente de traitement
+        (affect&eacute;es ou en cours).
+      </p>
+    </div>
+
+    <h3>Les statuts des sollicitations</h3>
+    <table>
+      <thead>
+        <tr><th>Statut</th><th>Signification</th><th>Votre action possible</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="badge badge-new">Nouvelle</span></td>
+          <td>Vient d'&ecirc;tre envoy&eacute;e par un habitant</td>
+          <td>La prendre en charge</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-assigned">Affect&eacute;e</span></td>
+          <td>Un &eacute;lu s'en occupe</td>
+          <td>Passer &laquo; en cours &raquo;, commenter, r&eacute;soudre</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-progress">En cours</span></td>
+          <td>Le traitement est en cours</td>
+          <td>Commenter, r&eacute;soudre</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-resolved">R&eacute;solue</span></td>
+          <td>R&eacute;ponse donn&eacute;e &agrave; l'habitant</td>
+          <td>Consultation uniquement</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- Prendre en charge -->
+  <section class="section" id="prendre-en-charge">
+    <h2>Prendre en charge une sollicitation</h2>
+    <p>
+      Lorsqu'un habitant envoie une sollicitation, elle appara&icirc;t avec le statut
+      <span class="badge badge-new">Nouvelle</span>. Un &eacute;lu doit s'en saisir.
+    </p>
+    <ol class="steps">
+      <li>Dans le tableau de bord, rep&eacute;rez les sollicitations avec le statut <span class="badge badge-new">Nouvelle</span></li>
+      <li>Cliquez sur la sollicitation pour voir son d&eacute;tail</li>
+      <li>Lisez attentivement la demande de l'habitant</li>
+      <li>Cliquez sur le bouton <strong>&laquo; Prendre en charge &raquo;</strong></li>
+    </ol>
+    <p>
+      La sollicitation passe au statut <span class="badge badge-assigned">Affect&eacute;e</span>
+      et appara&icirc;t d&eacute;sormais dans votre onglet <strong>&laquo; Mes t&acirc;ches &raquo;</strong>.
+    </p>
+    <div class="info-box">
+      <strong>Bon &agrave; savoir :</strong> L'habitant re&ccedil;oit automatiquement une notification lui indiquant qu'un &eacute;lu s'occupe de sa demande.
+    </div>
+  </section>
+
+  <!-- Traiter -->
+  <section class="section" id="traiter">
+    <h2>Traiter une sollicitation</h2>
+
+    <h3>Passer en &laquo; En cours &raquo;</h3>
+    <p>
+      Lorsque vous commencez &agrave; travailler sur une sollicitation qui vous est affect&eacute;e,
+      indiquez-le en changeant le statut :
+    </p>
+    <ol class="steps">
+      <li>Ouvrez la sollicitation dans le tableau de bord</li>
+      <li>Cliquez sur le bouton <strong>&laquo; Passer en cours &raquo;</strong></li>
+      <li>Ajoutez &eacute;ventuellement un <strong>commentaire</strong> pour pr&eacute;ciser ce que vous faites</li>
+    </ol>
+    <p>L'habitant est notifi&eacute; du changement de statut.</p>
+
+    <h3>R&eacute;affecter &agrave; un autre &eacute;lu</h3>
+    <p>
+      Si vous r&eacute;alisez que la sollicitation rel&egrave;ve davantage d'un autre &eacute;lu
+      (par exemple, un dossier li&eacute; &agrave; la voirie alors que vous &ecirc;tes en charge de l'urbanisme) :
+    </p>
+    <ol class="steps">
+      <li>Ouvrez la sollicitation</li>
+      <li>Cliquez sur <strong>&laquo; R&eacute;affecter &raquo;</strong></li>
+      <li>S&eacute;lectionnez l'&eacute;lu concern&eacute; dans la liste</li>
+      <li>Validez</li>
+    </ol>
+    <div class="warning-box">
+      <strong>Attention :</strong> La r&eacute;affectation remet le statut &agrave; &laquo; Affect&eacute;e &raquo;.
+      Le nouvel &eacute;lu re&ccedil;oit une notification.
+    </div>
+  </section>
+
+  <!-- Commenter -->
+  <section class="section" id="commenter">
+    <h2>Commenter et &eacute;changer avec l'habitant</h2>
+    <p>
+      Vous pouvez &eacute;changer avec l'habitant via les <strong>commentaires</strong>.
+      C'est utile pour demander des pr&eacute;cisions, informer de l'avancement, ou partager des informations.
+    </p>
+    <ol class="steps">
+      <li>Ouvrez la sollicitation</li>
+      <li>Faites d&eacute;filer vers le bas jusqu'&agrave; la section <strong>&laquo; Commentaires &raquo;</strong></li>
+      <li>R&eacute;digez votre message</li>
+      <li>Cliquez sur <strong>&laquo; Envoyer &raquo;</strong></li>
+    </ol>
+    <p>L'habitant re&ccedil;oit une notification (sur le site et par email) pour chaque nouveau commentaire.</p>
+    <div class="info-box">
+      <strong>Conseil :</strong> R&eacute;pondez dans un langage simple et courtois. Les habitants ne sont pas forc&eacute;ment familiers
+      avec le jargon administratif. Privil&eacute;giez des r&eacute;ponses claires et concr&egrave;tes.
+    </div>
+  </section>
+
+  <!-- Résoudre -->
+  <section class="section" id="resoudre">
+    <h2>R&eacute;soudre une sollicitation</h2>
+    <p>
+      Lorsque vous avez trait&eacute; la demande et souhaitez donner une <strong>r&eacute;ponse d&eacute;finitive</strong> &agrave; l'habitant :
+    </p>
+    <ol class="steps">
+      <li>Ouvrez la sollicitation</li>
+      <li>Cliquez sur le bouton <strong>&laquo; R&eacute;soudre &raquo;</strong></li>
+      <li>R&eacute;digez votre <strong>r&eacute;ponse &agrave; l'habitant</strong> dans le champ pr&eacute;vu (ce champ est <strong>obligatoire</strong>)</li>
+      <li>Validez</li>
+    </ol>
+    <div class="warning-box">
+      <strong>Important :</strong> La r&eacute;ponse que vous r&eacute;digez ici est la <strong>r&eacute;ponse officielle</strong>
+      qui sera affich&eacute;e &agrave; l'habitant. Prenez le temps de la r&eacute;diger clairement.
+      Si la sollicitation est publique, cette r&eacute;ponse sera visible par tous les habitants inscrits.
+    </div>
+    <p>
+      La sollicitation passe au statut <span class="badge badge-resolved">R&eacute;solue</span>.
+      L'habitant re&ccedil;oit un email avec votre r&eacute;ponse.
+    </p>
+  </section>
+
+  <!-- Visibilité -->
+  <section class="section" id="visibilite">
+    <h2>G&eacute;rer la visibilit&eacute; (public / priv&eacute;)</h2>
+    <p>
+      Chaque sollicitation peut &ecirc;tre <strong>publique</strong> ou <strong>priv&eacute;e</strong>.
+    </p>
+    <table>
+      <thead>
+        <tr><th>Visibilit&eacute;</th><th>Qui peut voir ?</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Publique</strong></td>
+          <td>L'auteur, tous les &eacute;lus, et tous les habitants inscrits (dans le tableau de bord public, une fois prise en charge)</td>
+        </tr>
+        <tr>
+          <td><strong>Priv&eacute;e</strong></td>
+          <td>L'auteur et les &eacute;lus uniquement</td>
+        </tr>
+      </tbody>
+    </table>
+    <p>En tant qu'&eacute;lu, vous pouvez <strong>&agrave; tout moment</strong> basculer la visibilit&eacute; :</p>
+    <ol class="steps">
+      <li>Ouvrez la sollicitation</li>
+      <li>Cliquez sur le bouton <strong>&laquo; Rendre publique &raquo;</strong> ou <strong>&laquo; Rendre priv&eacute;e &raquo;</strong></li>
+    </ol>
+    <div class="info-box">
+      <strong>Quand rendre publique ?</strong> Les questions d'int&eacute;r&ecirc;t g&eacute;n&eacute;ral (voirie, &eacute;quipements, vie communale)
+      gagnent &agrave; &ecirc;tre publiques pour informer tous les habitants. Les demandes personnelles (aide individuelle, questions priv&eacute;es)
+      doivent rester priv&eacute;es.
+    </div>
+  </section>
+
+  <!-- Notifications -->
+  <section class="section" id="notifications">
+    <h2>Notifications</h2>
+    <p>Vous &ecirc;tes notifi&eacute; automatiquement dans les cas suivants :</p>
+    <table>
+      <thead>
+        <tr><th>&Eacute;v&eacute;nement</th><th>Notification</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Un habitant envoie une nouvelle sollicitation</td>
+          <td>Notification sur le site + email</td>
+        </tr>
+        <tr>
+          <td>Une sollicitation vous est affect&eacute;e</td>
+          <td>Notification sur le site + email</td>
+        </tr>
+        <tr>
+          <td>Un habitant commente une sollicitation dont vous &ecirc;tes responsable</td>
+          <td>Notification sur le site + email</td>
+        </tr>
+        <tr>
+          <td>Relance pour une sollicitation non prise en charge</td>
+          <td>Email de rappel</td>
+        </tr>
+      </tbody>
+    </table>
+    <p>
+      La <strong>cloche</strong> en haut &agrave; droite indique vos notifications non lues.
+      Vous pouvez g&eacute;rer vos pr&eacute;f&eacute;rences email dans
+      <strong>&laquo; Notifications &raquo; &rarr; &laquo; Pr&eacute;f&eacute;rences &raquo;</strong>.
+    </p>
+  </section>
+
+  <!-- Bonnes pratiques -->
+  <section class="section" id="bonnes-pratiques">
+    <h2>Bonnes pratiques</h2>
+
+    <div class="card">
+      <h4>R&eacute;activit&eacute;</h4>
+      <p>
+        Essayez de prendre en charge les nouvelles sollicitations <strong>dans les jours qui suivent</strong> leur envoi.
+        Au-del&agrave; de 7 jours sans prise en charge, la sollicitation est signal&eacute;e comme &laquo; orpheline &raquo;
+        au maire, et un rappel est envoy&eacute; par email.
+      </p>
+    </div>
+
+    <div class="card">
+      <h4>Communication</h4>
+      <p>
+        M&ecirc;me si le traitement prend du temps, <strong>envoyez un commentaire</strong> pour informer l'habitant
+        que sa demande est bien prise en compte. Un message simple suffit :
+        &laquo; Nous avons bien re&ccedil;u votre signalement, nous allons v&eacute;rifier sur place. &raquo;
+      </p>
+    </div>
+
+    <div class="card">
+      <h4>R&eacute;ponse de r&eacute;solution</h4>
+      <p>
+        Lorsque vous r&eacute;solvez une sollicitation, r&eacute;digez une <strong>r&eacute;ponse compl&egrave;te</strong> :
+        ce qui a &eacute;t&eacute; fait, le r&eacute;sultat, et s'il y a une suite &agrave; donner.
+        Cette r&eacute;ponse est la trace officielle du traitement.
+      </p>
+    </div>
+
+    <div class="card">
+      <h4>R&eacute;affectation</h4>
+      <p>
+        N'h&eacute;sitez pas &agrave; <strong>r&eacute;affecter</strong> une sollicitation si elle ne rel&egrave;ve pas de vos comp&eacute;tences.
+        Mieux vaut r&eacute;affecter vite que laisser une demande en suspens.
+      </p>
+    </div>
+  </section>
+
+</div>
+
+<footer class="doc-footer">
+  Saulzet & Vous &mdash; Guide du Conseiller Municipal &mdash; Mairie de Saulzet-le-Froid
+</footer>
+
+</body>
+</html>

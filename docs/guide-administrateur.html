@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Guide de l'Administrateur — Saulzet & Vous</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Source+Sans+3:wght@300;400;600;700&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --vert-foret: #2D5016;
+      --vert-prairie: #4A7C28;
+      --vert-clair: #7BAE4E;
+      --vert-tres-clair: #E8F3DC;
+      --terre-claire: #C49A2A;
+      --terre: #8B6914;
+      --creme: #FDF8F0;
+      --creme-fonce: #F5EDE0;
+      --encre: #1A1A18;
+      --blanc: #FFFFFF;
+      --gris-pierre: #6B6560;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Source Sans 3', 'Segoe UI', Arial, sans-serif;
+      background: var(--creme);
+      color: var(--encre);
+      font-size: 16px;
+      line-height: 1.7;
+    }
+    .doc-header {
+      background: var(--vert-foret);
+      color: white;
+      padding: 2.5rem 1.5rem;
+      text-align: center;
+    }
+    .doc-header h1 {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 2.2rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+    .doc-header .subtitle { font-size: 1.1rem; opacity: 0.9; }
+
+    .doc-nav {
+      background: var(--blanc);
+      border-bottom: 3px solid var(--vert-tres-clair);
+      padding: 1rem 1.5rem;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    .doc-nav h2 {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 1.1rem;
+      color: var(--vert-foret);
+      margin-bottom: 0.75rem;
+    }
+    .doc-nav ul { list-style: none; display: flex; flex-wrap: wrap; gap: 0.5rem; }
+    .doc-nav a {
+      display: inline-block;
+      background: var(--vert-tres-clair);
+      color: var(--vert-foret);
+      padding: 0.4rem 1rem;
+      border-radius: 2rem;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.95rem;
+      transition: background 0.2s;
+    }
+    .doc-nav a:hover, .doc-nav a:focus { background: var(--vert-prairie); color: white; }
+
+    .doc-content { max-width: 900px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+
+    .section { margin-bottom: 3rem; }
+    .section h2 {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 1.6rem;
+      color: var(--vert-foret);
+      border-bottom: 3px solid var(--vert-clair);
+      padding-bottom: 0.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .section h3 {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 1.2rem;
+      color: var(--vert-prairie);
+      margin: 1.5rem 0 0.75rem;
+    }
+    .section p, .section > ul > li, .section > ol > li {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 1rem;
+      line-height: 1.8;
+      margin-bottom: 0.5rem;
+    }
+
+    .steps { counter-reset: step; list-style: none; padding: 0; }
+    .steps li {
+      counter-increment: step;
+      position: relative;
+      padding-left: 3.5rem;
+      margin-bottom: 1rem;
+      min-height: 2.5rem;
+    }
+    .steps li::before {
+      content: counter(step);
+      position: absolute;
+      left: 0; top: 0;
+      width: 2.5rem; height: 2.5rem;
+      background: var(--vert-foret);
+      color: white;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 1.1rem;
+      font-family: 'Source Sans 3', sans-serif;
+    }
+
+    .info-box {
+      background: var(--vert-tres-clair);
+      border-left: 4px solid var(--vert-clair);
+      padding: 1rem 1.25rem;
+      border-radius: 0 0.75rem 0.75rem 0;
+      margin: 1.25rem 0;
+    }
+    .info-box strong { color: var(--vert-foret); }
+    .warning-box {
+      background: #FFF8E1;
+      border-left: 4px solid var(--terre-claire);
+      padding: 1rem 1.25rem;
+      border-radius: 0 0.75rem 0.75rem 0;
+      margin: 1.25rem 0;
+    }
+    .warning-box strong { color: var(--terre); }
+    .danger-box {
+      background: #FEE2E2;
+      border-left: 4px solid #DC2626;
+      padding: 1rem 1.25rem;
+      border-radius: 0 0.75rem 0.75rem 0;
+      margin: 1.25rem 0;
+    }
+    .danger-box strong { color: #991B1B; }
+
+    .card {
+      background: var(--blanc);
+      border-radius: 0.75rem;
+      padding: 1.25rem;
+      margin: 1rem 0;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+    .card h4 {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 1.1rem;
+      color: var(--vert-foret);
+      margin-bottom: 0.4rem;
+    }
+
+    table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 0.95rem; }
+    th, td { text-align: left; padding: 0.6rem 0.8rem; border-bottom: 1px solid var(--creme-fonce); }
+    th { background: var(--vert-tres-clair); color: var(--vert-foret); font-weight: 600; font-family: 'Source Sans 3', sans-serif; }
+    tr:hover { background: var(--creme-fonce); }
+
+    code {
+      background: var(--creme-fonce);
+      padding: 0.15rem 0.4rem;
+      border-radius: 0.25rem;
+      font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+      font-size: 0.9em;
+      color: var(--vert-foret);
+    }
+    pre {
+      background: #1a1a2e;
+      color: #e0e0e0;
+      padding: 1.25rem;
+      border-radius: 0.75rem;
+      overflow-x: auto;
+      font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+      font-size: 0.88rem;
+      line-height: 1.6;
+      margin: 1rem 0;
+    }
+    pre .cmd { color: #7BAE4E; }
+    pre .comment { color: #6B6560; font-style: italic; }
+    pre .flag { color: #C49A2A; }
+
+    .doc-footer {
+      background: var(--vert-foret);
+      color: white;
+      text-align: center;
+      padding: 1.5rem;
+      font-size: 0.9rem;
+      opacity: 0.9;
+    }
+
+    @media print {
+      .doc-nav { display: none; }
+      body { font-size: 12px; }
+      .doc-header { padding: 1rem; }
+      .section { page-break-inside: avoid; }
+      pre { font-size: 0.8rem; }
+    }
+    @media (max-width: 640px) {
+      body { font-size: 14px; }
+      .doc-header h1 { font-size: 1.5rem; }
+      .section h2 { font-size: 1.3rem; }
+      .doc-content { padding: 1rem; }
+      .doc-nav ul { flex-direction: column; }
+      pre { font-size: 0.8rem; padding: 0.75rem; }
+    }
+  </style>
+</head>
+<body>
+
+<header class="doc-header">
+  <h1>Guide de l'Administrateur</h1>
+  <div class="subtitle">Saulzet & Vous — Administration technique de la plateforme</div>
+</header>
+
+<nav class="doc-nav" aria-label="Sommaire">
+  <h2>Sommaire</h2>
+  <ul>
+    <li><a href="#role">R&ocirc;le et acc&egrave;s</a></li>
+    <li><a href="#architecture">Architecture</a></li>
+    <li><a href="#settings">Param&egrave;tres centralis&eacute;s</a></li>
+    <li><a href="#utilisateurs">Gestion des utilisateurs</a></li>
+    <li><a href="#inscriptions">Inscriptions</a></li>
+    <li><a href="#nettoyage">Nettoyage des donn&eacute;es</a></li>
+    <li><a href="#audit">Journal d'audit</a></li>
+    <li><a href="#notifications">Notifications et emails</a></li>
+    <li><a href="#relances">Relances automatiques</a></li>
+    <li><a href="#commandes">Commandes de gestion</a></li>
+    <li><a href="#deploiement">D&eacute;ploiement</a></li>
+    <li><a href="#securite">S&eacute;curit&eacute;</a></li>
+  </ul>
+</nav>
+
+<div class="doc-content">
+
+  <!-- Rôle -->
+  <section class="section" id="role">
+    <h2>R&ocirc;le et acc&egrave;s</h2>
+    <p>
+      L'administrateur g&egrave;re la <strong>partie technique</strong> de la plateforme :
+      configuration, comptes utilisateurs, nettoyage de la base de donn&eacute;es, monitoring.
+    </p>
+    <p>Acc&egrave;s disponibles :</p>
+    <table>
+      <thead><tr><th>Interface</th><th>URL</th><th>Usage</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>Admin Django</td>
+          <td><code>/admin/</code></td>
+          <td>Gestion compl&egrave;te (utilisateurs, pages, documents, param&egrave;tres)</td>
+        </tr>
+        <tr>
+          <td>Tableau de bord admin</td>
+          <td><code>/etvous/tableau-de-bord/admin/cleanup/</code></td>
+          <td>Nettoyage des sollicitations</td>
+        </tr>
+        <tr>
+          <td>Journal d'audit</td>
+          <td><code>/etvous/tableau-de-bord/journal/</code></td>
+          <td>Tra&ccedil;abilit&eacute; des actions</td>
+        </tr>
+        <tr>
+          <td>Inscriptions</td>
+          <td><code>/etvous/tableau-de-bord/inscriptions/</code></td>
+          <td>Validation des comptes (partag&eacute; avec le maire)</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- Architecture -->
+  <section class="section" id="architecture">
+    <h2>Architecture de l'application</h2>
+
+    <h3>Stack technique</h3>
+    <table>
+      <thead><tr><th>Composant</th><th>Technologie</th></tr></thead>
+      <tbody>
+        <tr><td>Backend</td><td>Django 5.2, Python 3.12+</td></tr>
+        <tr><td>Frontend</td><td>HTMX 2.x + Alpine.js 3.x + Tailwind CSS 3.x + DaisyUI 4.x</td></tr>
+        <tr><td>CMS</td><td>django-tinymce 5.x (WYSIWYG)</td></tr>
+        <tr><td>Cartographie</td><td>Leaflet.js + OpenStreetMap</td></tr>
+        <tr><td>BDD</td><td>SQLite (dev) / PostgreSQL (prod recommand&eacute;)</td></tr>
+        <tr><td>Tests</td><td>pytest + pytest-django</td></tr>
+        <tr><td>Linting</td><td>ruff</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Apps Django</h3>
+    <table>
+      <thead><tr><th>App</th><th>R&ocirc;le</th><th>Mod&egrave;les cl&eacute;s</th></tr></thead>
+      <tbody>
+        <tr><td><code>accounts</code></td><td>Authentification, profils, r&ocirc;les</td><td>User (AbstractUser), MagicLinkToken</td></tr>
+        <tr><td><code>reports</code></td><td>Sollicitations citoyennes</td><td>Report, Photo, Comment</td></tr>
+        <tr><td><code>dashboard</code></td><td>Tableau de bord &eacute;lus/maire/admin</td><td>(views only, pas de mod&egrave;les)</td></tr>
+        <tr><td><code>pages</code></td><td>CMS (pages, documents, galerie)</td><td>Page, Document, GalleryPhoto</td></tr>
+        <tr><td><code>notifications</code></td><td>Notifications, emails, audit</td><td>Notification, NotificationPreference, AuditLog</td></tr>
+        <tr><td><code>settings_app</code></td><td>Configuration centralis&eacute;e</td><td>SiteSettings (singleton), Village</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Structure des fichiers cl&eacute;s</h3>
+    <pre>
+saulzet-et-vous/
+├── apps/
+│   ├── accounts/          <span class="comment"># Auth, users, magic link</span>
+│   ├── reports/           <span class="comment"># Sollicitations, photos, comments</span>
+│   ├── dashboard/         <span class="comment"># Views &eacute;lus/maire/admin</span>
+│   ├── pages/             <span class="comment"># CMS, documents, galerie</span>
+│   ├── notifications/     <span class="comment"># Notifs, emails, audit log</span>
+│   └── settings_app/      <span class="comment"># SiteSettings singleton, villages</span>
+├── templates/             <span class="comment"># Tous les templates (pas dans les apps)</span>
+│   ├── components/        <span class="comment"># Composants r&eacute;utilisables</span>
+│   ├── notifications/emails/  <span class="comment"># Templates email HTML+TXT</span>
+│   └── ...
+├── static/css/            <span class="comment"># input.css (source) + output.css (compil&eacute;)</span>
+├── saulzet_et_vous/
+│   ├── settings/          <span class="comment"># base.py, dev.py, prod.py</span>
+│   └── urls.py            <span class="comment"># Routing principal</span>
+└── VERSION                <span class="comment"># Version courante (ex: 0.8.0)</span></pre>
+
+    <h3>R&ocirc;les utilisateurs</h3>
+    <table>
+      <thead><tr><th>R&ocirc;le</th><th>Valeur</th><th>D&eacute;corateurs</th><th>Permissions</th></tr></thead>
+      <tbody>
+        <tr><td>Admin</td><td><code>admin</code></td><td><code>@admin_required</code></td><td>Acc&egrave;s complet Django admin + nettoyage + audit</td></tr>
+        <tr><td>Secr&eacute;taire</td><td><code>secretary</code></td><td><code>is_staff=True</code></td><td>Admin Django limit&eacute; (pages.* uniquement)</td></tr>
+        <tr><td>Maire</td><td><code>mayor</code></td><td><code>@mayor_required</code></td><td>Tout &eacute;lu + affectation + inscriptions + stats + export</td></tr>
+        <tr><td>&Eacute;lu</td><td><code>elected</code></td><td><code>@elected_required</code></td><td>Dashboard, prise en charge, commentaires, r&eacute;solution</td></tr>
+        <tr><td>Habitant</td><td><code>citizen</code></td><td>login_required + is_approved</td><td>Cr&eacute;ation/suivi sollicitations</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Middleware</h3>
+    <ul style="list-style: disc; padding-left: 2rem;">
+      <li><code>ApprovalMiddleware</code> : redirige les utilisateurs non approuv&eacute;s vers <code>/comptes/pending/</code>. Exempte les URLs d'auth, static, media, home, admin.</li>
+    </ul>
+  </section>
+
+  <!-- SiteSettings -->
+  <section class="section" id="settings">
+    <h2>Param&egrave;tres centralis&eacute;s (SiteSettings)</h2>
+    <p>
+      Le mod&egrave;le <code>SiteSettings</code> est un <strong>singleton</strong> (pk=1) qui centralise toute la configuration du site.
+      Il est mis en cache pendant 5 minutes. Acc&egrave;s : <code>SiteSettings.load()</code> en Python, <code>{{ site_settings.* }}</code> dans les templates.
+    </p>
+
+    <h3>Param&egrave;tres disponibles</h3>
+    <table>
+      <thead><tr><th>Groupe</th><th>Champs</th></tr></thead>
+      <tbody>
+        <tr><td>Identit&eacute;</td><td><code>site_name</code>, <code>commune_name</code>, <code>population</code></td></tr>
+        <tr><td>Coordonn&eacute;es</td><td><code>address</code>, <code>phone</code>, <code>phone_secondary</code>, <code>opening_hours</code></td></tr>
+        <tr><td>Email exp&eacute;diteur</td><td><code>email_from_name</code>, <code>email_from_address</code></td></tr>
+        <tr><td>Email contact</td><td><code>email_contact</code> (re&ccedil;oit les soumissions du formulaire)</td></tr>
+        <tr><td>SMTP</td><td><code>smtp_host</code>, <code>smtp_port</code>, <code>smtp_username</code>, <code>smtp_password</code>, <code>smtp_use_tls</code>, <code>smtp_use_ssl</code></td></tr>
+        <tr><td>Cartographie</td><td><code>map_center_lat/lng</code>, <code>map_default_zoom</code>, <code>mairie_lat/lng</code></td></tr>
+        <tr><td>Seuils m&eacute;tier</td><td><code>orphan_days</code> (7), <code>cleanup_days</code> (30), <code>stats_period_days</code> (180), <code>reminder_interval_days</code> (7)</td></tr>
+      </tbody>
+    </table>
+
+    <div class="info-box">
+      <strong>R&egrave;gle absolue :</strong> aucune valeur susceptible de changer (coordonn&eacute;es, t&eacute;l&eacute;phone, seuils, GPS...)
+      ne doit &ecirc;tre cod&eacute;e en dur dans le code ou les templates. Tout passe par <code>SiteSettings</code>.
+    </div>
+
+    <h3>Configuration SMTP</h3>
+    <p>
+      Le backend email custom (<code>DatabaseEmailBackend</code>) lit la configuration SMTP depuis <code>SiteSettings</code>.
+      Si aucun h&ocirc;te SMTP n'est configur&eacute;, Django utilise le backend console (affichage terminal, utile en dev).
+    </p>
+    <p>Pour configurer l'envoi d'emails en production :</p>
+    <ol class="steps">
+      <li>Acc&eacute;dez &agrave; <code>/admin/settings_app/sitesettings/1/change/</code></li>
+      <li>Renseignez <code>smtp_host</code>, <code>smtp_port</code>, <code>smtp_username</code>, <code>smtp_password</code></li>
+      <li>Activez <code>smtp_use_tls</code> (recommand&eacute;) ou <code>smtp_use_ssl</code> selon votre fournisseur</li>
+      <li>Configurez <code>email_from_address</code> (l'adresse d'exp&eacute;dition)</li>
+      <li>Enregistrez</li>
+    </ol>
+
+    <h3>Villages</h3>
+    <p>
+      Les villages sont g&eacute;r&eacute;s dans <code>/admin/settings_app/village/</code>.
+      Chaque village a un nom, slug, coordonn&eacute;es GPS, ordre d'affichage, et un flag <code>is_active</code>.
+      Le champ <code>User.village</code> est une FK vers <code>Village</code>.
+    </p>
+  </section>
+
+  <!-- Utilisateurs -->
+  <section class="section" id="utilisateurs">
+    <h2>Gestion des utilisateurs</h2>
+
+    <h3>Cr&eacute;er un compte &eacute;lu/secr&eacute;taire</h3>
+    <ol class="steps">
+      <li>Acc&eacute;dez &agrave; <code>/admin/accounts/user/add/</code></li>
+      <li>Renseignez l'email, le nom, le r&ocirc;le (<code>mayor</code>, <code>elected</code>, <code>secretary</code>)</li>
+      <li>Cochez <code>is_approved</code></li>
+      <li>Pour la secr&eacute;taire : cochez aussi <code>is_staff</code> et attribuez les permissions <code>pages.*</code></li>
+      <li>D&eacute;finissez un mot de passe (obligatoire pour l'acc&egrave;s admin Django)</li>
+      <li>Enregistrez</li>
+    </ol>
+
+    <h3>Page &Eacute;quipe municipale</h3>
+    <p>
+      La page &laquo; &Eacute;quipe &raquo; affiche automatiquement les utilisateurs ayant le r&ocirc;le <code>mayor</code> ou <code>elected</code>,
+      tri&eacute;s par <code>function_order</code>. Pour chaque &eacute;lu, renseignez :
+    </p>
+    <ul style="list-style: disc; padding-left: 2rem;">
+      <li><code>function_title</code> : intitul&eacute; de la fonction (ex : &laquo; Adjoint &agrave; l'urbanisme &raquo;)</li>
+      <li><code>function_order</code> : ordre d'affichage (1 = maire, 2 = 1er adjoint, etc.)</li>
+      <li><code>photo</code> : photo de profil (optionnel)</li>
+    </ul>
+
+    <h3>Changer un r&ocirc;le</h3>
+    <p>
+      Modifiez le champ <code>role</code> dans l'admin Django.
+      Si vous changez un &eacute;lu en habitant, ses sollicitations affect&eacute;es ne sont <strong>pas</strong> r&eacute;affect&eacute;es automatiquement.
+      V&eacute;rifiez manuellement.
+    </p>
+  </section>
+
+  <!-- Inscriptions -->
+  <section class="section" id="inscriptions">
+    <h2>Validation des inscriptions</h2>
+    <p>
+      Les inscriptions sont valid&eacute;es via <code>/etvous/tableau-de-bord/inscriptions/</code>
+      (accessible aux r&ocirc;les <code>admin</code> et <code>mayor</code>).
+    </p>
+    <p>Fonctionnement :</p>
+    <ul style="list-style: disc; padding-left: 2rem;">
+      <li>Un habitant s'inscrit &rarr; <code>is_approved=False</code></li>
+      <li><code>ApprovalMiddleware</code> le redirige vers <code>/comptes/pending/</code></li>
+      <li>Notification <code>NEW_REGISTRATION</code> envoy&eacute;e &agrave; tous les admins</li>
+      <li>Admin/maire approuve &rarr; email de confirmation envoy&eacute; &agrave; l'habitant</li>
+      <li>Admin/maire refuse &rarr; le compte est <strong>supprim&eacute;</strong> de la BDD</li>
+    </ul>
+  </section>
+
+  <!-- Nettoyage -->
+  <section class="section" id="nettoyage">
+    <h2>Nettoyage de la base de donn&eacute;es</h2>
+    <p>
+      L'interface de nettoyage est accessible &agrave; <code>/etvous/tableau-de-bord/admin/cleanup/</code>.
+    </p>
+
+    <h3>Suppression des sollicitations annul&eacute;es</h3>
+    <p>
+      Supprime toutes les sollicitations au statut <code>CANCELLED</code>.
+      L'interface affiche le nombre de sollicitations concern&eacute;es (pr&eacute;visualisation HTMX en temps r&eacute;el).
+    </p>
+
+    <h3>Suppression des sollicitations r&eacute;solues anciennes</h3>
+    <p>
+      Supprime les sollicitations <code>RESOLVED</code> plus anciennes que N jours
+      (par d&eacute;faut : <code>cleanup_days = 30</code>, configurable dans SiteSettings).
+    </p>
+
+    <div class="danger-box">
+      <strong>Actions irr&eacute;versibles :</strong> Les suppressions sont d&eacute;finitives.
+      Les photos et commentaires associ&eacute;s sont supprim&eacute;s en cascade.
+      Pr&eacute;voyez un export CSV (fonction maire) avant un nettoyage massif.
+    </div>
+  </section>
+
+  <!-- Audit -->
+  <section class="section" id="audit">
+    <h2>Journal d'audit</h2>
+    <p>
+      Le journal est accessible &agrave; <code>/etvous/tableau-de-bord/journal/</code>.
+      Il enregistre toutes les actions significatives via le mod&egrave;le <code>AuditLog</code>.
+    </p>
+
+    <h3>Actions trac&eacute;es</h3>
+    <table>
+      <thead><tr><th>Action</th><th>Code</th><th>D&eacute;clencheur</th></tr></thead>
+      <tbody>
+        <tr><td>Cr&eacute;ation</td><td><code>CREATE</code></td><td>Nouvelle sollicitation, nouveau commentaire</td></tr>
+        <tr><td>Mise &agrave; jour</td><td><code>UPDATE</code></td><td>Modification d'une sollicitation</td></tr>
+        <tr><td>Suppression</td><td><code>DELETE</code></td><td>Nettoyage de sollicitations</td></tr>
+        <tr><td>Changement de statut</td><td><code>STATUS_CHANGE</code></td><td>Progression dans le workflow</td></tr>
+        <tr><td>Affectation</td><td><code>ASSIGN</code></td><td>Prise en charge ou affectation</td></tr>
+        <tr><td>Approbation</td><td><code>APPROVE</code></td><td>Validation d'une inscription</td></tr>
+        <tr><td>Connexion</td><td><code>LOGIN</code></td><td>Connexion utilisateur (mot de passe ou magic link)</td></tr>
+      </tbody>
+    </table>
+
+    <p>Chaque entr&eacute;e contient :</p>
+    <ul style="list-style: disc; padding-left: 2rem;">
+      <li><code>user</code> : qui a fait l'action</li>
+      <li><code>action</code> : type d'action</li>
+      <li><code>target_type</code>, <code>target_id</code>, <code>target_label</code> : l'objet concern&eacute;</li>
+      <li><code>details</code> : m&eacute;tadonn&eacute;es JSON (ancien statut, nouveau statut, etc.)</li>
+      <li><code>ip_address</code> : adresse IP du client</li>
+      <li><code>created_at</code> : horodatage</li>
+    </ul>
+
+    <p>L'interface supporte le filtrage par <strong>type d'action</strong> et par <strong>utilisateur</strong>, avec pagination.</p>
+  </section>
+
+  <!-- Notifications -->
+  <section class="section" id="notifications">
+    <h2>Syst&egrave;me de notifications</h2>
+
+    <h3>Architecture</h3>
+    <p>Le service <code>notify()</code> dans <code>apps/notifications/services.py</code> :</p>
+    <ol style="list-style: decimal; padding-left: 2rem;">
+      <li>Cr&eacute;e une <code>Notification</code> in-app (visible via la cloche)</li>
+      <li>V&eacute;rifie les <code>NotificationPreference</code> de l'utilisateur</li>
+      <li>Envoie un email HTML+TXT si les pr&eacute;f&eacute;rences l'autorisent et que le SMTP est configur&eacute;</li>
+    </ol>
+
+    <h3>Types de notifications</h3>
+    <table>
+      <thead><tr><th>Type</th><th>Code</th><th>D&eacute;clencheur</th><th>Destinataires</th></tr></thead>
+      <tbody>
+        <tr><td>Changement de statut</td><td><code>STATUS_CHANGE</code></td><td>&Eacute;lu change le statut</td><td>Auteur de la sollicitation</td></tr>
+        <tr><td>Nouveau commentaire</td><td><code>NEW_COMMENT</code></td><td>Commentaire ajout&eacute;</td><td>Partie oppos&eacute;e (habitant &harr; &eacute;lu)</td></tr>
+        <tr><td>Affectation</td><td><code>ASSIGNMENT</code></td><td>Affectation d'une sollicitation</td><td>&Eacute;lu d&eacute;sign&eacute;</td></tr>
+        <tr><td>Nouvelle sollicitation</td><td><code>NEW_REPORT</code></td><td>Habitant cr&eacute;e une sollicitation</td><td>Tous les &eacute;lus + maire</td></tr>
+        <tr><td>Nouvelle inscription</td><td><code>NEW_REGISTRATION</code></td><td>Habitant s'inscrit</td><td>Tous les admins</td></tr>
+        <tr><td>Formulaire de contact</td><td><code>CONTACT_FORM</code></td><td>Soumission formulaire contact</td><td><code>email_contact</code> (SiteSettings)</td></tr>
+        <tr><td>Relance</td><td><code>REMINDER</code></td><td>Commande <code>send_reminders</code></td><td>Tous les &eacute;lus</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Templates email</h3>
+    <p>
+      Les emails sont dans <code>templates/notifications/emails/</code> :
+      chaque type a un fichier <code>.html</code> (rendu riche) et un <code>.txt</code> (fallback texte brut).
+      Ils h&eacute;ritent de <code>base_email.html</code> qui applique la charte graphique Saulzet.
+    </p>
+  </section>
+
+  <!-- Relances -->
+  <section class="section" id="relances">
+    <h2>Relances automatiques</h2>
+    <p>
+      La commande <code>send_reminders</code> envoie des emails de rappel pour les sollicitations orphelines
+      (statut <code>NEW</code>, plus anciennes que le seuil configur&eacute;).
+    </p>
+
+    <pre>
+<span class="comment"># Pr&eacute;visualisation (aucun email envoy&eacute;)</span>
+<span class="cmd">python manage.py send_reminders</span> <span class="flag">--dry-run</span>
+
+<span class="comment"># Envoi effectif (seuil par d&eacute;faut : orphan_days dans SiteSettings)</span>
+<span class="cmd">python manage.py send_reminders</span>
+
+<span class="comment"># Seuil personnalis&eacute; (3 jours)</span>
+<span class="cmd">python manage.py send_reminders</span> <span class="flag">--days 3</span></pre>
+
+    <div class="info-box">
+      <strong>Automatisation :</strong> Ajoutez cette commande dans un <strong>cron</strong> quotidien en production :
+    </div>
+    <pre>
+<span class="comment"># Crontab : relance quotidienne &agrave; 8h</span>
+0 8 * * * cd /path/to/saulzet-et-vous && /path/to/venv/bin/python manage.py send_reminders</pre>
+
+    <p>
+      L'intervalle minimal entre deux relances pour la m&ecirc;me sollicitation est configurable via
+      <code>SiteSettings.reminder_interval_days</code> (d&eacute;faut : 7 jours).
+    </p>
+  </section>
+
+  <!-- Commandes -->
+  <section class="section" id="commandes">
+    <h2>Commandes de gestion</h2>
+
+    <h3>Commandes courantes</h3>
+    <pre>
+<span class="comment"># Activer l'environnement virtuel</span>
+<span class="cmd">source venv/bin/activate</span>
+
+<span class="comment"># Serveur de d&eacute;veloppement</span>
+<span class="cmd">python manage.py runserver</span> 0.0.0.0:8000
+
+<span class="comment"># Compiler le CSS (Tailwind)</span>
+<span class="cmd">npm run build:css</span>
+
+<span class="comment"># Tailwind en mode watch (recompile automatiquement)</span>
+<span class="cmd">npm run watch:css</span>
+
+<span class="comment"># Linting</span>
+<span class="cmd">ruff check .</span>
+
+<span class="comment"># Tests</span>
+<span class="cmd">pytest</span>
+
+<span class="comment"># Migrations</span>
+<span class="cmd">python manage.py makemigrations</span> && <span class="cmd">python manage.py migrate</span></pre>
+
+    <h3>Commandes sp&eacute;cifiques au projet</h3>
+    <pre>
+<span class="comment"># Relances orphelines</span>
+<span class="cmd">python manage.py send_reminders</span>
+<span class="cmd">python manage.py send_reminders</span> <span class="flag">--dry-run</span>
+<span class="cmd">python manage.py send_reminders</span> <span class="flag">--days 3</span>
+
+<span class="comment"># Migration de contenu (Phase 5 — r&eacute;f&eacute;rence historique)</span>
+<span class="cmd">python manage.py build_inventory</span>
+<span class="cmd">python manage.py migrate_content</span>             <span class="comment"># Dry run</span>
+<span class="cmd">python manage.py migrate_content</span> <span class="flag">--execute</span>    <span class="comment"># Ex&eacute;cution</span>
+<span class="cmd">python manage.py create_initial_pages</span></pre>
+
+    <h3>Gestion du versioning</h3>
+    <pre>
+<span class="comment"># La version est d&eacute;finie dans le fichier VERSION &agrave; la racine</span>
+<span class="comment"># R&egrave;gle : mettre &agrave; jour VERSION AVANT de cr&eacute;er le tag Git</span>
+<span class="cmd">echo</span> "0.9.0" > VERSION
+<span class="cmd">git add</span> VERSION
+<span class="cmd">git commit</span> -m "Bump version to 0.9.0"
+<span class="cmd">git tag</span> v0.9.0</pre>
+  </section>
+
+  <!-- Déploiement -->
+  <section class="section" id="deploiement">
+    <h2>D&eacute;ploiement</h2>
+
+    <h3>Environnements</h3>
+    <table>
+      <thead><tr><th>Env</th><th>Settings</th><th>URL</th></tr></thead>
+      <tbody>
+        <tr><td>D&eacute;veloppement</td><td><code>settings.dev</code></td><td>localhost:8000</td></tr>
+        <tr><td>Tunnel Cloudflare</td><td><code>settings.dev</code></td><td>saulzet.jautzy.com</td></tr>
+        <tr><td>Production</td><td><code>settings.prod</code></td><td>saulzet-le-froid.com</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Settings s&eacute;par&eacute;s</h3>
+    <p>
+      Les settings sont dans <code>saulzet_et_vous/settings/</code> :
+      <code>base.py</code> (commun), <code>dev.py</code> (d&eacute;veloppement), <code>prod.py</code> (production).
+    </p>
+
+    <h3>Checklist de mise en production</h3>
+    <ul style="list-style: disc; padding-left: 2rem;">
+      <li>Configurer le SMTP dans SiteSettings</li>
+      <li>Migrer la BDD (<code>python manage.py migrate</code>)</li>
+      <li>Compiler le CSS (<code>npm run build:css</code>)</li>
+      <li>Collecter les fichiers statiques (<code>python manage.py collectstatic</code>)</li>
+      <li>V&eacute;rifier <code>SECRET_KEY</code>, <code>DEBUG=False</code>, <code>ALLOWED_HOSTS</code></li>
+      <li>Configurer le cron pour <code>send_reminders</code></li>
+      <li>Mettre &agrave; jour le fichier <code>VERSION</code></li>
+    </ul>
+  </section>
+
+  <!-- Sécurité -->
+  <section class="section" id="securite">
+    <h2>S&eacute;curit&eacute;</h2>
+
+    <h3>Authentification</h3>
+    <ul style="list-style: disc; padding-left: 2rem;">
+      <li><strong>Magic link</strong> : token SHA256, expiration 15 min, usage unique</li>
+      <li><strong>Mot de passe</strong> : hash Django standard (PBKDF2)</li>
+      <li><strong>Middleware</strong> : v&eacute;rification <code>is_approved</code> sur toutes les requ&ecirc;tes authentifi&eacute;es</li>
+      <li><strong>D&eacute;corateurs</strong> : <code>@login_required</code>, <code>@elected_required</code>, <code>@mayor_required</code>, <code>@admin_required</code></li>
+    </ul>
+
+    <h3>Uploads</h3>
+    <ul style="list-style: disc; padding-left: 2rem;">
+      <li>Validation MIME type (JPG, PNG, HEIC, WEBP uniquement pour les photos)</li>
+      <li>Limite 10 Mo par fichier, 5 photos max par sollicitation</li>
+      <li>Compression automatique (max 1920px largeur)</li>
+      <li>G&eacute;n&eacute;ration de miniatures</li>
+    </ul>
+
+    <h3>Protection CSRF</h3>
+    <p>
+      Tous les formulaires utilisent le middleware CSRF de Django.
+      Les requ&ecirc;tes HTMX incluent automatiquement le token CSRF.
+    </p>
+
+    <h3>Tra&ccedil;abilit&eacute;</h3>
+    <p>
+      Le <code>AuditLog</code> enregistre toutes les actions sensibles avec l'adresse IP,
+      permettant un audit complet en cas de probl&egrave;me.
+    </p>
+  </section>
+
+</div>
+
+<footer class="doc-footer">
+  Saulzet & Vous &mdash; Guide de l'Administrateur &mdash; Version 0.8.0
+</footer>
+
+</body>
+</html>

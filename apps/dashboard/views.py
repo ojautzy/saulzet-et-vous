@@ -4,6 +4,7 @@ from datetime import timedelta
 
 from django.contrib import messages
 from django.contrib.auth import get_user_model
+from django.contrib.auth.decorators import login_required
 from django.db.models import Avg, Case, Count, F, IntegerField, Value, When
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -709,3 +710,17 @@ def audit_log_view(request: HttpRequest) -> HttpResponse:
         "action_choices": AuditLog.Action.choices,
         "staff_users": User.objects.filter(is_approved=True).order_by("last_name"),
     })
+
+
+@login_required
+def documentation_view(request: HttpRequest) -> HttpResponse:
+    """Display the user guide matching the current user's role."""
+    template_map = {
+        "admin": "docs/guide-administrateur.html",
+        "secretary": "docs/guide-secretaire.html",
+        "mayor": "docs/guide-maire.html",
+        "elected": "docs/guide-conseiller.html",
+        "citizen": "docs/guide-habitant.html",
+    }
+    template = template_map.get(request.user.role, "docs/guide-habitant.html")
+    return render(request, template)
