@@ -20,10 +20,10 @@ class DatabaseEmailBackend(SmtpBackend):
             ConsoleBackend.__init__(self, **kwargs)
             return
 
-        kwargs.setdefault("host", config.smtp_host)
-        kwargs.setdefault("port", config.smtp_port)
-        kwargs.setdefault("username", config.smtp_username)
-        kwargs.setdefault("password", config.smtp_password)
-        kwargs.setdefault("use_tls", config.smtp_use_tls)
-        kwargs.setdefault("use_ssl", config.smtp_use_ssl)
+        kwargs["host"] = config.smtp_host
+        kwargs["port"] = config.smtp_port
+        kwargs["username"] = config.smtp_username
+        kwargs["password"] = config.smtp_password
+        kwargs["use_tls"] = config.smtp_use_tls
+        kwargs["use_ssl"] = config.smtp_use_ssl
         super().__init__(**kwargs)
