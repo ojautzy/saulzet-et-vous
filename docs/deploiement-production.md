@@ -620,6 +620,20 @@ En attendant le transfert du .fr, si e-monsite permet d'editer le contenu HTML :
 
 ### Script de deploiement
 
+Le script prêt à l'emploi est versionné dans le dépôt : [`scripts/deploy.sh`](../scripts/deploy.sh).
+
+**Installation initiale** (une seule fois, depuis la machine de dev) :
+
+```bash
+scp scripts/deploy.sh ubuntu@185.x.x.x:/tmp/deploy.sh
+ssh ubuntu@185.x.x.x 'sudo mv /tmp/deploy.sh /home/saulzet/deploy.sh \
+    && sudo chown saulzet:saulzet /home/saulzet/deploy.sh \
+    && sudo chmod +x /home/saulzet/deploy.sh'
+```
+
+<details>
+<summary>Ou, pour référence, créer le script manuellement sur le serveur</summary>
+
 ```bash
 # Se connecter au serveur et basculer vers saulzet
 ssh ubuntu@185.x.x.x
@@ -660,6 +674,8 @@ echo "==> Done! Version: $(cat VERSION)"
 SCRIPT
 chmod +x ~/deploy.sh
 ```
+
+</details>
 
 ### Utilisation au quotidien
 
