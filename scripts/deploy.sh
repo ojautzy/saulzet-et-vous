@@ -11,7 +11,8 @@
 #       && sudo chmod +x /home/saulzet/deploy.sh'
 #
 # Lancement en routine (depuis la machine de dev, après git push) :
-#   ssh ubuntu@<IP> 'sudo su - saulzet -c ~/deploy.sh'
+#   ssh ubuntu@<IP> 'sudo su - saulzet -c /home/saulzet/deploy.sh'
+# (chemin explicite pour éviter l'expansion de ~ par le shell appelant)
 #
 # Voir docs/deploiement-production.md § 15 pour le contexte complet.
 

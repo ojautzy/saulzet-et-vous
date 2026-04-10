@@ -689,7 +689,7 @@ Depuis la machine de dev :
 git push origin main
 
 # 2. Deployer (se connecte en ubuntu, bascule en saulzet, lance le script)
-ssh ubuntu@185.x.x.x 'sudo su - saulzet -c ~/deploy.sh'
+ssh ubuntu@185.x.x.x 'sudo su - saulzet -c /home/saulzet/deploy.sh'
 ```
 
 ### Variante rapide (sans rebuild CSS)
