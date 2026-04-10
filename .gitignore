@@ -44,3 +44,10 @@ Thumbs.db
 # Documents de planification (restent locaux)
 prompt-*.md
 *-plan-*.md
+
+# Dumps de données Django (dumpdata, exports, backups)
+data_export*.json
+dump*.json
+*.dump.json
+*.sql
+*.sqlite3-backup
