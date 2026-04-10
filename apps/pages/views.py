@@ -54,6 +54,11 @@ def page_detail_view(request, slug, parent_slug=None):
     return render(request, template_name, context)
 
 
+def legal_notice_view(request):
+    """Page des mentions légales."""
+    return render(request, "pages/legal_notice.html")
+
+
 def contact_view(request):
     """Page de contact avec formulaire."""
     page = Page.objects.filter(slug="contact", is_published=True).first()

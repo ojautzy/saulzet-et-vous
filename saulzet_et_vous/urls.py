@@ -23,6 +23,7 @@ urlpatterns = [
     path("etvous/notifications/", include("apps.notifications.urls")),
 
     # Pages CMS spéciales
+    path("mentions-legales/", pages_views.legal_notice_view, name="legal_notice"),
     path("contact/", pages_views.contact_view, name="contact"),
     path("documents/", pages_views.document_list_view, name="document_list"),
     path("documents/<str:category>/", pages_views.document_list_view, name="document_list_category"),
