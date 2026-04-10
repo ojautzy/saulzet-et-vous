@@ -21,8 +21,13 @@ cd /home/saulzet/app
 source venv/bin/activate
 export DJANGO_SETTINGS_MODULE=saulzet_et_vous.settings.prod
 
-echo "==> Pulling latest code..."
-git pull origin main
+echo "==> Fetching latest code..."
+# On utilise fetch + reset --hard plutot que pull pour :
+#  - rester idempotent (l'etat local est toujours exactement origin/main)
+#  - survivre a toute reecriture d'historique sur origin (filter-repo, rebase)
+#  - ne jamais creer de merge commit parasite en prod
+git fetch origin main
+git reset --hard origin/main
 
 echo "==> Installing Python dependencies..."
 pip install -q -r requirements.txt
