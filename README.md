@@ -1,10 +1,12 @@
 # Saulzet & Vous
 
-Site communal et plateforme de démocratie participative pour la commune de **Saulzet-le-Froid** (284 hab., Puy-de-Dôme).
+Site communal et plateforme de démocratie participative pour la commune de **Saulzet-le-Froid** (287 hab., Puy-de-Dôme).
 
 Le site comprend :
-- Un **site communal** avec pages éditables (CMS intégré), documents officiels, page de contact et équipe municipale
+- Un **site communal** avec pages éditables (CMS intégré), documents officiels, galerie photos, mentions légales, page de contact et équipe municipale
 - Une **plateforme participative** « Saulzet & Vous » où les habitants écrivent à leurs élus (questions, idées, signalements)
+
+**Version en production** : 1.0.0 — déployée sur [www.saulzet-le-froid.com](https://www.saulzet-le-froid.com).
 
 ## Stack technique
 
@@ -41,7 +43,7 @@ cp .env.example .env
 python manage.py migrate
 
 # Créer un super-administrateur
-python manage.py createsuperadmin
+python manage.py createsuperadmin    # commande projet (équivalent amélioré de createsuperuser)
 
 # Lancer le serveur
 python manage.py runserver 0.0.0.0:8000
@@ -68,13 +70,12 @@ ruff format .
 pytest
 ```
 
-## Accès distant (tunnel Cloudflare)
+## Environnements
 
-L'application est exposée sur Internet via un tunnel Cloudflare à l'adresse :
+- **Production** : [https://www.saulzet-le-froid.com](https://www.saulzet-le-froid.com) (GandiCloud + PostgreSQL + Nginx + Gunicorn)
+- **Développement** : instance locale exposée ponctuellement via tunnel Cloudflare à l'adresse `https://saulzet.jautzy.com`
 
-**https://saulzet.jautzy.com**
-
-Domaine de production : **saulzet-le-froid.com**
+Le guide de déploiement complet est dans [`docs/deploiement-production.md`](docs/deploiement-production.md).
 
 ## Rôles utilisateur
 
@@ -91,8 +92,10 @@ Domaine de production : **saulzet-le-froid.com**
 ### Site communal
 - **Pages CMS** : pages éditables avec TinyMCE, menu dynamique, fil d'Ariane
 - **Documents** : PV de conseil, bulletins, arrêtés, documents PLU
+- **Galerie photos** : visionneuse lightbox, réordonnancement depuis l'admin
 - **Équipe municipale** : page avec photos et fonctions des élus
 - **Contact** : formulaire de contact avec envoi par email
+- **Mentions légales** : page dédiée accessible depuis le footer
 - **Page d'accueil** : portail communal avec accès rapides et actualités
 
 ### Module participatif (Saulzet & Vous)
@@ -107,6 +110,16 @@ Domaine de production : **saulzet-le-froid.com**
 
 La version du projet est dans le fichier `VERSION` à la racine et affichée dans le footer du site.
 Elle suit le schéma `MAJEURE.MINEURE.PATCH` et doit toujours être synchronisée avec le tag Git.
+
+## Documentation utilisateur
+
+Des guides HTML par rôle sont accessibles depuis le site (et dans [`docs/`](docs/)) :
+
+- [Guide de l'habitant](docs/guide-habitant.html)
+- [Guide du conseiller municipal](docs/guide-conseiller.html)
+- [Guide du maire](docs/guide-maire.html)
+- [Guide de la secrétaire de mairie](docs/guide-secretaire.html)
+- [Guide de l'administrateur](docs/guide-administrateur.html)
 
 ## Licence
 

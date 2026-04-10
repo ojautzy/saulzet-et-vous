@@ -1,7 +1,7 @@
 # Guide de deploiement en production — Saulzet & Vous
 
-> **Version** : 0.9.0
-> **Date** : 2026-04-08
+> **Version documentee** : 1.0.0 (site en production depuis avril 2026)
+> **Derniere mise a jour** : 2026-04-10
 > **Cible** : GandiCloud + OVH (DNS + mail Zimbra Pro)
 > **Domaine principal** : `www.saulzet-le-froid.com`
 > **Ancien domaine** : `www.saulzet-le-froid.fr` (e-monsite, a rediriger)
@@ -118,7 +118,7 @@ Dans le prompt PostgreSQL, coller les commandes suivantes
 
 ```sql
 CREATE DATABASE saulzet_db;
-CREATE USER saulzet_user WITH PASSWORD 'REDACTED_DB_PASSWORD';
+CREATE USER saulzet_user WITH PASSWORD 'COLLER_LE_MOT_DE_PASSE_ICI';
 ALTER ROLE saulzet_user SET client_encoding TO 'utf8';
 ALTER ROLE saulzet_user SET default_transaction_isolation TO 'read committed';
 ALTER ROLE saulzet_user SET timezone TO 'Europe/Paris';
@@ -171,14 +171,17 @@ Noter la cle affichee. Creer le fichier `~/app/.env`
 
 ```bash
 cat > ~/app/.env << 'EOF'
-SECRET_KEY=REDACTED_SECRET_KEY
+SECRET_KEY=REMPLACER_PAR_LA_CLE_GENEREE_CI_DESSUS
 ALLOWED_HOSTS=saulzet-le-froid.com,www.saulzet-le-froid.com
 CSRF_TRUSTED_ORIGINS=https://saulzet-le-froid.com,https://www.saulzet-le-froid.com
-DATABASE_URL=postgres://saulzet_user:REDACTED_DB_PASSWORD@localhost:5432/saulzet_db
+DATABASE_URL=postgres://saulzet_user:REMPLACER_PAR_LE_MOT_DE_PASSE_ETAPE_3@localhost:5432/saulzet_db
 SITE_URL=https://www.saulzet-le-froid.com
 DJANGO_SETTINGS_MODULE=saulzet_et_vous.settings.prod
 EOF
 ```
+
+> **Ne jamais committer ce fichier `.env`** : il est exclu via `.gitignore`.
+> La cle secrete et le mot de passe PostgreSQL doivent rester strictement sur le serveur.
 
 ---
 
@@ -388,7 +391,7 @@ Depuis la machine de dev, copier vers le home de `ubuntu`
 
 ```bash
 scp data_export.json ubuntu@185.x.x.x:/tmp/
-rsync -avz --progress media/ ubuntu@92.243.27.159:/tmp/media_upload/
+rsync -avz --progress media/ ubuntu@185.x.x.x:/tmp/media_upload/
 ```
 
 Puis sur le serveur, deplacer vers le repertoire de saulzet :

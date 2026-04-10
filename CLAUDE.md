@@ -86,6 +86,7 @@ python manage.py create_initial_pages      # Arborescence initiale des pages
 - `/etvous/notifications/` : centre de notifications
 - `/etvous/notifications/preferences/` : préférences email
 - `/contact/`, `/documents/` : pages CMS spéciales
+- `/mentions-legales/` : page de mentions légales (liée depuis le footer)
 - `/<slug>/`, `/<parent>/<slug>/` : pages CMS catch-all
 
 ### Arborescence des pages CMS
@@ -115,7 +116,7 @@ python manage.py create_initial_pages      # Arborescence initiale des pages
 
 - **Documents** (PDF, etc.) : stockés dans `media/documents/`, gérés via le modèle `Document` de l'app `pages`. Référencer dans les pages CMS avec `<a href="/media/documents/nom.pdf">`.
 - **Images des pages** : stockées dans `media/pages/images/`. Référencer dans les pages CMS avec `<img src="/media/pages/images/nom.jpg">`.
-- **Templates spéciaux** : certaines pages utilisent des templates dédiés (`habitants` pour la courbe démographique Chart.js, `acces` pour la carte Leaflet, `equipe`, `contact`, `documents`).
+- **Templates spéciaux** : certaines pages utilisent des templates dédiés (`habitants` pour la courbe démographique Chart.js, `acces` pour la carte Leaflet, `galerie` pour la visionneuse lightbox, `equipe`, `contact`, `documents`).
 
 ## SiteSettings (singleton)
 
@@ -145,6 +146,8 @@ Le service `notify()` dans `apps/notifications/services.py` crée la notificatio
 
 ## État du projet
 
-- **Version actuelle** : 0.8.0 (Phase 6 — Notifications email et administration)
+- **Version actuelle** : 1.0.0 — site déployé en production sur https://www.saulzet-le-froid.com
 - Plan complet dans `saulzet-et-vous-plan-v3.md`. Prompts par phase dans `prompt-phase*-claude-code.md`.
-- Phases 1 à 6 implémentées. Prochaine étape : Phase 7.
+- Toutes les phases (1 à 7) sont livrées : fondations, sollicitations, interface élus, retours utilisateurs, site communal CMS, migration de contenu, notifications/administration, mise en production.
+- v1.0.0 ajoute la galerie photos, la page de mentions légales et le lien dans le footer.
+- Guide de déploiement : `docs/deploiement-production.md`. Script de déploiement : `scripts/deploy.sh`.

@@ -321,7 +321,7 @@ saulzet-et-vous/
 ├── saulzet_et_vous/
 │   ├── settings/          <span class="comment"># base.py, dev.py, prod.py</span>
 │   └── urls.py            <span class="comment"># Routing principal</span>
-└── VERSION                <span class="comment"># Version courante (ex: 0.8.0)</span></pre>
+└── VERSION                <span class="comment"># Version courante (ex: 1.0.0)</span></pre>
 
     <h3>R&ocirc;les utilisateurs</h3>
     <table>
@@ -610,10 +610,10 @@ saulzet-et-vous/
     <pre>
 <span class="comment"># La version est d&eacute;finie dans le fichier VERSION &agrave; la racine</span>
 <span class="comment"># R&egrave;gle : mettre &agrave; jour VERSION AVANT de cr&eacute;er le tag Git</span>
-<span class="cmd">echo</span> "0.9.0" > VERSION
+<span class="cmd">echo</span> "1.0.1" > VERSION
 <span class="cmd">git add</span> VERSION
-<span class="cmd">git commit</span> -m "Bump version to 0.9.0"
-<span class="cmd">git tag</span> v0.9.0</pre>
+<span class="cmd">git commit</span> -m "Bump version to 1.0.1"
+<span class="cmd">git tag</span> v1.0.1</pre>
   </section>
 
   <!-- Déploiement -->
@@ -625,10 +625,16 @@ saulzet-et-vous/
       <thead><tr><th>Env</th><th>Settings</th><th>URL</th></tr></thead>
       <tbody>
         <tr><td>D&eacute;veloppement</td><td><code>settings.dev</code></td><td>localhost:8000</td></tr>
-        <tr><td>Tunnel Cloudflare</td><td><code>settings.dev</code></td><td>saulzet.jautzy.com</td></tr>
-        <tr><td>Production</td><td><code>settings.prod</code></td><td>saulzet-le-froid.com</td></tr>
+        <tr><td>Tunnel Cloudflare (dev)</td><td><code>settings.dev</code></td><td>saulzet.jautzy.com</td></tr>
+        <tr><td>Production</td><td><code>settings.prod</code></td><td>www.saulzet-le-froid.com</td></tr>
       </tbody>
     </table>
+
+    <div class="info-box">
+      <strong>Guide complet :</strong> la proc&eacute;dure de mise en production (GandiCloud + OVH + PostgreSQL + Nginx + Gunicorn + Let's Encrypt)
+      est documentee dans <code>docs/deploiement-production.md</code>.
+      Le script de d&eacute;ploiement routinier est dans <code>scripts/deploy.sh</code>.
+    </div>
 
     <h3>Settings s&eacute;par&eacute;s</h3>
     <p>
@@ -684,7 +690,7 @@ saulzet-et-vous/
 </div>
 
 <footer class="doc-footer">
-  Saulzet & Vous &mdash; Guide de l'Administrateur &mdash; Version 0.8.0
+  Saulzet & Vous &mdash; Guide de l'Administrateur &mdash; Version 1.0.0
 </footer>
 
 </body>
