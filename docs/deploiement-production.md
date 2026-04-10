@@ -4,7 +4,7 @@
 > **Derniere mise a jour** : 2026-04-10
 > **Cible** : GandiCloud + OVH (DNS + mail Zimbra Pro)
 > **Domaine principal** : `www.saulzet-le-froid.com`
-> **Ancien domaine** : `www.saulzet-le-froid.fr` (e-monsite, a rediriger)
+> **Domaine secondaire** : `www.saulzet-le-froid.fr` (redirection 301 vers le .com)
 
 ---
 
@@ -492,130 +492,70 @@ Ajouter :
 
 ---
 
-## 14. Redirection de l'ancien domaine .fr vers .com
+## 14. Redirection du domaine .fr vers .com
 
-L'objectif : tout internaute visitant `www.saulzet-le-froid.fr` (heberge actuellement chez e-monsite) est redirige automatiquement vers `https://www.saulzet-le-froid.com`.
+L'objectif : tout internaute visitant `saulzet-le-froid.fr` ou `www.saulzet-le-froid.fr` est redirige en **301 permanente** vers `https://www.saulzet-le-froid.com`.
 
-Il y a **trois strategies possibles**, selon le niveau de controle que l'on a sur le .fr.
+La redirection est faite **au niveau Nginx**, sur le meme serveur GandiCloud qui heberge le .com. Django ne voit jamais ces requetes : inutile d'ajouter le .fr a `ALLOWED_HOSTS` ou `CSRF_TRUSTED_ORIGINS`.
 
-### Strategie A — Redirection via e-monsite (le plus simple)
+### Etape 1 : DNS du .fr
 
-Si e-monsite propose une option de redirection dans son panneau d'administration :
+Dans la zone DNS OVH de `saulzet-le-froid.fr`, faire pointer l'apex et `www` vers l'IP du serveur GandiCloud :
 
-1. Se connecter au back-office e-monsite
-2. Chercher une option **Redirection 301** ou **Redirection de domaine**
-3. Configurer la redirection vers `https://www.saulzet-le-froid.com`
+| Type | Sous-domaine | Cible | TTL |
+|---|---|---|---|
+| A | *(vide = @)* | `92.243.27.159` | 3600 |
+| A | `www` | `92.243.27.159` | 3600 |
 
-> C'est la solution la plus rapide si e-monsite la propose.
-> Verifier dans les parametres du site ou contacter leur support.
+Verifier la propagation :
 
-### Strategie B — Transferer le DNS du .fr vers OVH et rediriger (recommande)
+```bash
+dig +short saulzet-le-froid.fr
+dig +short www.saulzet-le-froid.fr
+# Doivent retourner 92.243.27.159
+```
 
-C'est la meilleure solution a moyen terme : on prend le controle du .fr chez OVH et on configure une redirection permanente.
+### Etape 2 : Server block Nginx de redirection
 
-#### Etape 1 : Transferer le domaine .fr vers OVH
+Sur le serveur, creer `/etc/nginx/sites-available/saulzet-redirect-fr` :
 
-1. Chez e-monsite / le registrar actuel du .fr :
-   - Deverrouiller le domaine
-   - Recuperer le **code de transfert** (code AUTH / EPP)
-2. Chez OVH :
-   - Aller dans **Commander** > **Transferer un domaine**
-   - Saisir `saulzet-le-froid.fr`
-   - Coller le code de transfert
-   - Valider (~5-7 jours de delai)
+```bash
+sudo tee /etc/nginx/sites-available/saulzet-redirect-fr << 'EOF'
+server {
+    listen 80;
+    server_name saulzet-le-froid.fr www.saulzet-le-froid.fr;
+    return 301 https://www.saulzet-le-froid.com$request_uri;
+}
+EOF
 
-#### Etape 2 : Configurer la redirection dans la zone DNS OVH du .fr
+sudo ln -sf /etc/nginx/sites-available/saulzet-redirect-fr /etc/nginx/sites-enabled/saulzet-redirect-fr
+sudo nginx -t && sudo systemctl reload nginx
+```
 
-Une fois le .fr transfere chez OVH, dans **Noms de domaine** > `saulzet-le-froid.fr` > **Zone DNS** :
+### Etape 3 : Certificat HTTPS pour le .fr
 
-**Option 2a — Redirection web OVH (le plus simple) :**
+Sans certificat, `https://www.saulzet-le-froid.fr` afficherait une erreur TLS avant de pouvoir rediriger. On en obtient un avec certbot :
 
-1. Aller dans l'onglet **Redirection**
-2. Ajouter une redirection :
-   - Source : `saulzet-le-froid.fr` (et `www.saulzet-le-froid.fr`)
-   - Destination : `https://www.saulzet-le-froid.com`
-   - Type : **Permanente (301)**
+```bash
+sudo certbot --nginx \
+  -d saulzet-le-froid.fr -d www.saulzet-le-froid.fr \
+  --non-interactive --agree-tos --redirect --expand \
+  -m contact@saulzet-le-froid.com
+```
 
-OVH s'occupe de tout (serveur web intermediaire, certificat).
+Certbot transforme automatiquement le bloc en deux server blocks — un sur :80 (redirection HTTP) et un sur :443 (redirection HTTPS avec le certificat Let's Encrypt). Le renouvellement automatique est pris en charge par le timer systemd de certbot deja en place pour le .com.
 
-**Option 2b — Via un server block Nginx sur le serveur GandiCloud :**
+### Etape 4 : Verification
 
-1. Faire pointer le .fr vers le serveur Gandi :
+```bash
+for url in http://saulzet-le-froid.fr http://www.saulzet-le-froid.fr \
+           https://saulzet-le-froid.fr https://www.saulzet-le-froid.fr; do
+  printf "%-40s -> " "$url"
+  curl -sI -o /dev/null -w "%{http_code} %{redirect_url}\n" "$url"
+done
+```
 
-   | Type | Sous-domaine | Cible | TTL |
-   |---|---|---|---|
-   | A | *(vide = @)* | `185.x.x.x` | 3600 |
-   | A | `www` | `185.x.x.x` | 3600 |
-
-2. Ajouter un server block Nginx sur le serveur (`/etc/nginx/sites-available/saulzet-redirect-fr`) :
-
-   ```nginx
-   server {
-       listen 80;
-       server_name saulzet-le-froid.fr www.saulzet-le-froid.fr;
-       return 301 https://www.saulzet-le-froid.com$request_uri;
-   }
-   ```
-
-3. Activer et obtenir un certificat :
-
-   ```bash
-   sudo ln -s /etc/nginx/sites-available/saulzet-redirect-fr /etc/nginx/sites-enabled/
-   sudo nginx -t && sudo systemctl reload nginx
-   sudo certbot --nginx -d saulzet-le-froid.fr -d www.saulzet-le-froid.fr
-   ```
-
-   Certbot transformera le bloc en :
-
-   ```nginx
-   server {
-       listen 443 ssl;
-       server_name saulzet-le-froid.fr www.saulzet-le-froid.fr;
-       ssl_certificate /etc/letsencrypt/live/saulzet-le-froid.fr/fullchain.pem;
-       ssl_certificate_key /etc/letsencrypt/live/saulzet-le-froid.fr/privkey.pem;
-       return 301 https://www.saulzet-le-froid.com$request_uri;
-   }
-
-   server {
-       listen 80;
-       server_name saulzet-le-froid.fr www.saulzet-le-froid.fr;
-       return 301 https://www.saulzet-le-froid.com$request_uri;
-   }
-   ```
-
-### Strategie C — Page de redirection temporaire chez e-monsite
-
-En attendant le transfert du .fr, si e-monsite permet d'editer le contenu HTML :
-
-1. Remplacer le contenu de la page d'accueil par :
-
-   ```html
-   <!DOCTYPE html>
-   <html lang="fr">
-   <head>
-       <meta charset="utf-8">
-       <meta http-equiv="refresh" content="0;url=https://www.saulzet-le-froid.com">
-       <title>Saulzet-le-Froid - Nouveau site</title>
-   </head>
-   <body>
-       <p>Le site de Saulzet-le-Froid a demenage.
-          <a href="https://www.saulzet-le-froid.com">Cliquez ici</a>
-          si vous n'etes pas redirige automatiquement.</p>
-   </body>
-   </html>
-   ```
-
-> **Attention** : `<meta http-equiv="refresh">` n'est pas une vraie 301.
-> Les moteurs de recherche ne la traitent pas toujours comme une redirection permanente.
-> C'est un palliatif en attendant la strategie B.
-
-### Recommandation
-
-| Phase | Action |
-|---|---|
-| **Immediatement** | Strategie C — page de redirection chez e-monsite |
-| **Sous 1-2 semaines** | Strategie B — lancer le transfert du .fr vers OVH |
-| **Apres transfert** | Option 2a (redirection OVH) ou 2b (Nginx) au choix |
+Toutes les variantes doivent renvoyer un `301` vers `https://www.saulzet-le-froid.com/`.
 
 ---
 
