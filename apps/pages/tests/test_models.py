@@ -3,7 +3,7 @@
 import pytest
 from django.core.files.uploadedfile import SimpleUploadedFile
 
-from apps.pages.models import Document, Page
+from apps.pages.models import Document, DocumentCategory, Page
 
 
 @pytest.mark.django_db
@@ -55,10 +55,11 @@ class TestPage:
 @pytest.mark.django_db
 class TestDocument:
     def test_str(self):
+        cat_pv, _ = DocumentCategory.objects.get_or_create(slug="pv", defaults={"name": "PV"})
         doc = Document.objects.create(
             title="PV du 15 mars",
             file=SimpleUploadedFile("test.pdf", b"content"),
-            category=Document.Category.PV,
+            category=cat_pv,
         )
         assert str(doc) == "PV du 15 mars"
 
@@ -77,9 +78,15 @@ class TestDocument:
         )
         assert "Ko" in doc.file_size_display
 
-    def test_category_choices(self):
-        assert Document.Category.PV == "pv"
-        assert Document.Category.BULLETIN == "bulletin"
+    def test_dynamic_categories(self):
+        cat, _ = DocumentCategory.objects.get_or_create(slug="bulletin", defaults={"name": "Bulletin municipal"})
+        assert "ulletin" in str(cat)
+        doc = Document.objects.create(
+            title="Test",
+            file=SimpleUploadedFile("test.pdf", b"content"),
+            category=cat,
+        )
+        assert doc.category.slug == "bulletin"
 
     def test_page_association(self):
         page = Page.objects.create(title="Docs", slug="docs")

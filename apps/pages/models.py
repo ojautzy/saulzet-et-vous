@@ -114,21 +114,32 @@ class Page(models.Model):
         return crumbs
 
 
-class Document(models.Model):
-    class Category(models.TextChoices):
-        PV = "pv", _("Procès-verbal de conseil")
-        BULLETIN = "bulletin", _("Bulletin municipal")
-        PLU = "plu", _("Document PLU")
-        ARRETE = "arrete", _("Arrêté")
-        OTHER = "other", _("Autre")
+class DocumentCategory(models.Model):
+    """Dynamic, admin-editable document category."""
 
+    name = models.CharField(_("nom"), max_length=100)
+    slug = models.SlugField(_("slug"), max_length=100, unique=True)
+    order = models.PositiveIntegerField(_("ordre"), default=0)
+
+    class Meta:
+        verbose_name = _("catégorie de document")
+        verbose_name_plural = _("catégories de documents")
+        ordering = ["order", "name"]
+
+    def __str__(self):
+        return self.name
+
+
+class Document(models.Model):
     title = models.CharField(_("titre"), max_length=200)
     file = models.FileField(_("fichier"), upload_to="documents/")
-    category = models.CharField(
-        _("catégorie"),
-        max_length=20,
-        choices=Category.choices,
-        default=Category.OTHER,
+    category = models.ForeignKey(
+        DocumentCategory,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="documents",
+        verbose_name=_("catégorie"),
     )
     date = models.DateField(
         _("date du document"),

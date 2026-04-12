@@ -5,7 +5,7 @@ from django.contrib import admin
 from django.utils.html import format_html
 from django.utils.translation import gettext_lazy as _
 
-from .models import Document, GalleryPhoto, Page
+from .models import Document, DocumentCategory, GalleryPhoto, Page
 
 SPECIAL_TEMPLATES = {
     Page.Template.GALERIE,
@@ -88,6 +88,13 @@ class PageAdmin(admin.ModelAdmin):
 
     def get_queryset(self, request):
         return super().get_queryset(request).select_related("parent")
+
+
+@admin.register(DocumentCategory)
+class DocumentCategoryAdmin(admin.ModelAdmin):
+    list_display = ("name", "slug", "order")
+    list_editable = ("order",)
+    prepopulated_fields = {"slug": ("name",)}
 
 
 @admin.register(Document)

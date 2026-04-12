@@ -14,7 +14,7 @@
         {{ doc.file_size_display }}
       </p>
     </div>
-    <span class="badge bg-creme-fonce text-gris-pierre border-none text-xs flex-shrink-0">{{ doc.get_category_display }}</span>
+    {% if doc.category %}<span class="badge bg-creme-fonce text-gris-pierre border-none text-xs flex-shrink-0">{{ doc.category.name }}</span>{% endif %}
   </a>
   {% empty %}
   <p class="text-gris-pierre italic">Aucun document disponible.</p>

@@ -67,6 +67,12 @@
               <a href="{% url 'dashboard:documentation' %}" class="block px-4 py-2 hover:bg-vert-tres-clair transition-colors text-sm">
                 {% trans "Aide" %}
               </a>
+              {% if user.is_secretary %}
+              <div class="border-t border-gray-200 my-1"></div>
+              <a href="/admin/pages/" class="block px-4 py-2 hover:bg-vert-tres-clair transition-colors text-sm">
+                {% trans "Édition" %}
+              </a>
+              {% endif %}
               {% if user.is_admin %}
               <div class="border-t border-gray-200 my-1"></div>
               <a href="{% url 'dashboard:admin_cleanup' %}" class="block px-4 py-2 hover:bg-vert-tres-clair transition-colors text-sm">
@@ -171,6 +177,9 @@
         <a href="{% url 'reports:list' %}" class="block py-2 hover:text-vert-tres-clair">{% trans "Mes sollicitations" %}</a>
         <a href="{% url 'reports:create' %}" class="block py-2 hover:text-vert-tres-clair">{% trans "Écrire à vos élus" %}</a>
         <a href="{% url 'dashboard:documentation' %}" class="block py-2 hover:text-vert-tres-clair text-sm text-white/80">{% trans "Aide" %}</a>
+        {% if user.is_secretary %}
+        <a href="/admin/pages/" class="block py-2 hover:text-vert-tres-clair">{% trans "Édition" %}</a>
+        {% endif %}
         {% if user.is_admin %}
         <a href="{% url 'dashboard:admin_cleanup' %}" class="block py-2 hover:text-vert-tres-clair">{% trans "Maintenance" %}</a>
         {% endif %}

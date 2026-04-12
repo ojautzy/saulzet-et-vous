@@ -59,12 +59,12 @@ TEMPLATE_MAP = {
     "default": Page.Template.DEFAULT,
 }
 
-# Category mapping for PDFs based on filename patterns
+# Category mapping for PDFs based on filename patterns (slug-based)
 PDF_CATEGORY_PATTERNS = {
-    r"pv|proces.verbal|conseil": Document.Category.PV,
-    r"bulletin": Document.Category.BULLETIN,
-    r"plu|urbanisme|reglement|zonage": Document.Category.PLU,
-    r"arrete": Document.Category.ARRETE,
+    r"pv|proces.verbal|conseil": "pv",
+    r"bulletin": "bulletin",
+    r"plu|urbanisme|reglement|zonage": "plu",
+    r"arrete": "arrete",
 }
 
 
@@ -305,11 +305,13 @@ def extract_main_content(html_file):
 
 def guess_pdf_category(filename, link_text=""):
     """Guess the document category from the filename and link text."""
+    from apps.pages.models import DocumentCategory
+
     combined = f"{filename} {link_text}".lower()
-    for pattern, category in PDF_CATEGORY_PATTERNS.items():
+    for pattern, slug in PDF_CATEGORY_PATTERNS.items():
         if re.search(pattern, combined):
-            return category
-    return Document.Category.OTHER
+            return DocumentCategory.objects.filter(slug=slug).first()
+    return DocumentCategory.objects.filter(slug="other").first()
 
 
 def extract_date_from_filename(filename):

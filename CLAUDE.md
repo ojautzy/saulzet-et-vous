@@ -61,7 +61,7 @@ python manage.py create_initial_pages      # Arborescence initiale des pages
 ## Architecture des rôles
 
 - `admin` : gestion technique, validation inscriptions, nettoyage (suppression sollicitations annulées/résolues)
-- `secretary` : secrétaire de mairie — édition des pages CMS et documents via l'admin Django (accès `is_staff`, permissions limitées à `pages.*`)
+- `secretary` : secrétaire de mairie — édition des pages CMS, documents et catégories de documents via l'admin Django (accès `is_staff`, permissions limitées à `pages.*`). Lien « Édition » dans le menu Saulzet & Vous.
 - `mayor` : supervision, affectation/réaffectation des sollicitations, dashboard de pilotage
 - `elected` : prise en charge, commentaires, clôture, bascule public/privé
 - `citizen` : création, suivi, modification de ses sollicitations, choix public/privé (tant que statut NEW)
@@ -114,7 +114,7 @@ python manage.py create_initial_pages      # Arborescence initiale des pages
 
 ## Médias et documents
 
-- **Documents** (PDF, etc.) : stockés dans `media/documents/`, gérés via le modèle `Document` de l'app `pages`. Référencer dans les pages CMS avec `<a href="/media/documents/nom.pdf">`.
+- **Documents** (PDF, etc.) : stockés dans `media/documents/`, gérés via le modèle `Document` de l'app `pages`. Les catégories de documents sont dynamiques (modèle `DocumentCategory`), administrables par la secrétaire et l'admin via l'interface Django. Référencer dans les pages CMS avec `<a href="/media/documents/nom.pdf">`.
 - **Images des pages** : stockées dans `media/pages/images/`. Référencer dans les pages CMS avec `<img src="/media/pages/images/nom.jpg">`.
 - **Templates spéciaux** : certaines pages utilisent des templates dédiés (`habitants` pour la courbe démographique Chart.js, `acces` pour la carte Leaflet, `galerie` pour la visionneuse lightbox, `equipe`, `contact`, `documents`).
 
@@ -146,8 +146,9 @@ Le service `notify()` dans `apps/notifications/services.py` crée la notificatio
 
 ## État du projet
 
-- **Version actuelle** : 1.0.0 — site déployé en production sur https://www.saulzet-le-froid.com
+- **Version actuelle** : 1.1.0 — site déployé en production sur https://www.saulzet-le-froid.com
 - Plan complet dans `saulzet-et-vous-plan-v3.md`. Prompts par phase dans `prompt-phase*-claude-code.md`.
 - Toutes les phases (1 à 7) sont livrées : fondations, sollicitations, interface élus, retours utilisateurs, site communal CMS, migration de contenu, notifications/administration, mise en production.
 - v1.0.0 ajoute la galerie photos, la page de mentions légales et le lien dans le footer.
+- v1.1.0 ajoute le lien « Édition » dans le menu secrétaire et rend les catégories de documents dynamiques (modèle `DocumentCategory`).
 - Guide de déploiement : `docs/deploiement-production.md`. Script de déploiement : `scripts/deploy.sh`.

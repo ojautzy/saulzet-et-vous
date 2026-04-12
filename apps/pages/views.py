@@ -5,7 +5,7 @@ from django.shortcuts import get_object_or_404, render
 from django.utils.translation import gettext_lazy as _
 
 from .forms import ContactForm
-from .models import Document, Page
+from .models import Document, DocumentCategory, Page
 
 
 def home_view(request):
@@ -83,10 +83,10 @@ def contact_view(request):
 def document_list_view(request, category=None):
     """Liste des documents téléchargeables."""
     page = Page.objects.filter(slug="documents", is_published=True).first()
-    documents = Document.objects.all()
+    documents = Document.objects.select_related("category").all()
     if category:
-        documents = documents.filter(category=category)
-    categories = Document.Category.choices
+        documents = documents.filter(category__slug=category)
+    categories = DocumentCategory.objects.all()
     return render(request, "pages/page_documents.html", {
         "page": page,
         "documents": documents,

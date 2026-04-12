@@ -325,10 +325,12 @@ class TestMigratedPageViews:
             is_published=True,
             template=Page.Template.DOCUMENTS,
         )
+        from apps.pages.models import DocumentCategory
+        cat_pv, _ = DocumentCategory.objects.get_or_create(slug="pv", defaults={"name": "PV"})
         Document.objects.create(
             title="PV Mars 2025",
             file=SimpleUploadedFile("pv.pdf", b"content"),
-            category=Document.Category.PV,
+            category=cat_pv,
             page=page,
         )
         # Documents template page accessed at root level

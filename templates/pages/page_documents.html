@@ -23,10 +23,10 @@
        class="btn btn-sm {% if not current_category %}btn-primary-saulzet{% else %}btn-ghost border-vert-prairie text-vert-foret{% endif %}">
       {% trans "Tous" %}
     </a>
-    {% for value, label in categories %}
-    <a href="{% url 'document_list_category' category=value %}"
-       class="btn btn-sm {% if current_category == value %}btn-primary-saulzet{% else %}btn-ghost border-vert-prairie text-vert-foret{% endif %}">
-      {{ label }}
+    {% for cat in categories %}
+    <a href="{% url 'document_list_category' category=cat.slug %}"
+       class="btn btn-sm {% if current_category == cat.slug %}btn-primary-saulzet{% else %}btn-ghost border-vert-prairie text-vert-foret{% endif %}">
+      {{ cat.name }}
     </a>
     {% endfor %}
   </div>
