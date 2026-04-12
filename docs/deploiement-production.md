@@ -1,6 +1,6 @@
 # Guide de deploiement en production — Saulzet & Vous
 
-> **Version documentee** : 1.3.0 (site en production depuis avril 2026)
+> **Version documentee** : 1.3.5 (site en production depuis avril 2026)
 > **Derniere mise a jour** : 2026-04-12
 > **Cible** : GandiCloud + OVH (DNS + mail Zimbra Pro)
 > **Domaine principal** : `www.saulzet-le-froid.com`

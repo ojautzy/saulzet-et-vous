@@ -159,11 +159,12 @@ Le service `notify()` dans `apps/notifications/services.py` crée la notificatio
 
 ## État du projet
 
-- **Version actuelle** : 1.3.0 — site déployé en production sur https://www.saulzet-le-froid.com
+- **Version actuelle** : 1.3.5 — site déployé en production sur https://www.saulzet-le-froid.com
 - Plan complet dans `saulzet-et-vous-plan-v3.md`. Prompts par phase dans `prompt-phase*-claude-code.md`.
 - Toutes les phases (1 à 7) sont livrées : fondations, sollicitations, interface élus, retours utilisateurs, site communal CMS, migration de contenu, notifications/administration, mise en production.
 - v1.0.0 ajoute la galerie photos, la page de mentions légales et le lien dans le footer.
 - v1.1.0 ajoute le lien « Édition » dans le menu secrétaire et rend les catégories de documents dynamiques (modèle `DocumentCategory`).
 - v1.2.0 correctifs de sécurité prioritaires : HSTS, CSP (middleware Django), masquage IP dans la doc, correction SITE_URL par défaut.
 - v1.3.0 correctifs de sécurité court terme : rate limiting (`django-ratelimit`), sanitisation HTML CMS (`nh3`), validation des entrées, remplacement de `.extra()` par `TruncMonth`, `robots.txt`, redirection non-www → www.
+- v1.3.5 protection anti-spam du formulaire de contact : honeypot, rate limiting (3/min/IP), validation temporelle (< 3s).
 - Guide de déploiement : `docs/deploiement-production.md`. Script de déploiement : `scripts/deploy.sh`.
