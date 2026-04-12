@@ -2,6 +2,7 @@
 
 from io import BytesIO
 
+import nh3
 from django.conf import settings
 from django.core.files.base import ContentFile
 from django.db import models
@@ -9,6 +10,39 @@ from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 from PIL import Image
 from tinymce.models import HTMLField
+
+# Whitelist for nh3 HTML sanitization of CMS content.
+# Must cover all TinyMCE formatting used by editors (headings, lists, tables,
+# images, links, text styling). Update this list when adding new TinyMCE
+# plugins or content types (e.g. video embeds, iframes).
+ALLOWED_TAGS = {
+    # Structure
+    "h1", "h2", "h3", "h4", "h5", "h6",
+    "p", "br", "hr", "div", "span", "blockquote", "pre", "code",
+    # Lists
+    "ul", "ol", "li",
+    # Tables
+    "table", "thead", "tbody", "tfoot", "tr", "th", "td", "caption", "colgroup", "col",
+    # Inline formatting
+    "strong", "b", "em", "i", "u", "s", "sub", "sup", "small", "mark", "abbr",
+    # Media & links
+    "a", "img",
+    # Definition lists
+    "dl", "dt", "dd",
+    # Figures
+    "figure", "figcaption",
+}
+
+ALLOWED_ATTRIBUTES = {
+    "*": {"class", "id", "style", "title", "lang", "dir"},
+    "a": {"href", "target", "rel", "title"},
+    "img": {"src", "alt", "width", "height", "loading"},
+    "td": {"colspan", "rowspan", "headers"},
+    "th": {"colspan", "rowspan", "scope", "headers"},
+    "col": {"span"},
+    "colgroup": {"span"},
+    "ol": {"start", "type"},
+}
 
 
 class Page(models.Model):
@@ -96,6 +130,13 @@ class Page(models.Model):
     def save(self, *args, **kwargs):
         if not self.slug:
             self.slug = slugify(self.title)
+        if self.content:
+            self.content = nh3.clean(
+                self.content,
+                tags=ALLOWED_TAGS,
+                attributes=ALLOWED_ATTRIBUTES,
+                link_rel=None,
+            )
         super().save(*args, **kwargs)
 
     def get_absolute_url(self):

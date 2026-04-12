@@ -6,6 +6,7 @@ from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.db.models import Avg, Case, Count, F, IntegerField, Value, When
+from django.db.models.functions import TruncMonth
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
@@ -427,7 +428,10 @@ def admin_cleanup_cancelled_view(request: HttpRequest) -> HttpResponse:
 @admin_required
 def admin_cleanup_resolved_view(request: HttpRequest) -> HttpResponse:
     """Delete resolved reports older than a given delay."""
-    days = int(request.POST.get("days", 30))
+    try:
+        days = max(1, min(int(request.POST.get("days", 30)), 365))
+    except (ValueError, TypeError):
+        days = 30
     cutoff = timezone.now() - timedelta(days=days)
     resolved = Report.objects.filter(
         status=Report.Status.RESOLVED,
@@ -449,7 +453,10 @@ def admin_cleanup_resolved_view(request: HttpRequest) -> HttpResponse:
 @admin_required
 def admin_cleanup_resolved_count_view(request: HttpRequest) -> HttpResponse:
     """Return the count of resolved reports for a given delay (HTMX)."""
-    days = int(request.GET.get("days", 30))
+    try:
+        days = max(1, min(int(request.GET.get("days", 30)), 365))
+    except (ValueError, TypeError):
+        days = 30
     count = _get_resolved_count(days)
     return HttpResponse(str(count))
 
@@ -552,7 +559,7 @@ def mayor_dashboard_view(request: HttpRequest) -> HttpResponse:
     six_months_ago = timezone.now() - timedelta(days=config.stats_period_days)
     monthly_reports = (
         Report.objects.filter(created_at__gte=six_months_ago)
-        .extra(select={"month": "strftime('%%Y-%%m', created_at)"})
+        .annotate(month=TruncMonth("created_at"))
         .values("month")
         .annotate(count=Count("id"))
         .order_by("month")

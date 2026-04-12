@@ -141,7 +141,7 @@
             <h3 class="text-sm font-semibold text-gris-pierre uppercase tracking-wide mb-2">{% trans "Par mois (6 derniers)" %}</h3>
             {% for entry in monthly_reports %}
             <div class="flex items-center justify-between py-1">
-              <span class="text-sm">{{ entry.month }}</span>
+              <span class="text-sm">{{ entry.month|date:"Y-m" }}</span>
               <span class="font-semibold text-vert-foret">{{ entry.count }}</span>
             </div>
             {% empty %}
