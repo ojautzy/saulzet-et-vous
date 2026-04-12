@@ -1,5 +1,7 @@
 """Tests for pages app views."""
 
+import time
+
 import pytest
 from django.urls import reverse
 
@@ -67,6 +69,10 @@ class TestHomeView:
 
 @pytest.mark.django_db
 class TestContactView:
+    @pytest.fixture(autouse=True)
+    def _disable_ratelimit(self, settings):
+        settings.RATELIMIT_ENABLE = False
+
     def test_contact_get(self, client):
         response = client.get(reverse("contact"))
         assert response.status_code == 200
@@ -78,6 +84,7 @@ class TestContactView:
             "email": "test@example.fr",
             "subject": "Question",
             "message": "Bonjour, ceci est un test.",
+            "timestamp": str(time.time() - 10),
         })
         assert response.status_code == 200
         assert len(mailoutbox) >= 1
@@ -89,9 +96,101 @@ class TestContactView:
             "email": "invalid",
             "subject": "",
             "message": "",
+            "timestamp": str(time.time() - 10),
         })
         assert response.status_code == 200
         assert response.context["form"].errors
+
+
+@pytest.mark.django_db
+class TestContactAntiSpam:
+    """Tests for the 3 anti-spam layers on the contact form."""
+
+    @pytest.fixture(autouse=True)
+    def _disable_ratelimit(self, settings):
+        settings.RATELIMIT_ENABLE = False
+
+    VALID_DATA = {
+        "name": "Marie Dupont",
+        "email": "marie@example.fr",
+        "subject": "Renseignement",
+        "message": "Bonjour, je souhaite un renseignement.",
+    }
+
+    # -- Honeypot --
+
+    def test_honeypot_filled_rejects(self, client):
+        """A bot that fills the hidden website field is rejected."""
+        data = {**self.VALID_DATA, "website": "http://spam.com", "timestamp": str(time.time() - 10)}
+        response = client.post(reverse("contact"), data)
+        assert response.status_code == 200
+        assert response.context["form"].errors
+
+    def test_honeypot_empty_passes(self, client, mailoutbox):
+        """A human that leaves the honeypot empty passes."""
+        data = {**self.VALID_DATA, "website": "", "timestamp": str(time.time() - 10)}
+        response = client.post(reverse("contact"), data)
+        assert response.status_code == 200
+        assert len(mailoutbox) >= 1
+
+    # -- Timestamp --
+
+    def test_instant_submit_rejects(self, client):
+        """Submitting faster than CONTACT_MIN_SUBMIT_SECONDS is rejected."""
+        data = {**self.VALID_DATA, "timestamp": str(time.time())}
+        response = client.post(reverse("contact"), data)
+        assert response.status_code == 200
+        assert response.context["form"].errors
+
+    def test_missing_timestamp_rejects(self, client):
+        """Missing timestamp field is rejected."""
+        data = {**self.VALID_DATA}
+        response = client.post(reverse("contact"), data)
+        assert response.status_code == 200
+        assert response.context["form"].errors
+
+    def test_invalid_timestamp_rejects(self, client):
+        """Non-numeric timestamp is rejected."""
+        data = {**self.VALID_DATA, "timestamp": "not-a-number"}
+        response = client.post(reverse("contact"), data)
+        assert response.status_code == 200
+        assert response.context["form"].errors
+
+    def test_normal_submit_passes(self, client, mailoutbox):
+        """A realistic delay passes all checks."""
+        data = {**self.VALID_DATA, "timestamp": str(time.time() - 30)}
+        response = client.post(reverse("contact"), data)
+        assert response.status_code == 200
+        assert len(mailoutbox) >= 1
+
+    # -- GET embeds timestamp --
+
+    def test_get_provides_timestamp(self, client):
+        """GET response includes a hidden timestamp field with a recent value."""
+        response = client.get(reverse("contact"))
+        form = response.context["form"]
+        ts = form.initial.get("timestamp")
+        assert ts is not None
+        assert abs(time.time() - float(ts)) < 5
+
+
+@pytest.mark.django_db
+class TestContactRateLimit:
+    """Test that rate limiting is enforced on the contact form."""
+
+    def test_rate_limit_blocks_after_threshold(self, client):
+        """Posting more than 3 times per minute triggers a 403."""
+        data = {
+            "name": "Test",
+            "email": "t@t.fr",
+            "subject": "Test",
+            "message": "Test",
+            "timestamp": str(time.time() - 10),
+        }
+        for _ in range(3):
+            client.post(reverse("contact"), data)
+        response = client.post(reverse("contact"), data)
+        assert response.status_code == 403
 
 
 @pytest.mark.django_db

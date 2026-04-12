@@ -1,8 +1,11 @@
 """Views for the CMS pages app."""
 
+import time
+
 from django.contrib import messages as django_messages
 from django.shortcuts import get_object_or_404, render
 from django.utils.translation import gettext_lazy as _
+from django_ratelimit.decorators import ratelimit
 
 from .forms import ContactForm
 from .models import Document, DocumentCategory, Page
@@ -59,6 +62,7 @@ def legal_notice_view(request):
     return render(request, "pages/legal_notice.html")
 
 
+@ratelimit(key="ip", rate="3/m", method="POST", block=True)
 def contact_view(request):
     """Page de contact avec formulaire."""
     page = Page.objects.filter(slug="contact", is_published=True).first()
@@ -74,9 +78,9 @@ def contact_view(request):
                 message_text=f"[{form.cleaned_data['subject']}]\n\n{form.cleaned_data['message']}",
             )
             django_messages.success(request, _("Votre message a bien été envoyé."))
-            form = ContactForm()
+            form = ContactForm(initial={"timestamp": str(time.time())})
     else:
-        form = ContactForm()
+        form = ContactForm(initial={"timestamp": str(time.time())})
     return render(request, "pages/page_contact.html", {"page": page, "form": form})
 
 
