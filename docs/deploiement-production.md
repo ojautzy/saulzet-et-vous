@@ -1,7 +1,7 @@
 # Guide de deploiement en production — Saulzet & Vous
 
-> **Version documentee** : 1.0.0 (site en production depuis avril 2026)
-> **Derniere mise a jour** : 2026-04-10
+> **Version documentee** : 1.3.0 (site en production depuis avril 2026)
+> **Derniere mise a jour** : 2026-04-12
 > **Cible** : GandiCloud + OVH (DNS + mail Zimbra Pro)
 > **Domaine principal** : `www.saulzet-le-froid.com`
 > **Domaine secondaire** : `www.saulzet-le-froid.fr` (redirection 301 vers le .com)
@@ -265,9 +265,20 @@ Creer `/etc/nginx/sites-available/saulzet` :
 
 ```bash
 sudo tee /etc/nginx/sites-available/saulzet << 'EOF'
+# Redirection non-www HTTPS vers www (301)
+server {
+    listen 443 ssl;
+    server_name saulzet-le-froid.com;
+    ssl_certificate /etc/letsencrypt/live/saulzet-le-froid.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/saulzet-le-froid.com/privkey.pem;
+    include /etc/letsencrypt/options-ssl-nginx.conf;
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
+    return 301 https://www.saulzet-le-froid.com$request_uri;
+}
+
 server {
     listen 80;
-    server_name saulzet-le-froid.com www.saulzet-le-froid.com;
+    server_name www.saulzet-le-froid.com;
 
     client_max_body_size 10M;
 
@@ -293,6 +304,8 @@ server {
 EOF
 ```
 
+> **Note** : Certbot modifiera ensuite ce fichier pour ajouter l'ecoute 443, les certificats SSL et la redirection HTTP → HTTPS sur le bloc `www`. Le bloc de redirection non-www est deja en HTTPS car il doit servir un certificat valide avant de rediriger.
+
 Activer :
 
 ```bash
@@ -300,6 +313,14 @@ sudo ln -s /etc/nginx/sites-available/saulzet /etc/nginx/sites-enabled/
 sudo rm -f /etc/nginx/sites-enabled/default
 sudo nginx -t
 sudo systemctl reload nginx
+```
+
+Masquer la version de Nginx (securite) :
+
+```bash
+# Dans /etc/nginx/nginx.conf, section http { ... } :
+sudo sed -i '/http {/a \\tserver_tokens off;' /etc/nginx/nginx.conf
+sudo nginx -t && sudo systemctl reload nginx
 ```
 
 Rendre les fichiers statiques et media lisibles par Nginx (`www-data`) :
