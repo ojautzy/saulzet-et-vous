@@ -45,6 +45,9 @@ Thumbs.db
 prompt-*.md
 *-plan-*.md
 
+# Rapports d'audit (confidentiels, ne pas publier)
+audit-*.md
+
 # Dumps de données Django (dumpdata, exports, backups)
 data_export*.json
 dump*.json
