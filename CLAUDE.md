@@ -61,7 +61,7 @@ python manage.py create_initial_pages      # Arborescence initiale des pages
 ## Architecture des rôles
 
 - `admin` : gestion technique, validation inscriptions, nettoyage (suppression sollicitations annulées/résolues)
-- `secretary` : secrétaire de mairie — édition des pages CMS, documents et catégories de documents via l'admin Django (accès `is_staff`, permissions limitées à `pages.*`). Lien « Édition » dans le menu Saulzet & Vous.
+- `secretary` : secrétaire de mairie — édition des pages CMS **standard uniquement** (templates `default` et `full_width`), documents et catégories de documents via l'admin Django (accès `is_staff`, permissions limitées à `pages.*`). Les pages spéciales (contact, documents, équipe, habitants, accès, galerie) sont en **lecture seule** pour le secrétaire. La suppression est limitée aux pages standard créées par le secrétaire. Lien « Édition » dans le menu Saulzet & Vous.
 - `mayor` : supervision, affectation/réaffectation des sollicitations, dashboard de pilotage
 - `elected` : prise en charge, commentaires, clôture, bascule public/privé
 - `citizen` : création, suivi, modification de ses sollicitations, choix public/privé (tant que statut NEW)
@@ -124,6 +124,15 @@ Le formulaire `/contact/` est protégé par 3 couches anti-bot (cf. `apps/pages/
 3. **Validation temporelle** : timestamp caché injecté au GET, rejeté si soumission en moins de 3 secondes (`CONTACT_MIN_SUBMIT_SECONDS`).
 
 Les tests anti-spam désactivent le rate limiter via `settings.RATELIMIT_ENABLE = False` (fixture `_disable_ratelimit`). Le test du rate limiting lui-même est dans `TestContactRateLimit` (rate limiter activé).
+
+## Protection des pages spéciales (secrétaire)
+
+Les pages utilisant un template spécial (`contact`, `documents`, `equipe`, `galerie`, `habitants`, `acces`) sont protégées contre les modifications accidentelles par le secrétaire (cf. `apps/pages/admin.py`) :
+- **Édition** : `has_change_permission` retourne `False` pour le secrétaire sur les pages spéciales → affichage en lecture seule dans l'admin.
+- **Suppression** : `has_delete_permission` retourne `False` pour les pages spéciales ET pour les pages standard non créées par le secrétaire.
+- **Création** : `get_form` limite les choix de template aux seuls `default` et `full_width` pour le secrétaire.
+- **Message d'information** : `changeform_view` affiche un message quand le secrétaire consulte une page spéciale.
+- Les admins et superusers ne sont pas affectés par ces restrictions.
 
 ## Médias et documents
 

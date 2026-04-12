@@ -1,7 +1,7 @@
 """Admin configuration for pages app."""
 
 from django import forms
-from django.contrib import admin
+from django.contrib import admin, messages
 from django.utils.html import format_html
 from django.utils.translation import gettext_lazy as _
 
@@ -15,6 +15,16 @@ SPECIAL_TEMPLATES = {
     Page.Template.CONTACT,
     Page.Template.DOCUMENTS,
 }
+
+STANDARD_TEMPLATES = [
+    (Page.Template.DEFAULT, Page.Template.DEFAULT.label),
+    (Page.Template.FULL_WIDTH, Page.Template.FULL_WIDTH.label),
+]
+
+
+def _is_secretary(user):
+    """Check if user is a secretary (not admin/superuser)."""
+    return hasattr(user, "is_secretary") and user.is_secretary and not user.is_superuser
 
 
 class DocumentInline(admin.TabularInline):
@@ -64,6 +74,19 @@ class PageAdmin(admin.ModelAdmin):
         }),
     )
 
+    def has_change_permission(self, request, obj=None):
+        if obj and _is_secretary(request.user) and obj.template in SPECIAL_TEMPLATES:
+            return False
+        return super().has_change_permission(request, obj)
+
+    def has_delete_permission(self, request, obj=None):
+        if obj and _is_secretary(request.user):
+            if obj.template in SPECIAL_TEMPLATES:
+                return False
+            if obj.created_by != request.user:
+                return False
+        return super().has_delete_permission(request, obj)
+
     def get_inlines(self, request, obj=None):
         inlines = [DocumentInline]
         if obj and obj.template == Page.Template.GALERIE:
@@ -72,13 +95,31 @@ class PageAdmin(admin.ModelAdmin):
 
     def get_form(self, request, obj=None, **kwargs):
         form = super().get_form(request, obj, **kwargs)
-        if obj and obj.template in SPECIAL_TEMPLATES:
+        if obj and obj.template in SPECIAL_TEMPLATES and "content" in form.base_fields:
             form.base_fields["content"].widget = forms.Textarea(attrs={"rows": 4})
             form.base_fields["content"].help_text = _(
                 "Texte d'introduction optionnel, affiché avant le contenu "
                 "spécifique de la page. La mise en forme est automatique."
             )
+        if _is_secretary(request.user) and "template" in form.base_fields:
+            form.base_fields["template"].choices = STANDARD_TEMPLATES
         return form
+
+    def changeform_view(self, request, object_id=None, form_url="", extra_context=None):
+        if object_id and _is_secretary(request.user):
+            try:
+                obj = self.get_object(request, object_id)
+                if obj and obj.template in SPECIAL_TEMPLATES:
+                    messages.info(
+                        request,
+                        _(
+                            "Cette page utilise un modèle spécial et est protégée. "
+                            "Seul un administrateur peut la modifier."
+                        ),
+                    )
+            except Exception:
+                pass
+        return super().changeform_view(request, object_id, form_url, extra_context)
 
     def save_model(self, request, obj, form, change):
         if not change:
