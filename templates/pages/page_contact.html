@@ -17,7 +17,15 @@
       <h2 class="text-xl font-playfair font-bold text-vert-foret mb-4">{% trans "Envoyez-nous un message" %}</h2>
       <form method="post" class="space-y-4">
         {% csrf_token %}
-        {% for field in form %}
+        {# Anti-spam: honeypot field hidden via CSS #}
+        <div aria-hidden="true" style="position:absolute;left:-9999px;top:-9999px;">
+          <label for="{{ form.website.id_for_label }}">{% trans "Ne pas remplir" %}</label>
+          {{ form.website }}
+        </div>
+        {# Anti-spam: timestamp #}
+        {{ form.timestamp }}
+        {% for field in form.visible_fields %}
+        {% if field.name != "website" %}
         <div>
           <label for="{{ field.id_for_label }}" class="label">
             <span class="label-text font-semibold">{{ field.label }}</span>
@@ -27,6 +35,7 @@
           <p class="text-red-600 text-sm mt-1">{{ field.errors.0 }}</p>
           {% endif %}
         </div>
+        {% endif %}
         {% endfor %}
         <button type="submit" class="btn btn-primary-saulzet w-full">
           {% trans "Envoyer" %}

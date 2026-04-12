@@ -116,6 +116,15 @@ python manage.py create_initial_pages      # Arborescence initiale des pages
 
 Le contenu HTML des pages CMS est sanitisé à la sauvegarde via `nh3` (cf. `apps/pages/models.py`). La liste blanche de balises et attributs autorisés est définie dans les constantes `ALLOWED_TAGS` et `ALLOWED_ATTRIBUTES` en haut du fichier. Elle couvre les usages TinyMCE actuels : titres, paragraphes, listes, tableaux, images, liens, mise en forme inline. **Si un nouveau type de contenu est ajouté** (embed vidéo, iframe, etc.), mettre à jour ces constantes.
 
+## Protection anti-spam du formulaire de contact
+
+Le formulaire `/contact/` est protégé par 3 couches anti-bot (cf. `apps/pages/forms.py` et `apps/pages/views.py`) :
+1. **Honeypot** : champ `website` invisible (CSS `position:absolute;left:-9999px`), rejeté silencieusement si rempli.
+2. **Rate limiting** : `@ratelimit(key="ip", rate="3/m")` via `django-ratelimit` — max 3 soumissions/minute par IP.
+3. **Validation temporelle** : timestamp caché injecté au GET, rejeté si soumission en moins de 3 secondes (`CONTACT_MIN_SUBMIT_SECONDS`).
+
+Les tests anti-spam désactivent le rate limiter via `settings.RATELIMIT_ENABLE = False` (fixture `_disable_ratelimit`). Le test du rate limiting lui-même est dans `TestContactRateLimit` (rate limiter activé).
+
 ## Médias et documents
 
 - **Documents** (PDF, etc.) : stockés dans `media/documents/`, gérés via le modèle `Document` de l'app `pages`. Les catégories de documents sont dynamiques (modèle `DocumentCategory`), administrables par la secrétaire et l'admin via l'interface Django. Référencer dans les pages CMS avec `<a href="/media/documents/nom.pdf">`.
