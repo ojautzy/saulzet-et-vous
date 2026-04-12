@@ -14,7 +14,9 @@ from django.http import HttpRequest, HttpResponse
 from django.shortcuts import redirect, render
 from django.template.loader import render_to_string
 from django.utils import timezone
+from django.utils.decorators import method_decorator
 from django.utils.translation import gettext_lazy as _
+from django_ratelimit.decorators import ratelimit
 
 from .forms import LoginForm, MagicLinkForm, ProfileForm, RegisterForm
 
@@ -41,6 +43,7 @@ def login_view(request: HttpRequest) -> HttpResponse:
     )
 
 
+@ratelimit(key="ip", rate="5/m", method="POST", block=True)
 def magic_link_request_view(request: HttpRequest) -> HttpResponse:
     """Handle magic link request."""
     if request.method != "POST":
@@ -145,6 +148,7 @@ def magic_link_verify_view(request: HttpRequest, token: str) -> HttpResponse:
     return redirect("home")
 
 
+@method_decorator(ratelimit(key="ip", rate="5/m", method="POST", block=True), name="dispatch")
 class PasswordLoginView(LoginView):
     """Handle password-based login."""
 
@@ -173,6 +177,7 @@ class PasswordLoginView(LoginView):
         return super().form_valid(form)
 
 
+@ratelimit(key="ip", rate="5/m", method="POST", block=True)
 def register_view(request: HttpRequest) -> HttpResponse:
     """Handle user registration."""
     if request.user.is_authenticated:

@@ -3,11 +3,26 @@
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
+from django.http import HttpResponse
 from django.urls import include, path
 
 from apps.pages import views as pages_views
 
+
+def robots_txt(request):
+    lines = [
+        "User-agent: *",
+        "Disallow: /admin/",
+        "Disallow: /etvous/",
+        "",
+    ]
+    return HttpResponse("\n".join(lines), content_type="text/plain")
+
+
 urlpatterns = [
+    # robots.txt
+    path("robots.txt", robots_txt, name="robots_txt"),
+
     # Admin Django
     path("admin/", admin.site.urls),
 

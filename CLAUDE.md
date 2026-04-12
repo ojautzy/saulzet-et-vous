@@ -112,6 +112,10 @@ python manage.py create_initial_pages      # Arborescence initiale des pages
 - **Règle impérative** : à chaque création de tag Git (`git tag vX.Y.Z`), mettre à jour le fichier `VERSION` avec la même valeur (sans le préfixe `v`). Toujours committer la mise à jour de `VERSION` **avant** de créer le tag.
 - Schéma : `MAJEURE.MINEURE.PATCH` — une phase de développement = une version mineure
 
+## Sanitisation HTML CMS (nh3)
+
+Le contenu HTML des pages CMS est sanitisé à la sauvegarde via `nh3` (cf. `apps/pages/models.py`). La liste blanche de balises et attributs autorisés est définie dans les constantes `ALLOWED_TAGS` et `ALLOWED_ATTRIBUTES` en haut du fichier. Elle couvre les usages TinyMCE actuels : titres, paragraphes, listes, tableaux, images, liens, mise en forme inline. **Si un nouveau type de contenu est ajouté** (embed vidéo, iframe, etc.), mettre à jour ces constantes.
+
 ## Médias et documents
 
 - **Documents** (PDF, etc.) : stockés dans `media/documents/`, gérés via le modèle `Document` de l'app `pages`. Les catégories de documents sont dynamiques (modèle `DocumentCategory`), administrables par la secrétaire et l'admin via l'interface Django. Référencer dans les pages CMS avec `<a href="/media/documents/nom.pdf">`.

@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Trop de tentatives" %}{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto px-4 py-16 text-center">
+  <h1 class="text-3xl font-bold text-vert-foret mb-4">{% trans "Trop de tentatives" %}</h1>
+  <p class="text-lg text-gray-600 mb-8">
+    {% trans "Vous avez effectué trop de requêtes. Veuillez patienter quelques minutes avant de réessayer." %}
+  </p>
+  <a href="{% url 'home' %}" class="btn btn-primary-saulzet">{% trans "Retour à l'accueil" %}</a>
+</div>
+{% endblock %}
