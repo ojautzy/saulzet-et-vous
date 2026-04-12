@@ -504,15 +504,15 @@ Dans la zone DNS OVH de `saulzet-le-froid.fr`, faire pointer l'apex et `www` ver
 
 | Type | Sous-domaine | Cible | TTL |
 |---|---|---|---|
-| A | *(vide = @)* | `92.243.27.159` | 3600 |
-| A | `www` | `92.243.27.159` | 3600 |
+| A | *(vide = @)* | `<IP-SERVEUR>` | 3600 |
+| A | `www` | `<IP-SERVEUR>` | 3600 |
 
 Verifier la propagation :
 
 ```bash
 dig +short saulzet-le-froid.fr
 dig +short www.saulzet-le-froid.fr
-# Doivent retourner 92.243.27.159
+# Doivent retourner <IP-SERVEUR>
 ```
 
 ### Etape 2 : Server block Nginx de redirection

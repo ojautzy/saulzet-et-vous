@@ -22,7 +22,7 @@ DATABASES = {
 }
 
 # Site URL for magic links
-SITE_URL = env("SITE_URL", default="https://saulzet.jautzy.com")
+SITE_URL = env("SITE_URL", default="https://www.saulzet-le-froid.com")
 
 # Security
 SECURE_BROWSER_XSS_FILTER = True
@@ -30,3 +30,8 @@ SECURE_CONTENT_TYPE_NOSNIFF = True
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
 X_FRAME_OPTIONS = "DENY"
+
+# HSTS (A1 — audit 2026-04-12)
+SECURE_HSTS_SECONDS = 31536000
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+SECURE_HSTS_PRELOAD = True
