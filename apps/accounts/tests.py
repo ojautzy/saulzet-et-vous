@@ -189,6 +189,24 @@ class TestMagicLink(TestCase):
         assert self.user.magic_link_token is not None
         assert self.user.magic_link_expires is not None
 
+    def test_magic_link_email_uses_correct_url_prefix(self):
+        """Regression: the emailed magic link must use /comptes/, not /accounts/.
+
+        The accounts app is mounted under /comptes/ in the project URLconf,
+        so a hardcoded /accounts/... prefix produced 404s on click.
+        """
+        from django.core import mail
+
+        mail.outbox.clear()
+        self.client.post(
+            "/comptes/magic/request/",
+            {"email": "magic@example.com"},
+        )
+        assert len(mail.outbox) == 1
+        body = mail.outbox[0].body
+        assert "/comptes/magic/" in body
+        assert "/accounts/magic/" not in body
+
     def test_magic_link_valid_token(self):
         raw_token = secrets.token_urlsafe(32)
         token_hash = hashlib.sha256(raw_token.encode()).hexdigest()
