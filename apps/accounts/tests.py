@@ -456,3 +456,106 @@ class TestVillageField(TestCase):
         )
         assert response.status_code == 200
         assert "Zanières" in response.content.decode()
+
+
+class TestPasswordChange(TestCase):
+    """Tests for the password change / set view."""
+
+    URL = "/comptes/mot-de-passe/"
+
+    def setUp(self):
+        self.user = User.objects.create_user(
+            email="changer@example.com",
+            password="oldpass123!",
+            first_name="Cha",
+            last_name="Nger",
+            is_approved=True,
+        )
+
+    def test_requires_login(self):
+        response = self.client.get(self.URL)
+        assert response.status_code == 302
+        assert "/comptes/login" in response.url
+
+    def test_get_renders_change_form(self):
+        self.client.login(email="changer@example.com", password="oldpass123!")
+        response = self.client.get(self.URL)
+        assert response.status_code == 200
+        content = response.content.decode()
+        assert "Changer mon mot de passe" in content
+        assert "old_password" in content
+
+    def test_change_password_success(self):
+        self.client.login(email="changer@example.com", password="oldpass123!")
+        response = self.client.post(
+            self.URL,
+            {
+                "old_password": "oldpass123!",
+                "new_password1": "BrandNew$ecret42",
+                "new_password2": "BrandNew$ecret42",
+            },
+        )
+        assert response.status_code == 302
+        assert response.url == "/comptes/profile/"
+        self.user.refresh_from_db()
+        assert self.user.check_password("BrandNew$ecret42")
+        # Session preserved (still authenticated after change)
+        response2 = self.client.get("/comptes/profile/")
+        assert response2.status_code == 200
+
+    def test_change_password_wrong_old_password(self):
+        self.client.login(email="changer@example.com", password="oldpass123!")
+        response = self.client.post(
+            self.URL,
+            {
+                "old_password": "wrong!",
+                "new_password1": "BrandNew$ecret42",
+                "new_password2": "BrandNew$ecret42",
+            },
+        )
+        assert response.status_code == 200
+        self.user.refresh_from_db()
+        assert self.user.check_password("oldpass123!")
+
+    def test_change_password_validators_reject_short_password(self):
+        self.client.login(email="changer@example.com", password="oldpass123!")
+        response = self.client.post(
+            self.URL,
+            {
+                "old_password": "oldpass123!",
+                "new_password1": "abc",
+                "new_password2": "abc",
+            },
+        )
+        assert response.status_code == 200
+        self.user.refresh_from_db()
+        assert self.user.check_password("oldpass123!")
+
+    def test_set_password_for_user_without_password(self):
+        magic_user = User.objects.create_user(
+            email="magic@example.com",
+            first_name="Ma",
+            last_name="Gic",
+            is_approved=True,
+        )
+        assert not magic_user.has_usable_password()
+        self.client.force_login(magic_user)
+
+        # GET shows the "set" form (no old_password field)
+        response = self.client.get(self.URL)
+        assert response.status_code == 200
+        content = response.content.decode()
+        assert "Définir un mot de passe" in content
+        assert "old_password" not in content
+
+        response = self.client.post(
+            self.URL,
+            {
+                "new_password1": "FreshSecret$42",
+                "new_password2": "FreshSecret$42",
+            },
+        )
+        assert response.status_code == 302
+        magic_user.refresh_from_db()
+        assert magic_user.has_usable_password()
+        assert magic_user.check_password("FreshSecret$42")

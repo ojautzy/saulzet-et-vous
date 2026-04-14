@@ -2,8 +2,18 @@
 
 from django import forms
 from django.contrib.auth import get_user_model
-from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth.forms import (
+    AuthenticationForm,
+)
+from django.contrib.auth.forms import (
+    PasswordChangeForm as DjangoPasswordChangeForm,
+)
+from django.contrib.auth.forms import (
+    SetPasswordForm as DjangoSetPasswordForm,
+)
 from django.utils.translation import gettext_lazy as _
+
+PASSWORD_INPUT_CLASS = "input input-bordered w-full"
 
 User = get_user_model()
 
@@ -183,3 +193,32 @@ class ProfileForm(forms.ModelForm):
             "address": _("Adresse à Saulzet-le-Froid"),
             "village": _("Village / Hameau"),
         }
+
+
+def _style_password_fields(form: forms.Form) -> None:
+    """Apply the DaisyUI input class to all password fields of a form."""
+    for field in form.fields.values():
+        field.widget.attrs.setdefault("class", PASSWORD_INPUT_CLASS)
+        field.widget.attrs.setdefault("autocomplete", "new-password")
+
+
+class PasswordChangeForm(DjangoPasswordChangeForm):
+    """Password change form for users that already have a usable password."""
+
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+        _style_password_fields(self)
+        self.fields["old_password"].widget.attrs["autocomplete"] = "current-password"
+        self.fields["old_password"].label = _("Mot de passe actuel")
+        self.fields["new_password1"].label = _("Nouveau mot de passe")
+        self.fields["new_password2"].label = _("Confirmer le nouveau mot de passe")
+
+
+class PasswordSetForm(DjangoSetPasswordForm):
+    """Password set form for users without a usable password (magic link only)."""
+
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+        _style_password_fields(self)
+        self.fields["new_password1"].label = _("Mot de passe")
+        self.fields["new_password2"].label = _("Confirmer le mot de passe")

@@ -15,5 +15,6 @@ urlpatterns = [
     path("pending/", views.pending_view, name="pending"),
     path("logout/", views.logout_view, name="logout"),
     path("profile/", views.profile_view, name="profile"),
+    path("mot-de-passe/", views.password_change_view, name="password_change"),
     path("delete/", views.delete_account_view, name="delete_account"),
 ]
