@@ -13,6 +13,7 @@ from django.core.mail import send_mail
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import redirect, render
 from django.template.loader import render_to_string
+from django.urls import reverse
 from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.utils.translation import gettext_lazy as _
@@ -85,9 +86,11 @@ def magic_link_request_view(request: HttpRequest) -> HttpResponse:
     )
     user.save(update_fields=["magic_link_token", "magic_link_expires"])
 
-    # Build magic link URL
+    # Build magic link URL — use reverse() so the URL stays correct regardless
+    # of where the accounts app is mounted (currently /comptes/, not /accounts/).
     site_url = getattr(settings, "SITE_URL", "http://localhost:8000")
-    magic_url = f"{site_url}/accounts/magic/{raw_token}/"
+    magic_path = reverse("accounts:magic_link_verify", kwargs={"token": raw_token})
+    magic_url = f"{site_url.rstrip('/')}{magic_path}"
 
     # Send email
     from apps.settings_app.models import SiteSettings
