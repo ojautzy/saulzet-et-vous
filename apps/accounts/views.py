@@ -6,7 +6,7 @@ from typing import Any
 
 from django.conf import settings
 from django.contrib import messages
-from django.contrib.auth import get_user_model, login, logout
+from django.contrib.auth import get_user_model, login, logout, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import LoginView
 from django.core.mail import send_mail
@@ -19,7 +19,14 @@ from django.utils.decorators import method_decorator
 from django.utils.translation import gettext_lazy as _
 from django_ratelimit.decorators import ratelimit
 
-from .forms import LoginForm, MagicLinkForm, ProfileForm, RegisterForm
+from .forms import (
+    LoginForm,
+    MagicLinkForm,
+    PasswordChangeForm,
+    PasswordSetForm,
+    ProfileForm,
+    RegisterForm,
+)
 
 User = get_user_model()
 
@@ -233,6 +240,38 @@ def profile_view(request: HttpRequest) -> HttpResponse:
         form = ProfileForm(instance=request.user)
 
     return render(request, "accounts/profile.html", {"form": form})
+
+
+@login_required
+@ratelimit(key="ip", rate="5/m", method="POST", block=True)
+def password_change_view(request: HttpRequest) -> HttpResponse:
+    """Allow the user to change or set their password.
+
+    Uses :class:`PasswordChangeForm` when the user already has a usable
+    password, and :class:`PasswordSetForm` for users registered via magic
+    link only (no current password to verify).
+    """
+    has_password = request.user.has_usable_password()
+    form_class = PasswordChangeForm if has_password else PasswordSetForm
+
+    if request.method == "POST":
+        form = form_class(request.user, request.POST)
+        if form.is_valid():
+            form.save()
+            update_session_auth_hash(request, form.user)
+            if has_password:
+                messages.success(request, _("Votre mot de passe a été mis à jour."))
+            else:
+                messages.success(request, _("Votre mot de passe a été défini."))
+            return redirect("accounts:profile")
+    else:
+        form = form_class(request.user)
+
+    return render(
+        request,
+        "accounts/password_change.html",
+        {"form": form, "has_password": has_password},
+    )
 
 
 @login_required

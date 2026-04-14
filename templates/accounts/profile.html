@@ -75,6 +75,17 @@
       </button>
     </form>
 
+    <!-- Password change -->
+    <div class="border-t border-creme-fonce mt-8 pt-6">
+      <a href="{% url 'accounts:password_change' %}" class="btn btn-outline w-full">
+        {% if user.has_usable_password %}
+          {% trans "Changer mon mot de passe" %}
+        {% else %}
+          {% trans "Définir un mot de passe" %}
+        {% endif %}
+      </a>
+    </div>
+
     <!-- Delete account -->
     <div class="border-t border-creme-fonce mt-8 pt-6" x-data="{ confirmDelete: false }">
       <button @click="confirmDelete = true" x-show="!confirmDelete"
