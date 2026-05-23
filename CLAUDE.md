@@ -99,10 +99,14 @@ python manage.py create_initial_pages      # Arborescence initiale des pages
 - `/documents/` — Documents officiels (PV, bulletins, PLU, arrêtés)
 - `/contact/` — Contact
 
-## Accès dev
+## Accès dev et production
 
-- URL tunnel Cloudflare : https://saulzet.jautzy.com
+- URL tunnel Cloudflare (dev) : https://saulzet.jautzy.com
 - Domaine de production : saulzet-le-froid.com
+- **Serveur de production** : OVH VPS (Debian 13), IP `57.129.46.15`
+- **Accès SSH** : `ssh debian@57.129.46.15` (clé SSH `~/.ssh/id_ed25519.pub`), puis `sudo su - saulzet` pour l'utilisateur applicatif
+- **Déploiement** : `ssh debian@57.129.46.15 'sudo su - saulzet -c /home/saulzet/deploy.sh'`
+- **DNS et domaines** : gérés chez OVH (zone DNS), les deux domaines `.com` et `.fr` pointent vers le VPS OVH
 - Coordonnées Saulzet-le-Froid (Le Bourg) : lat 45.6415, lng 2.9178
 
 ## Versioning
@@ -168,7 +172,8 @@ Le service `notify()` dans `apps/notifications/services.py` crée la notificatio
 
 ## État du projet
 
-- **Version actuelle** : 1.3.5 — site déployé en production sur https://www.saulzet-le-froid.com
+- **Version actuelle** : 1.4.1 — site déployé en production sur https://www.saulzet-le-froid.com
+- **Hébergement** : OVH VPS (Debian 13) — migré depuis GandiCloud (Ubuntu) le 2026-04-16.
 - Plan complet dans `saulzet-et-vous-plan-v3.md`. Prompts par phase dans `prompt-phase*-claude-code.md`.
 - Toutes les phases (1 à 7) sont livrées : fondations, sollicitations, interface élus, retours utilisateurs, site communal CMS, migration de contenu, notifications/administration, mise en production.
 - v1.0.0 ajoute la galerie photos, la page de mentions légales et le lien dans le footer.
