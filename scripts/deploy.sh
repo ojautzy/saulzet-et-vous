@@ -5,13 +5,13 @@
 # Utilisateur : saulzet (pas ubuntu, pas root)
 #
 # Installation initiale (depuis la machine de dev) :
-#   scp scripts/deploy.sh ubuntu@<IP>:/tmp/deploy.sh
-#   ssh ubuntu@<IP> 'sudo mv /tmp/deploy.sh /home/saulzet/deploy.sh \
+#   scp scripts/deploy.sh debian@57.129.46.15:/tmp/deploy.sh
+#   ssh debian@57.129.46.15 'sudo mv /tmp/deploy.sh /home/saulzet/deploy.sh \
 #       && sudo chown saulzet:saulzet /home/saulzet/deploy.sh \
 #       && sudo chmod +x /home/saulzet/deploy.sh'
 #
 # Lancement en routine (depuis la machine de dev, après git push) :
-#   ssh ubuntu@<IP> 'sudo su - saulzet -c /home/saulzet/deploy.sh'
+#   ssh debian@57.129.46.15 'sudo su - saulzet -c /home/saulzet/deploy.sh'
 # (chemin explicite pour éviter l'expansion de ~ par le shell appelant)
 #
 # Voir docs/deploiement-production.md § 15 pour le contexte complet.

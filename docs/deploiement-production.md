@@ -1,16 +1,18 @@
 # Guide de deploiement en production — Saulzet & Vous
 
-> **Version documentee** : 1.3.5 (site en production depuis avril 2026)
-> **Derniere mise a jour** : 2026-04-12
-> **Cible** : GandiCloud + OVH (DNS + mail Zimbra Pro)
+> **Version documentee** : 1.4.1 (site en production depuis avril 2026)
+> **Derniere mise a jour** : 2026-04-16
+> **Cible** : OVH VPS (Debian 13) + OVH (DNS + mail Zimbra Pro)
 > **Domaine principal** : `www.saulzet-le-froid.com`
 > **Domaine secondaire** : `www.saulzet-le-froid.fr` (redirection 301 vers le .com)
+> **IP serveur** : `57.129.46.15`
+> **Acces SSH** : `ssh debian@57.129.46.15`
 
 ---
 
 ## Table des matieres
 
-1. [Creation du serveur GandiCloud](#1-creation-du-serveur-gandicloud)
+1. [Creation du serveur OVH VPS](#1-creation-du-serveur-ovh-vps)
 2. [Preparation du serveur](#2-preparation-du-serveur)
 3. [PostgreSQL](#3-postgresql)
 4. [Deploiement du code](#4-deploiement-du-code)
@@ -18,7 +20,7 @@
 6. [Initialisation de Django](#6-initialisation-de-django)
 7. [Gunicorn + Supervisor](#7-gunicorn--supervisor)
 8. [Nginx](#8-nginx)
-9. [DNS — pointer saulzet-le-froid.com vers GandiCloud](#9-dns--pointer-saulzet-le-froidcom-vers-gandicloud)
+9. [DNS — pointer saulzet-le-froid.com vers le VPS OVH](#9-dns--pointer-saulzet-le-froidcom-vers-le-vps-ovh)
 10. [HTTPS avec Let's Encrypt](#10-https-avec-lets-encrypt)
 11. [Transfert des donnees de dev vers production](#11-transfert-des-donnees-de-dev-vers-production)
 12. [Configuration email (SMTP OVH Zimbra)](#12-configuration-email-smtp-ovh-zimbra)
@@ -29,43 +31,32 @@
 
 ---
 
-## 1. Creation du serveur GandiCloud
+## 1. Creation du serveur OVH VPS
 
-### Choix de la configuration
+Commander un VPS sur [ovhcloud.com](https://www.ovhcloud.com/fr/vps/) :
 
-| Critere | V-R1 (1 vCPU / 1 Go) | V-R2 (1 vCPU / 2 Go) |
-|---|---|---|
-| Django + Gunicorn + Nginx + PostgreSQL | Juste | Confortable |
-| Marge pour pics / cron / backups | Non | Oui |
-| Cout mensuel | ~3-4 EUR | ~6-7 EUR |
+- **OS** : Debian 13 (trixie)
+- **Localisation** : France
+- **Stockage** : 20 Go minimum (le site + DB + media peseront < 1 Go)
 
-**Recommandation : V-R2** — marge suffisante pour l'ensemble de la stack sur une seule machine.
+### Pas a pas
 
-### Pas a pas dans l'interface GandiCloud
-
-1. Se connecter sur [cloud.gandi.net](https://cloud.gandi.net)
-2. Cliquer **Creer un serveur**
-3. **Nom** : `saulzet-prod`
-4. **Region** : FR-SD6 (France)
-5. **Configuration** : **V-R2**
-6. **Image OS** : **Ubuntu 24.04 LTS** (support jusqu'en 2029)
-7. **Stockage** : 25 Go (le site + DB + media peseront < 1 Go)
-8. **Cle SSH** : ajouter sa cle publique (`~/.ssh/id_ed25519.pub`)
+1. Se connecter sur l'espace client OVH
+2. Commander un VPS, choisir **Debian 13**
+3. Une fois cree, noter l'**adresse IP publique** : `57.129.46.15`
+4. Copier sa cle SSH sur le serveur :
    ```bash
-   # Si pas de cle SSH existante :
-   ssh-keygen -t ed25519 -C "olivier@saulzet"
-   cat ~/.ssh/id_ed25519.pub
+   ssh-copy-id -i ~/.ssh/id_ed25519.pub debian@57.129.46.15
    ```
-9. **Valider** et attendre le provisionnement (~1-2 min)
-10. **Noter l'adresse IP publique** attribuee (ex : `185.x.x.x`)
+5. Verifier la connexion par cle : `ssh debian@57.129.46.15`
 
 ---
 
 ## 2. Preparation du serveur
 
 ```bash
-# Connexion (GandiCloud Ubuntu interdit root, utiliser l'utilisateur ubuntu)
-ssh ubuntu@185.x.x.x
+# Connexion (l'utilisateur par defaut sur OVH Debian est debian)
+ssh debian@57.129.46.15
 
 # Mise a jour systeme
 sudo apt update && sudo apt upgrade -y
@@ -74,7 +65,7 @@ sudo apt update && sudo apt upgrade -y
 sudo apt install -y python3 python3-venv python3-pip python3-dev \
   postgresql postgresql-contrib libpq-dev \
   nginx certbot python3-certbot-nginx \
-  git nodejs npm supervisor ufw
+  git nodejs npm supervisor ufw cron rsync
 
 # Pare-feu
 sudo ufw allow OpenSSH
@@ -157,7 +148,7 @@ npm run build:css
 
 ```bash
 # Se connecter au serveur et basculer vers saulzet
-ssh ubuntu@185.x.x.x
+ssh debian@57.129.46.15
 sudo su - saulzet
 
 # Activer le venv et generer la cle secrete
@@ -189,7 +180,7 @@ EOF
 
 ```bash
 # Se connecter au serveur et basculer vers saulzet
-ssh ubuntu@185.x.x.x
+ssh debian@57.129.46.15
 sudo su - saulzet
 
 cd ~/app
@@ -211,7 +202,7 @@ python manage.py collectstatic --noinput
 
 ```bash
 # Se connecter au serveur (en tant que ubuntu pour les commandes sudo)
-ssh ubuntu@185.x.x.x
+ssh debian@57.129.46.15
 ```
 
 Creer le repertoire de logs :
@@ -258,7 +249,7 @@ curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:8000/
 
 ```bash
 # Se connecter au serveur
-ssh ubuntu@185.x.x.x
+ssh debian@57.129.46.15
 ```
 
 Creer `/etc/nginx/sites-available/saulzet` :
@@ -333,23 +324,24 @@ sudo chmod -R 755 /home/saulzet/app/media/
 
 ---
 
-## 9. DNS — pointer saulzet-le-froid.com vers GandiCloud
+## 9. DNS — pointer saulzet-le-froid.com vers le VPS OVH
 
 Dans l'**espace client OVH** > **Noms de domaine** > `saulzet-le-froid.com` > **Zone DNS** :
 
 | Type | Sous-domaine | Cible | TTL |
 |---|---|---|---|
-| A | *(vide = @)* | `185.x.x.x` | 3600 |
-| A | `www` | `185.x.x.x` | 3600 |
+| A | *(vide = @)* | `57.129.46.15` | 60 |
+| A | `www` | `57.129.46.15` | 60 |
 
 > **Ne pas toucher aux enregistrements MX** — ils gerent le mail Zimbra Pro.
+> Le TTL est a 60s pour faciliter les migrations futures. Remonter a 3600 une fois le site stable.
 
 Verification (apres propagation, quelques minutes a quelques heures) :
 
 ```bash
 dig +short saulzet-le-froid.com
 dig +short www.saulzet-le-froid.com
-# Doivent retourner 185.x.x.x
+# Doivent retourner 57.129.46.15
 ```
 
 ---
@@ -360,7 +352,7 @@ Une fois le DNS propage :
 
 ```bash
 # Se connecter au serveur
-ssh ubuntu@185.x.x.x
+ssh debian@57.129.46.15
 
 sudo certbot --nginx -d saulzet-le-froid.com -d www.saulzet-le-froid.com
 ```
@@ -411,14 +403,14 @@ Depuis la machine de dev, copier vers le home de `ubuntu`
 (on ne peut pas se connecter directement en `saulzet` via SSH) :
 
 ```bash
-scp data_export.json ubuntu@185.x.x.x:/tmp/
-rsync -avz --progress media/ ubuntu@185.x.x.x:/tmp/media_upload/
+scp data_export.json debian@57.129.46.15:/tmp/
+rsync -avz --progress media/ debian@57.129.46.15:/tmp/media_upload/
 ```
 
 Puis sur le serveur, deplacer vers le repertoire de saulzet :
 
 ```bash
-ssh ubuntu@185.x.x.x
+ssh debian@57.129.46.15
 
 sudo cp /tmp/data_export.json /home/saulzet/app/
 sudo mkdir -p /home/saulzet/app/media
@@ -432,7 +424,7 @@ rm -rf /tmp/data_export.json /tmp/media_upload
 
 ```bash
 # Se connecter au serveur et basculer vers saulzet
-ssh ubuntu@185.x.x.x
+ssh debian@57.129.46.15
 sudo su - saulzet
 
 cd ~/app && source venv/bin/activate
@@ -479,7 +471,7 @@ Pour tester :
 
 ```bash
 # Se connecter au serveur et basculer vers saulzet
-ssh ubuntu@185.x.x.x
+ssh debian@57.129.46.15
 sudo su - saulzet
 
 cd ~/app && source venv/bin/activate
@@ -498,7 +490,7 @@ send_mail('Test', 'Ceci est un test.', config.from_email, ['votre@email.com'])
 
 ```bash
 # Se connecter au serveur et basculer vers saulzet
-ssh ubuntu@185.x.x.x
+ssh debian@57.129.46.15
 sudo su - saulzet
 
 crontab -e
@@ -517,23 +509,23 @@ Ajouter :
 
 L'objectif : tout internaute visitant `saulzet-le-froid.fr` ou `www.saulzet-le-froid.fr` est redirige en **301 permanente** vers `https://www.saulzet-le-froid.com`.
 
-La redirection est faite **au niveau Nginx**, sur le meme serveur GandiCloud qui heberge le .com. Django ne voit jamais ces requetes : inutile d'ajouter le .fr a `ALLOWED_HOSTS` ou `CSRF_TRUSTED_ORIGINS`.
+La redirection est faite **au niveau Nginx**, sur le meme serveur OVH VPS qui heberge le .com. Django ne voit jamais ces requetes : inutile d'ajouter le .fr a `ALLOWED_HOSTS` ou `CSRF_TRUSTED_ORIGINS`.
 
 ### Etape 1 : DNS du .fr
 
-Dans la zone DNS OVH de `saulzet-le-froid.fr`, faire pointer l'apex et `www` vers l'IP du serveur GandiCloud :
+Dans la zone DNS OVH de `saulzet-le-froid.fr`, faire pointer l'apex et `www` vers l'IP du VPS OVH :
 
 | Type | Sous-domaine | Cible | TTL |
 |---|---|---|---|
-| A | *(vide = @)* | `<IP-SERVEUR>` | 3600 |
-| A | `www` | `<IP-SERVEUR>` | 3600 |
+| A | *(vide = @)* | `57.129.46.15` | 3600 |
+| A | `www` | `57.129.46.15` | 3600 |
 
 Verifier la propagation :
 
 ```bash
 dig +short saulzet-le-froid.fr
 dig +short www.saulzet-le-froid.fr
-# Doivent retourner <IP-SERVEUR>
+# Doivent retourner 57.129.46.15
 ```
 
 ### Etape 2 : Server block Nginx de redirection
@@ -589,8 +581,8 @@ Le script prêt à l'emploi est versionné dans le dépôt : [`scripts/deploy.sh
 **Installation initiale** (une seule fois, depuis la machine de dev) :
 
 ```bash
-scp scripts/deploy.sh ubuntu@185.x.x.x:/tmp/deploy.sh
-ssh ubuntu@185.x.x.x 'sudo mv /tmp/deploy.sh /home/saulzet/deploy.sh \
+scp scripts/deploy.sh debian@57.129.46.15:/tmp/deploy.sh
+ssh debian@57.129.46.15 'sudo mv /tmp/deploy.sh /home/saulzet/deploy.sh \
     && sudo chown saulzet:saulzet /home/saulzet/deploy.sh \
     && sudo chmod +x /home/saulzet/deploy.sh'
 ```
@@ -600,7 +592,7 @@ ssh ubuntu@185.x.x.x 'sudo mv /tmp/deploy.sh /home/saulzet/deploy.sh \
 
 ```bash
 # Se connecter au serveur et basculer vers saulzet
-ssh ubuntu@185.x.x.x
+ssh debian@57.129.46.15
 sudo su - saulzet
 ```
 
@@ -649,8 +641,8 @@ Depuis la machine de dev :
 # 1. Committer et pousser
 git push origin main
 
-# 2. Deployer (se connecte en ubuntu, bascule en saulzet, lance le script)
-ssh ubuntu@185.x.x.x 'sudo su - saulzet -c /home/saulzet/deploy.sh'
+# 2. Deployer (se connecte en debian, bascule en saulzet, lance le script)
+ssh debian@57.129.46.15 'sudo su - saulzet -c /home/saulzet/deploy.sh'
 ```
 
 ### Variante rapide (sans rebuild CSS)
@@ -658,7 +650,7 @@ ssh ubuntu@185.x.x.x 'sudo su - saulzet -c /home/saulzet/deploy.sh'
 Si seul du code Python/templates a change, un deploiement plus rapide :
 
 ```bash
-ssh ubuntu@185.x.x.x 'sudo su - saulzet -c "cd ~/app && git pull && source venv/bin/activate && python manage.py migrate --noinput && python manage.py collectstatic --noinput && sudo supervisorctl restart saulzet"'
+ssh debian@57.129.46.15 'sudo su - saulzet -c "cd ~/app && git pull && source venv/bin/activate && python manage.py migrate --noinput && python manage.py collectstatic --noinput && sudo supervisorctl restart saulzet"'
 ```
 
 ### Transferts de donnees supplementaires
@@ -666,8 +658,8 @@ ssh ubuntu@185.x.x.x 'sudo su - saulzet -c "cd ~/app && git pull && source venv/
 Pour re-synchroniser les media (nouvelles images, documents PDF) :
 
 ```bash
-rsync -avz --progress media/ ubuntu@185.x.x.x:/tmp/media_upload/
-ssh ubuntu@185.x.x.x 'sudo cp -r /tmp/media_upload/* /home/saulzet/app/media/ && sudo chown -R saulzet:saulzet /home/saulzet/app/media/ && rm -rf /tmp/media_upload'
+rsync -avz --progress media/ debian@57.129.46.15:/tmp/media_upload/
+ssh debian@57.129.46.15 'sudo cp -r /tmp/media_upload/* /home/saulzet/app/media/ && sudo chown -R saulzet:saulzet /home/saulzet/app/media/ && rm -rf /tmp/media_upload'
 ```
 
 ---
@@ -677,11 +669,11 @@ ssh ubuntu@185.x.x.x 'sudo cp -r /tmp/media_upload/* /home/saulzet/app/media/ &&
 ```
 Internet
   |
-  |-- DNS OVH : saulzet-le-froid.com  --> IP GandiCloud
+  |-- DNS OVH : saulzet-le-froid.com  --> 57.129.46.15 (VPS OVH)
   |-- DNS OVH : saulzet-le-froid.fr   --> redirection 301 vers .com
   |-- MX OVH  : Zimbra Pro (inchange)
   |
-  +-- GandiCloud V-R2 (Ubuntu 24.04 LTS)
+  +-- OVH VPS (Debian 13 trixie) — 57.129.46.15
        |
        |-- Nginx (ports 443/80)
        |     |-- HTTPS : Let's Encrypt (certbot auto-renew)
@@ -709,7 +701,7 @@ Internet
 
 ## Checklist de mise en production
 
-- [ ] Serveur GandiCloud cree (V-R2, Ubuntu 24.04)
+- [ ] Serveur OVH VPS cree (Debian 13)
 - [ ] Paquets systeme installes
 - [ ] Utilisateur `saulzet` cree
 - [ ] PostgreSQL configure
