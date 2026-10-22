@@ -31,7 +31,10 @@ git fetch origin main
 git reset --hard origin/main
 
 echo "==> Installing Python dependencies..."
-pip install -q -r requirements.txt
+# -U : sans lui, pip considere une borne ">=" deja satisfaite et n'installe
+# jamais les versions correctives (ex. securite Django 5.2.x). Les bornes
+# hautes de requirements*.txt empechent tout saut de version majeure.
+pip install -q -U -r requirements-prod.txt
 
 echo "==> Building CSS..."
 npm ci --silent
