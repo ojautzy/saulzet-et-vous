@@ -1,7 +1,7 @@
 # Guide de deploiement en production — Saulzet & Vous
 
-> **Version documentee** : 1.4.1 (site en production depuis avril 2026)
-> **Derniere mise a jour** : 2026-04-16
+> **Version documentee** : 1.4.3 (site en production depuis avril 2026)
+> **Derniere mise a jour** : 2026-10-22
 > **Cible** : OVH VPS (Debian 13) + OVH (DNS + mail Zimbra Pro)
 > **Domaine principal** : `www.saulzet-le-froid.com`
 > **Domaine secondaire** : `www.saulzet-le-froid.fr` (redirection 301 vers le .com)
@@ -134,13 +134,17 @@ git clone https://github.com/ojautzy/saulzet-et-vous.git .
 python3 -m venv venv
 source venv/bin/activate
 pip install --upgrade pip
-pip install -r requirements.txt
-pip install gunicorn psycopg2-binary
+pip install -r requirements-prod.txt
 
 # Compiler le CSS Tailwind
 npm ci
 npm run build:css
 ```
+
+> **`requirements-prod.txt`** inclut `requirements.txt` et ajoute les paquets
+> propres a la production (`gunicorn`, `psycopg2-binary`), avec des bornes de
+> version. Ne pas installer ces paquets a la main : `deploy.sh` les met a jour
+> a partir de ce fichier (voir section 15).
 
 ---
 
@@ -191,7 +195,7 @@ python manage.py migrate
 python manage.py collectstatic --noinput
 
 # Creer un superuser UNIQUEMENT si vous ne prevoyez pas d'importer
-# les donnees de dev a l'etape 12 (le loaddata amenera le compte admin existant).
+# les donnees de dev a l'etape 11 (le loaddata amenera le compte admin existant).
 # Sinon, sauter cette commande pour eviter un doublon :
 # python manage.py createsuperuser
 ```
@@ -201,7 +205,7 @@ python manage.py collectstatic --noinput
 ## 7. Gunicorn + Supervisor
 
 ```bash
-# Se connecter au serveur (en tant que ubuntu pour les commandes sudo)
+# Se connecter au serveur (en tant que debian pour les commandes sudo)
 ssh debian@57.129.46.15
 ```
 
@@ -399,7 +403,7 @@ python manage.py dumpdata \
 
 ### 11.2 Copier vers le serveur
 
-Depuis la machine de dev, copier vers le home de `ubuntu`
+Depuis la machine de dev, copier vers `/tmp` en tant que `debian`
 (on ne peut pas se connecter directement en `saulzet` via SSH) :
 
 ```bash
@@ -576,7 +580,21 @@ Toutes les variantes doivent renvoyer un `301` vers `https://www.saulzet-le-froi
 
 ### Script de deploiement
 
-Le script prêt à l'emploi est versionné dans le dépôt : [`scripts/deploy.sh`](../scripts/deploy.sh).
+Le script de reference est versionne dans le depot : [`scripts/deploy.sh`](../scripts/deploy.sh).
+Il s'execute sur le serveur, en tant que `saulzet`, et enchaine :
+
+1. `git fetch origin main` + `git reset --hard origin/main` : le code du serveur
+   est toujours exactement celui de `origin/main` (pas de merge parasite, resiste
+   a une reecriture d'historique) ;
+2. `pip install -q -U -r requirements-prod.txt` : mise a jour des dependances
+   Python (voir ci-dessous) ;
+3. `npm ci` + `npm run build:css` : recompilation du CSS Tailwind ;
+4. `migrate --noinput` puis `collectstatic --noinput` ;
+5. `sudo supervisorctl restart saulzet` : redemarrage de Gunicorn ;
+6. affichage de la version deployee (fichier `VERSION`).
+
+Le script s'arrete a la premiere erreur (`set -euo pipefail`) : en cas d'echec,
+Gunicorn n'est pas redemarre et l'ancienne version continue de tourner.
 
 **Installation initiale** (une seule fois, depuis la machine de dev) :
 
@@ -587,51 +605,28 @@ ssh debian@57.129.46.15 'sudo mv /tmp/deploy.sh /home/saulzet/deploy.sh \
     && sudo chmod +x /home/saulzet/deploy.sh'
 ```
 
-<details>
-<summary>Ou, pour référence, créer le script manuellement sur le serveur</summary>
+### Mettre a jour le script sur le serveur
+
+`/home/saulzet/deploy.sh` est une **copie** : il n'est pas mis a jour par
+`git reset`. Apres toute modification de `scripts/deploy.sh`, deployer une
+premiere fois (le nouveau script arrive alors dans `~/app/scripts/`), puis
+remplacer la copie et relancer pour que les nouvelles etapes s'appliquent :
 
 ```bash
-# Se connecter au serveur et basculer vers saulzet
-ssh debian@57.129.46.15
-sudo su - saulzet
+ssh debian@57.129.46.15 'sudo su - saulzet -c "cp ~/app/scripts/deploy.sh ~/deploy.sh && chmod +x ~/deploy.sh"'
+ssh debian@57.129.46.15 'sudo su - saulzet -c /home/saulzet/deploy.sh'
 ```
 
-Creer `/home/saulzet/deploy.sh` :
+> **v1.4.3** : cette mise a jour est **obligatoire** pour les serveurs installes
+> avant la v1.4.3. L'ancien script installait `requirements.txt` sans `-U`, et
+> n'appliquait donc ni les correctifs de Django ni les nouvelles versions
+> minimales (Pillow 12, etc.).
+
+Verifier que les bonnes versions sont installees :
 
 ```bash
-cat > ~/deploy.sh << 'SCRIPT'
-#!/bin/bash
-set -e
-
-cd /home/saulzet/app
-source venv/bin/activate
-export DJANGO_SETTINGS_MODULE=saulzet_et_vous.settings.prod
-
-echo "==> Pulling latest code..."
-git pull origin main
-
-echo "==> Installing Python dependencies..."
-pip install -r requirements.txt
-
-echo "==> Building CSS..."
-npm ci --silent
-npm run build:css
-
-echo "==> Running migrations..."
-python manage.py migrate --noinput
-
-echo "==> Collecting static files..."
-python manage.py collectstatic --noinput
-
-echo "==> Restarting Gunicorn..."
-sudo supervisorctl restart saulzet
-
-echo "==> Done! Version: $(cat VERSION)"
-SCRIPT
-chmod +x ~/deploy.sh
+ssh debian@57.129.46.15 'sudo su - saulzet -c "~/app/venv/bin/pip list 2>/dev/null | grep -iE \"^(django|pillow|gunicorn|nh3) \""'
 ```
-
-</details>
 
 ### Utilisation au quotidien
 
@@ -645,13 +640,38 @@ git push origin main
 ssh debian@57.129.46.15 'sudo su - saulzet -c /home/saulzet/deploy.sh'
 ```
 
-### Variante rapide (sans rebuild CSS)
+Pour une version taguee, mettre a jour `VERSION`, committer, creer le tag puis
+pousser le tout avant de deployer (`git push origin main --tags`). Le script
+affiche la version en fin d'execution : verifier qu'elle correspond, ainsi que
+le numero affiche dans le footer du site.
 
-Si seul du code Python/templates a change, un deploiement plus rapide :
+### Dependances Python
+
+- `requirements.txt` : dependances de l'application, avec une borne basse
+  (version minimale testee) et une borne haute (ex. `Django>=5.2.18,<5.3`).
+- `requirements-prod.txt` : inclut `requirements.txt` et ajoute `gunicorn` et
+  `psycopg2-binary`.
+
+Le `-U` de `deploy.sh` est indispensable : sans lui, pip considere qu'une borne
+`>=` deja satisfaite ne demande rien et n'installe jamais les versions
+correctives (correctifs de securite Django 5.2.x LTS notamment). Les bornes
+hautes empechent tout saut de version majeure non teste. Chaque deploiement
+installe donc la derniere version corrective autorisee.
+
+Pour monter une borne (nouvelle version mineure ou majeure) : modifier
+`requirements*.txt`, faire tourner `pytest` en local, puis deployer.
+
+### Variante rapide (sans dependances ni rebuild CSS)
+
+Si seul du code Python/templates a change, sans nouvelle dependance ni
+modification CSS :
 
 ```bash
-ssh debian@57.129.46.15 'sudo su - saulzet -c "cd ~/app && git pull && source venv/bin/activate && python manage.py migrate --noinput && python manage.py collectstatic --noinput && sudo supervisorctl restart saulzet"'
+ssh debian@57.129.46.15 'sudo su - saulzet -c "cd ~/app && git fetch origin main && git reset --hard origin/main && source venv/bin/activate && export DJANGO_SETTINGS_MODULE=saulzet_et_vous.settings.prod && python manage.py migrate --noinput && python manage.py collectstatic --noinput && sudo supervisorctl restart saulzet"'
 ```
+
+> En cas de doute, utiliser `deploy.sh` : il est idempotent et ne prend que
+> quelques dizaines de secondes de plus.
 
 ### Transferts de donnees supplementaires
 
@@ -683,7 +703,7 @@ Internet
        |     +-- *.saulzet-le-froid.fr --> 301 vers .com
        |
        |-- Gunicorn (127.0.0.1:8000, 2 workers)
-       |     +-- Django 5.2 (settings.prod)
+       |     +-- Django 5.2 LTS (settings.prod)
        |
        |-- PostgreSQL (local)
        |     +-- saulzet_db
@@ -705,10 +725,10 @@ Internet
 - [ ] Paquets systeme installes
 - [ ] Utilisateur `saulzet` cree
 - [ ] PostgreSQL configure
-- [ ] Code clone et environnement Python pret
+- [ ] Code clone et environnement Python pret (`requirements-prod.txt`)
 - [ ] CSS Tailwind compile
 - [ ] Fichier `.env` configure
-- [ ] `migrate` + `collectstatic` + `createsuperuser` executes
+- [ ] `migrate` + `collectstatic` executes (`createsuperuser` seulement sans import de donnees)
 - [ ] Gunicorn / Supervisor fonctionnel
 - [ ] Nginx configure et actif
 - [ ] DNS .com pointe vers le serveur
@@ -718,5 +738,5 @@ Internet
 - [ ] SiteSettings : SITE_URL mis a jour vers `https://www.saulzet-le-froid.com`
 - [ ] Cron `send_reminders` configure
 - [ ] Redirection .fr vers .com en place
-- [ ] Script `deploy.sh` cree et teste
+- [ ] Script `deploy.sh` installe depuis `scripts/deploy.sh` et teste
 - [ ] Test complet : navigation, login, creation sollicitation, envoi email
