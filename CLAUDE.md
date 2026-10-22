@@ -172,9 +172,10 @@ Le service `notify()` dans `apps/notifications/services.py` crée la notificatio
 
 ## État du projet
 
-- **Version actuelle** : 1.4.2 — site déployé en production sur https://www.saulzet-le-froid.com
+- **Version actuelle** : 1.4.3 — site déployé en production sur https://www.saulzet-le-froid.com
 - **Hébergement** : OVH VPS (Debian 13) — migré depuis GandiCloud (Ubuntu) le 2026-04-16.
 - v1.4.2 corrige l'affichage des aperçus de photos sur le formulaire de création de sollicitation (CSP `img-src` : ajout de `blob:`) et documente la migration OVH.
+- v1.4.3 met à jour les dépendances Python (Django 5.2.18, Pillow 12), ajoute `requirements-prod.txt` (gunicorn, psycopg2-binary) et passe `deploy.sh` en `pip install -U` pour que les correctifs soient réellement installés en production.
 - Plan complet dans `saulzet-et-vous-plan-v3.md`. Prompts par phase dans `prompt-phase*-claude-code.md`.
 - Toutes les phases (1 à 7) sont livrées : fondations, sollicitations, interface élus, retours utilisateurs, site communal CMS, migration de contenu, notifications/administration, mise en production.
 - v1.0.0 ajoute la galerie photos, la page de mentions légales et le lien dans le footer.
